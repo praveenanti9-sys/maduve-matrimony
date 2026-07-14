@@ -717,6 +717,12 @@ export default function RegisterPage() {
                 </div>
               </div>
 
+              {errors.submit && (
+                <div style={{ padding: "12px 16px", borderRadius: "10px", background: "rgba(220,38,38,0.08)", color: "#dc2626", fontSize: "13px", fontWeight: 500, marginTop: "8px" }}>
+                  ⚠️ {errors.submit}
+                </div>
+              )}
+
               <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
                 <button type="button" onClick={() => setStep(2)} className="btn-outline" style={{ flex: 1, height: "48px" }}>
                   <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>

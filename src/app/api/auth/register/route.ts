@@ -22,10 +22,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: authError?.message || 'Auth registration failed' }, { status: 400 });
     }
 
-    // 2. Insert profile into profiles table via admin client (bypasses RLS)
+    // 2. Insert or update profile in profiles table via admin client (bypasses RLS & handles automatic triggers)
     const { data: profile, error: profileError } = await adminClient
       .from('profiles')
-      .insert({
+      .upsert({
         auth_id: authData.user.id,
         email,
         full_name: profileData.fullName || '',
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
         profile_photo: '',
         status: 'pending', // defaults to pending review
         role: 'user',
-      })
+      }, { onConflict: 'auth_id' })
       .select()
       .single();
 
