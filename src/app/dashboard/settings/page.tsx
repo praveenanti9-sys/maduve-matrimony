@@ -170,7 +170,7 @@ export default function SettingsPage() {
                 <Shield style={{ width: "20px", height: "20px", color: "#c6a55c" }} />
                 Super Admin System Settings
               </h3>
-              <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Daily Interest Limit per User</label>
@@ -192,7 +192,7 @@ export default function SettingsPage() {
                     <Toggle checked={autoApprove} onChange={setAutoApprove} />
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
           )}
 
