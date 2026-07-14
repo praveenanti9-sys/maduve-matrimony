@@ -29,14 +29,22 @@ export const metadata: Metadata = {
   ],
 };
 
+// Helper: read env vars via dynamic key access so Next.js does NOT
+// statically inline them at build time. This ensures they are read
+// from the actual runtime environment on the server.
+function getRuntimeEnv(key: string): string {
+  return process.env[key] || '';
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isEnvMissing = 
-    !process.env.NEXT_PUBLIC_SUPABASE_URL || 
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Read env vars at RUNTIME (not build time) using dynamic access
+  const supabaseUrl = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_URL');
+  const supabaseAnon = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  const isEnvMissing = !supabaseUrl || !supabaseAnon;
 
   if (isEnvMissing) {
     return (
@@ -125,8 +133,8 @@ export default function RootLayout({
   // Inject runtime env vars into the page so client-side code can use them
   // even if the NEXT_PUBLIC_ vars weren't baked at build time
   const envScript = `window.__ENV__=${JSON.stringify({
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnon,
   })};`;
 
   return (
