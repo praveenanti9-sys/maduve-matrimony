@@ -72,8 +72,18 @@ const validateEmail = (email: string): string => {
 
 const validatePhone = (phone: string): string => {
   if (!phone.trim()) return "Phone number is required";
-  const cleaned = phone.replace(/[\s+\-()]/g, '');
-  const digits = cleaned.replace(/^91/, '');
+  // Remove all non-digit characters
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Only strip country code '91' if the number has 12 digits total
+  // Only strip leading '0' if the number has 11 digits total
+  let digits = cleaned;
+  if (cleaned.length === 12 && cleaned.startsWith('91')) {
+    digits = cleaned.substring(2);
+  } else if (cleaned.length === 11 && cleaned.startsWith('0')) {
+    digits = cleaned.substring(1);
+  }
+
   if (!/^[6-9]\d{9}$/.test(digits)) return "Enter a valid 10-digit Indian mobile number";
   return "";
 };
