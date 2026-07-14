@@ -67,7 +67,7 @@ export function Navbar() {
 
   const notifCount = notificationList.length;
 
-  const showPublicLinks = !isLoggedIn || currentUser.role !== 'admin';
+  const showPublicLinks = !isLoggedIn && !pathname.startsWith('/dashboard');
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";

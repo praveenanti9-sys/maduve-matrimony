@@ -9,7 +9,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const isDashboard = pathname.startsWith("/dashboard");
 
   if (isDashboard) {
-    return <div style={{ minHeight: "100vh", background: "#f0ece4" }}>{children}</div>;
+    return (
+      <>
+        <Navbar />
+        <div style={{ minHeight: "100vh", background: "#f0ece4", paddingTop: "80px" }}>{children}</div>
+      </>
+    );
   }
 
   return (
