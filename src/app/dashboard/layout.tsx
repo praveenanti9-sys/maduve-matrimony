@@ -43,7 +43,7 @@ export default function DashboardLayout({
   const allLinks = isAdmin ? adminLinks : userLinks;
 
   return (
-    <div style={{ minHeight: "calc(100vh - 80px)", background: "#f0ece4", display: "flex" }}>
+    <div style={{ minHeight: "100vh", background: "#f0ece4", display: "flex" }}>
       {/* Desktop Sidebar */}
       <aside style={{
         display: "none",
@@ -51,8 +51,8 @@ export default function DashboardLayout({
         background: "#fff",
         borderRight: "1px solid #e3e8f0",
         position: "sticky",
-        top: "80px",
-        height: "calc(100vh - 80px)",
+        top: 0,
+        height: "100vh",
         flexDirection: "column",
         flexShrink: 0,
         zIndex: 30,
@@ -168,7 +168,7 @@ export default function DashboardLayout({
       </nav>
 
       {/* Main Content */}
-      <main style={{ flex: 1, minHeight: "calc(100vh - 80px)", paddingBottom: "80px" }}>
+      <main style={{ flex: 1, minHeight: "100vh", paddingBottom: "24px" }}>
         <div style={{ padding: "32px", maxWidth: "1200px", margin: "0 auto" }}>
           {children}
         </div>

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import ClientLayout from "@/components/layout/ClientLayout";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -148,9 +147,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: envScript }} />
       </head>
       <body style={{ margin: 0, padding: 0 }}>
-        <Navbar />
-        <main style={{ paddingTop: "80px" }}>{children}</main>
-        <Footer />
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
