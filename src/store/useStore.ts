@@ -442,30 +442,27 @@ export const useStore = create<AppState>((set, get) => ({
       const email = data.email || '';
       const password = data.password || '';
 
-      const dbData: Partial<DbProfile> = userProfileToDbUpdate(data);
-      dbData.full_name = data.fullName || '';
-
-      const { profile, error } = await svc.registerUser(email, password, dbData);
-      if (error || !profile) {
-        set({ isLoading: false, error: error || 'Registration failed' });
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, profileData: data })
+      });
+      const result = await res.json();
+      if (!res.ok || result.error) {
+        set({ isLoading: false, error: result.error || 'Registration failed' });
         return false;
       }
 
-      const userProfile = dbProfileToUserProfile(profile);
-      set({
-        currentUser: userProfile,
-        registeredUser: userProfile,
-        isLoggedIn: true,
-        isLoading: false,
-        error: null,
-      });
-
-      // Setup subscriptions for realtime updates
-      setupSubscriptions(profile.id, set, get);
-
-      // Fetch data
-      const state = get();
-      await Promise.all([state.fetchProfiles(), state.fetchMessages(), state.fetchSystemSettings()]);
+      // Log in client-side to establish authentication session & load profiles
+      const loggedIn = await get().login(email, password);
+      if (!loggedIn) {
+        // If login failed (e.g. because profile is pending review), handle gracefully
+        const cu = get().currentUser;
+        if (cu && cu.status === 'pending') {
+          return true; // Register was successful
+        }
+        return false;
+      }
       return true;
     } catch (e) {
       set({ isLoading: false, error: (e as Error).message });
