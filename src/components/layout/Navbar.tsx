@@ -67,11 +67,7 @@ export function Navbar() {
 
   const notifCount = notificationList.length;
 
-  const publicLinks = [
-    { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
-  ];
+  const showPublicLinks = !isLoggedIn || currentUser.role !== 'admin';
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -113,29 +109,35 @@ export function Navbar() {
 
         {/* Desktop Nav */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }} className="hidden md:flex">
-          <ul style={{ display: "flex", alignItems: "center", gap: "4px", listStyle: "none", padding: 0, margin: 0 }}>
-            {publicLinks.map((link) => (
-              <li key={link.name}>
-                <Link
-                  href={link.href}
-                  style={{
-                    display: "block",
-                    padding: "8px 16px",
-                    borderRadius: "8px",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: isActive(link.href) ? "#1e2a44" : "#5f6368",
-                    background: isActive(link.href) ? "rgba(30,42,68,0.06)" : "transparent",
-                    textDecoration: "none",
-                    letterSpacing: "0.3px",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  {link.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {showPublicLinks && (
+            <ul style={{ display: "flex", alignItems: "center", gap: "4px", listStyle: "none", padding: 0, margin: 0 }}>
+              {[
+                { name: "Home", href: "/" },
+                { name: "About", href: "/about" },
+                { name: "Contact", href: "/contact" },
+              ].map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    style={{
+                      display: "block",
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      color: isActive(link.href) ? "#1e2a44" : "#5f6368",
+                      background: isActive(link.href) ? "rgba(30,42,68,0.06)" : "transparent",
+                      textDecoration: "none",
+                      letterSpacing: "0.3px",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Right Actions */}
@@ -376,7 +378,11 @@ export function Navbar() {
           animation: "slideDown 0.2s ease-out",
         }} className="md:hidden">
           <ul style={{ padding: "8px 0", margin: 0, listStyle: "none" }}>
-            {publicLinks.map((link) => (
+            {showPublicLinks && [
+              { name: "Home", href: "/" },
+              { name: "About", href: "/about" },
+              { name: "Contact", href: "/contact" },
+            ].map((link) => (
               <li key={link.name}>
                 <Link
                   href={link.href}
