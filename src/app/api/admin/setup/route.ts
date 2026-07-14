@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Dynamic access prevents Next.js from statically inlining at build time
+function env(key: string): string { return process.env[key] || ''; }
+
 export async function POST() {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@maduvedibbana.com';
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123';
+    const supabaseUrl = env('NEXT_PUBLIC_SUPABASE_URL');
+    const serviceRoleKey = env('SUPABASE_SERVICE_ROLE_KEY');
+    const adminEmail = env('NEXT_PUBLIC_ADMIN_EMAIL') || 'admin@maduvedibbana.com';
+    const adminPassword = env('NEXT_PUBLIC_ADMIN_PASSWORD') || 'admin123';
 
     if (!supabaseUrl || !serviceRoleKey) {
       return NextResponse.json({ error: 'Missing Supabase credentials' }, { status: 500 });

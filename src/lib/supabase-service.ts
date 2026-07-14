@@ -91,22 +91,25 @@ export interface DbContactInquiry {
 
 // ── Supabase Clients ──
 
+// Dynamic access prevents Next.js from statically inlining NEXT_PUBLIC_ at build time
+function env(key: string): string { return process.env[key] || ''; }
+
+// Read env with fallback to server-injected window.__ENV__ for client-side code
+function clientEnv(key: string): string {
+  const val = env(key);
+  if (val) return val;
+  if (typeof window !== 'undefined') {
+    const injected = (window as unknown as Record<string, unknown>).__ENV__ as Record<string, string> | undefined;
+    if (injected?.[key]) return injected[key];
+  }
+  return '';
+}
+
 // Client-side Supabase (uses anon key, respects RLS)
 let _supabase: SupabaseClient | null = null;
 export function getSupabase(): SupabaseClient {
-  // Build-time values (baked by Next.js compiler)
-  let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  let key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  // Fallback: read runtime-injected values from the server via window.__ENV__
-  // This handles the case where env vars were added to Vercel AFTER the build
-  if ((!url || !key) && typeof window !== 'undefined') {
-    const injected = (window as unknown as Record<string, unknown>).__ENV__ as Record<string, string> | undefined;
-    if (injected) {
-      url = url || injected.NEXT_PUBLIC_SUPABASE_URL;
-      key = key || injected.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    }
-  }
+  const url = clientEnv('NEXT_PUBLIC_SUPABASE_URL');
+  const key = clientEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
 
   if (!_supabase) {
     if (!url || !key) {
@@ -120,8 +123,8 @@ export function getSupabase(): SupabaseClient {
 // Server-side Supabase (uses service role key, bypasses RLS — for admin operations)
 let _supabaseAdmin: SupabaseClient | null = null;
 export function getSupabaseAdmin(): SupabaseClient {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = env('NEXT_PUBLIC_SUPABASE_URL');
+  const serviceKey = env('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!_supabaseAdmin) {
     if (!url || !serviceKey) {

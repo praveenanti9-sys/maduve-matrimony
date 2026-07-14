@@ -2,6 +2,17 @@ import { create } from 'zustand';
 import * as svc from '@/lib/supabase-service';
 import type { DbProfile, DbMessage, DbInterest, DbSystemSettings } from '@/lib/supabase-service';
 
+// Read NEXT_PUBLIC_ env vars with fallback to server-injected runtime values
+function getClientEnv(key: string): string {
+  const buildTime = process.env[key];
+  if (buildTime) return buildTime;
+  if (typeof window !== 'undefined') {
+    const injected = (window as unknown as Record<string, unknown>).__ENV__ as Record<string, string> | undefined;
+    if (injected?.[key]) return injected[key];
+  }
+  return '';
+}
+
 // ── Constants ──
 export const DAILY_INTEREST_LIMIT = 10;
 
@@ -480,7 +491,7 @@ export const useStore = create<AppState>((set, get) => ({
       set({ isLoading: true, error: null });
 
       // If logging in as admin, trigger admin setup API route first to ensure admin exists in DB
-      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@maduvedibbana.com';
+      const adminEmail = getClientEnv('NEXT_PUBLIC_ADMIN_EMAIL') || 'admin@maduvedibbana.com';
       if (email === adminEmail) {
         try {
           await fetch('/api/admin/setup', { method: 'POST' });
