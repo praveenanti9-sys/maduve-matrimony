@@ -21,7 +21,8 @@ export default function ForgotPasswordPage() {
       if (success) {
         setStep("done");
       } else {
-        setError("Failed to send reset email. Please check your email and try again.");
+        const storeError = useStore.getState().error;
+        setError(storeError || "Failed to send reset email. Please check your email and try again.");
       }
     } catch {
       setError("Something went wrong. Please try again later.");
