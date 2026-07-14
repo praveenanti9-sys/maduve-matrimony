@@ -776,6 +776,7 @@ export function subscribeToInterests(
   const supabase = getSupabase();
   const channel = supabase
     .channel(`interests:${profileId}`)
+    // Listen to interests sent TO me
     .on(
       'postgres_changes',
       {
@@ -783,6 +784,19 @@ export function subscribeToInterests(
         schema: 'public',
         table: 'interests',
         filter: `to_id=eq.${profileId}`,
+      },
+      (payload) => {
+        onInterestUpdate(payload.new as DbInterest);
+      }
+    )
+    // Listen to updates on interests sent BY me (e.g., accepted/declined by others)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'interests',
+        filter: `from_id=eq.${profileId}`,
       },
       (payload) => {
         onInterestUpdate(payload.new as DbInterest);
