@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@/store/useStore";
 import {
   Shield, Users, Search, Ban, AlertTriangle, CheckCircle2,
@@ -8,13 +8,18 @@ import {
   Activity, Mail, Calendar, MapPin, Filter,
   MessageCircle, Heart, ArrowLeft, User, Briefcase,
   GraduationCap, Sparkles, Clock, Check, Trash2,
-  Phone, ChevronRight, Send,
+  Phone, ChevronRight, Send, Settings,
 } from "lucide-react";
 
-type AdminView = 'overview' | 'users' | 'approvals' | 'user-detail' | 'messages';
+type AdminView = 'overview' | 'users' | 'approvals' | 'user-detail' | 'messages' | 'settings';
 
 export default function AdminPage() {
-  const { currentUser, profiles, messages, interests, blockUser, suspendUser, activateUser, deleteUser, approveUser, rejectUser, verifyUser, registeredUser } = useStore();
+  const { 
+    currentUser, profiles, messages, interests, blockUser, suspendUser, 
+    activateUser, deleteUser, approveUser, rejectUser, verifyUser, 
+    registeredUser, systemSettings, fetchSystemSettings, updateSystemSettings 
+  } = useStore();
+  
   const [activeView, setActiveView] = useState<AdminView>('overview');
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"" | "active" | "suspended" | "blocked" | "pending">("");
@@ -26,6 +31,22 @@ export default function AdminPage() {
   const [toast, setToast] = useState<{ message: string; type: string } | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedConvoPartners, setSelectedConvoPartners] = useState<[string, string] | null>(null);
+
+  // Settings tab local state
+  const [interestLimit, setInterestLimit] = useState(10);
+  const [autoApprove, setAutoApprove] = useState(true);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  useEffect(() => {
+    fetchSystemSettings();
+  }, [fetchSystemSettings]);
+
+  useEffect(() => {
+    if (systemSettings) {
+      setInterestLimit(systemSettings.dailyInterestLimit);
+      setAutoApprove(systemSettings.autoApproveProfiles);
+    }
+  }, [systemSettings]);
 
   // Redirect non-admins
   if (currentUser.role !== 'admin') {
@@ -230,6 +251,7 @@ export default function AdminPage() {
     { id: 'users' as const, label: 'User Management', icon: Users, count: totalUsers },
     { id: 'approvals' as const, label: 'Pending Approvals', icon: Clock, count: pendingApprovalsCount },
     { id: 'messages' as const, label: 'All Messages', icon: MessageCircle, count: totalMessages },
+    { id: 'settings' as const, label: 'System Settings', icon: Settings, count: 0 },
   ];
 
   // ── Selected conversation messages ──
@@ -269,7 +291,7 @@ export default function AdminPage() {
 
       {/* Navigation Tabs */}
       {activeView !== 'user-detail' && (
-        <div style={{ display: "flex", gap: "4px", background: "#fff", padding: "4px", borderRadius: "12px", boxShadow: "0 2px 10px rgba(0,0,0,0.04)" }}>
+        <div style={{ display: "flex", gap: "4px", background: "#fff", padding: "4px", borderRadius: "12px", boxShadow: "0 2px 10px rgba(0,0,0,0.04)", overflowX: "auto" }}>
           {navTabs.map(tab => (
             <button key={tab.id} onClick={() => { setActiveView(tab.id); setSelectedConvoPartners(null); }} style={{
               flex: 1, padding: "12px 16px", borderRadius: "10px", fontSize: "13px", fontWeight: 600,
@@ -277,6 +299,7 @@ export default function AdminPage() {
               border: "none", cursor: "pointer", transition: "all 0.2s",
               background: activeView === tab.id ? "#1e2a44" : "transparent",
               color: activeView === tab.id ? "#fff" : "#5f6368",
+              whiteSpace: "nowrap",
             }}>
               <tab.icon style={{ width: "16px", height: "16px" }} />
               {tab.label}
@@ -299,8 +322,8 @@ export default function AdminPage() {
          ═══════════════════════════════════════════ */}
       {activeView === 'overview' && (
         <>
-          {/* Stats */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+          {/* Stats Grid */}
+          <div className="admin-stats-grid">
             {[
               { label: "Total Users", value: totalUsers, icon: Users, color: "#3b82f6", bg: "linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.2))" },
               { label: "Active", value: activeUsers, icon: Activity, color: "#16a34a", bg: "linear-gradient(135deg, rgba(22,163,106,0.1), rgba(22,163,106,0.2))" },
@@ -315,19 +338,20 @@ export default function AdminPage() {
                 backdropFilter: "blur(12px)", 
                 border: "1px solid rgba(255, 255, 255, 0.4)", 
                 borderRadius: "16px", 
-                padding: "24px", 
+                padding: "16px 12px", 
                 boxShadow: "0 8px 32px rgba(31, 38, 135, 0.05)",
-                display: "flex", flexDirection: "column", gap: "12px",
+                display: "flex", flexDirection: "column", gap: "8px",
                 transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                minWidth: "0",
               }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: stat.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <stat.icon style={{ width: "24px", height: "24px", color: stat.color }} />
+                  <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: stat.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <stat.icon style={{ width: "18px", height: "18px", color: stat.color }} />
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: "32px", fontWeight: 800, color: "#1e2a44", lineHeight: "1.2" }}>{stat.value}</div>
-                  <div style={{ fontSize: "13px", color: "#5f6368", fontWeight: 600 }}>{stat.label}</div>
+                  <div style={{ fontSize: "22px", fontWeight: 800, color: "#1e2a44", lineHeight: "1.2" }}>{stat.value}</div>
+                  <div style={{ fontSize: "11px", color: "#5f6368", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={stat.label}>{stat.label}</div>
                 </div>
               </div>
             ))}
@@ -945,6 +969,95 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          SYSTEM SETTINGS TAB
+         ═══════════════════════════════════════════ */}
+      {activeView === 'settings' && (
+        <div className="card animate-fade-in" style={{ padding: "32px", maxWidth: "600px", margin: "0 auto", width: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", borderBottom: "1px solid #f0ece4", paddingBottom: "16px" }}>
+            <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(198,165,92,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Settings style={{ width: "22px", height: "22px", color: "#c6a55c" }} />
+            </div>
+            <div>
+              <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#1e2a44", margin: 0 }}>System Configurations</h2>
+              <p style={{ fontSize: "12px", color: "#5f6368", margin: 0 }}>Global settings for the Maduvedibbana platform</p>
+            </div>
+          </div>
+
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            setIsSavingSettings(true);
+            try {
+              await updateSystemSettings({
+                dailyInterestLimit: Number(interestLimit),
+                autoApproveProfiles: autoApprove,
+              });
+              showToast("System settings updated successfully", "success");
+            } catch (err) {
+              showToast("Failed to update system settings", "error");
+            } finally {
+              setIsSavingSettings(false);
+            }
+          }} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            
+            <div>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>
+                Daily Interest Limit per User
+              </label>
+              <input
+                type="number"
+                value={interestLimit}
+                onChange={(e) => setInterestLimit(Number(e.target.value))}
+                className="input"
+                min={1}
+                max={100}
+                required
+              />
+              <p style={{ fontSize: "11px", color: "#a0aec0", marginTop: "4px" }}>
+                The maximum number of interest requests a regular member can send each day.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: "#fafcff", border: "1px solid #e3e8f0", borderRadius: "12px" }}>
+              <div style={{ flex: 1, paddingRight: "16px" }}>
+                <h4 style={{ fontWeight: 600, fontSize: "13px", color: "#1e2a44", margin: 0 }}>Auto-Approve Profiles</h4>
+                <p style={{ fontSize: "11px", color: "#5f6368", margin: "4px 0 0 0" }}>
+                  When enabled, newly registered users bypass manual admin validation and become Active immediately.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAutoApprove(!autoApprove)}
+                style={{
+                  width: "48px", height: "26px", borderRadius: "999px",
+                  background: autoApprove ? "#1e2a44" : "#e3e8f0",
+                  border: "none", cursor: "pointer",
+                  position: "relative", transition: "all 0.3s ease",
+                  flexShrink: 0,
+                }}
+              >
+                <div style={{
+                  width: "20px", height: "20px", borderRadius: "50%",
+                  background: "#fff", position: "absolute",
+                  top: "3px", left: autoApprove ? "25px" : "3px",
+                  transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                }} />
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSavingSettings}
+              className="btn-primary-gold"
+              style={{ width: "100%", height: "46px", marginTop: "8px", opacity: isSavingSettings ? 0.7 : 1 }}
+            >
+              {isSavingSettings ? "Saving Settings..." : "Save Configuration"}
+            </button>
+          </form>
         </div>
       )}
 

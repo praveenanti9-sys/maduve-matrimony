@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@/store/useStore";
 import { useRouter } from "next/navigation";
 import {
@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { currentUser, updateProfile, logout, systemSettings, updateSystemSettings, uploadPhoto } = useStore();
+  const { currentUser, updateProfile, logout, systemSettings, updateSystemSettings, uploadPhoto, fetchSystemSettings } = useStore();
   const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -36,8 +36,21 @@ export default function SettingsPage() {
   const [notifPromo, setNotifPromo] = useState(currentUser.notifPromo ?? false);
 
   // Super Admin settings states
-  const [interestLimit, setInterestLimit] = useState(systemSettings?.dailyInterestLimit ?? 10);
-  const [autoApprove, setAutoApprove] = useState(systemSettings?.autoApproveProfiles ?? true);
+  const [interestLimit, setInterestLimit] = useState(10);
+  const [autoApprove, setAutoApprove] = useState(true);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchSystemSettings();
+    }
+  }, [isAdmin, fetchSystemSettings]);
+
+  useEffect(() => {
+    if (systemSettings) {
+      setInterestLimit(systemSettings.dailyInterestLimit);
+      setAutoApprove(systemSettings.autoApproveProfiles);
+    }
+  }, [systemSettings]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
