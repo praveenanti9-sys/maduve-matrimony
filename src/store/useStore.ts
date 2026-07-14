@@ -99,6 +99,7 @@ export interface MatchProfile {
   adminReviewed?: boolean;
   isVerified?: boolean;
   photoPrivacy?: boolean;
+  role?: 'user' | 'admin';
 }
 
 export interface Message {
@@ -220,6 +221,7 @@ function dbProfileToMatchProfile(db: DbProfile): MatchProfile {
     adminReviewed: db.admin_reviewed,
     isVerified: db.is_verified,
     photoPrivacy: db.photo_privacy,
+    role: db.role as 'user' | 'admin',
   };
 }
 

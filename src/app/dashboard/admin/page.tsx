@@ -79,10 +79,16 @@ export default function AdminPage() {
     setActiveView('user-detail');
   };
 
-  // ── Inject registered user into profiles for admin view ──
+  // ── Inject registered user into profiles for admin view (excluding admins) ──
   const allProfiles = (() => {
-    if (!registeredUser || !registeredUser.email) return profiles;
-    // Convert the registered user to a MatchProfile-like object
+    // Filter profiles from store to exclude admin accounts
+    const clientProfiles = profiles.filter(p => p.role !== 'admin' && p.id !== currentUser.id);
+
+    if (!registeredUser || !registeredUser.email || registeredUser.role === 'admin') {
+      return clientProfiles;
+    }
+
+    // Convert the registered user to a MatchProfile-like object (only if not admin)
     const regProfile = {
       id: 'me',
       name: registeredUser.fullName || 'Registered User',
@@ -122,8 +128,9 @@ export default function AdminPage() {
       adminReviewed: registeredUser.adminReviewed,
       isVerified: registeredUser.isVerified,
       photoPrivacy: registeredUser.photoPrivacy,
+      role: registeredUser.role as 'user' | 'admin',
     };
-    return [regProfile, ...profiles];
+    return [regProfile, ...clientProfiles];
   })();
 
   // ── Stats ── (use allProfiles so registered user is counted)
