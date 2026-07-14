@@ -12,7 +12,7 @@ export default function Home() {
       ═══════════════════════════════════════════════════ */}
       <section style={{ position: "relative", width: "100%", height: "100vh", minHeight: "700px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", paddingBottom: "60px", overflow: "hidden" }}>
         <Image
-          src="https://maduvedibbana.com/wp-content/uploads/2026/04/madhuve.webp"
+          src="/Matrimonyyy.webp"
           alt="Traditional Indian Wedding"
           fill
           style={{ objectFit: "cover", objectPosition: "top center" }}
