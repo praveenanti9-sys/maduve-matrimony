@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/store/useStore";
@@ -129,6 +129,8 @@ export default function RegisterPage() {
   const [gender, setGender] = useState<Gender>("");
   const [dob, setDob] = useState("");
   const [profilePhoto, setProfilePhoto] = useState("");
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -137,10 +139,11 @@ export default function RegisterPage() {
         alert("Please upload a valid image file (JPG, PNG)");
         return;
       }
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Image must be smaller than 2MB");
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image must be smaller than 5MB");
         return;
       }
+      setProfilePhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePhoto(reader.result as string);
@@ -236,7 +239,7 @@ export default function RegisterPage() {
     if (Object.keys(newErrors).length > 0) return;
 
     const success = await register({
-      fullName, email, phone, password, gender, dob, profilePhoto,
+      fullName, email, phone, password, gender, dob, profilePhoto: "", // Reset to empty initially, we will upload to Storage next
       height, weight, complexion, maritalStatus,
       education, occupation, annualIncome,
       city, district, nativePlace, state: "Karnataka",
@@ -246,6 +249,10 @@ export default function RegisterPage() {
       prefAgeMin, prefAgeMax, prefHeightMin, prefDistrict, prefEducation
     });
     if (success) {
+      if (profilePhotoFile) {
+        // Upload photo file to storage bucket and update db profile
+        await useStore.getState().uploadPhoto(profilePhotoFile);
+      }
       setShowSuccessModal(true);
     } else {
       const storeError = useStore.getState().error;
@@ -516,17 +523,67 @@ export default function RegisterPage() {
                 <Camera style={{ width: "18px", height: "18px", color: "#c6a55c" }} />
                 <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44" }}>Profile Photos (Recommended)</h3>
               </div>
+              {/* Hidden file input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handlePhotoUpload}
+                accept="image/*"
+                style={{ display: "none" }}
+              />
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
-                {["Main Photo", "Side Photo", "Side Photo"].map((label, i) => (
-                  <div key={i} style={{
-                    height: "100px", borderRadius: "12px", border: "2px dashed #d4d8e0",
-                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", background: "rgba(30,42,68,0.02)", transition: "all 0.2s",
-                  }}>
-                    <Camera style={{ width: "20px", height: "20px", color: "#a0aec0", marginBottom: "4px" }} />
-                    <span style={{ fontSize: "10px", color: "#5f6368", fontWeight: 500 }}>{label}</span>
-                  </div>
-                ))}
+                {["Main Photo", "Side Photo (Opt)", "Side Photo (Opt)"].map((label, i) => {
+                  const isMain = i === 0;
+                  const hasPreview = isMain && profilePhoto;
+
+                  return (
+                    <div
+                      key={i}
+                      onClick={() => {
+                        if (isMain) {
+                          fileInputRef.current?.click();
+                        } else {
+                          alert("Optional side photos can be uploaded from profile settings later.");
+                        }
+                      }}
+                      style={{
+                        height: "100px",
+                        borderRadius: "12px",
+                        border: hasPreview ? "2px solid #16a34a" : "2px dashed #d4d8e0",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: isMain ? "pointer" : "not-allowed",
+                        backgroundImage: hasPreview ? `url('${profilePhoto}')` : "none",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                        position: "relative",
+                        background: hasPreview ? undefined : "rgba(30,42,68,0.02)",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      {!hasPreview && (
+                        <>
+                          <Camera style={{ width: "20px", height: "20px", color: isMain ? "#c6a55c" : "#a0aec0", marginBottom: "4px" }} />
+                          <span style={{ fontSize: "10px", color: "#5f6368", fontWeight: 500 }}>{label}</span>
+                        </>
+                      )}
+                      {hasPreview && (
+                        <div style={{
+                          position: "absolute", bottom: 0, left: 0, right: 0,
+                          background: "rgba(0,0,0,0.6)", padding: "4px",
+                          borderBottomLeftRadius: "10px", borderBottomRightRadius: "10px",
+                          textAlign: "center", fontSize: "9px", color: "#fff", fontWeight: 600
+                        }}>
+                          Change Photo
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
