@@ -242,7 +242,12 @@ export async function loginUser(
     return { profile: null, error: 'Profile not found.' };
   }
 
-  // Check if user is blocked/suspended
+  // Check if user is pending, blocked, or suspended
+  if (profile.status === 'pending') {
+    await supabase.auth.signOut();
+    return { profile: profile as DbProfile, error: 'Your profile is pending admin review and approval. You will receive an email once it is approved.' };
+  }
+
   if (profile.status === 'blocked' || profile.status === 'suspended') {
     await supabase.auth.signOut();
     return { profile: profile as DbProfile, error: `Your account is ${profile.status}. ${profile.status_reason || 'Please contact support.'}` };

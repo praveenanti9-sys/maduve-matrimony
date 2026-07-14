@@ -408,6 +408,11 @@ export const useStore = create<AppState>((set, get) => ({
       set({ isLoading: true });
       const profile = await svc.fetchMyProfile();
       if (profile) {
+        if (profile.status === 'pending' || profile.status === 'blocked' || profile.status === 'suspended') {
+          await svc.logoutUser();
+          set({ currentUser: defaultUser, isLoggedIn: false, isLoading: false });
+          return;
+        }
         const userProfile = dbProfileToUserProfile(profile);
         set({
           currentUser: userProfile,
