@@ -1,0 +1,13 @@
+{
+  "name": "matrimony-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix app",
+    "build": "npm run build --prefix app",
+    "start": "npm run start --prefix app"
+  },
+  "dependencies": {
+    "next": "16.2.7"
+  }
+}
