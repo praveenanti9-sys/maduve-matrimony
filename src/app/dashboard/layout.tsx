@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useStore } from "@/store/useStore";
 import {
   LayoutDashboard, User, Search, Heart, MessageCircle,
-  Settings, LogOut, ChevronRight, Shield,
+  Settings, LogOut, ChevronRight, Shield, Loader2,
 } from "lucide-react";
 
 const userLinks = [
@@ -32,7 +32,24 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, currentUser } = useStore();
+  const { logout, currentUser, initializeSession, isLoggedIn, isLoading } = useStore();
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  // Initialize session on load
+  useEffect(() => {
+    const init = async () => {
+      await initializeSession();
+      setSessionChecked(true);
+    };
+    init();
+  }, [initializeSession]);
+
+  // Protect route: redirect to login if session resolves to not logged in
+  useEffect(() => {
+    if (sessionChecked && !isLoading && !isLoggedIn) {
+      router.replace("/login");
+    }
+  }, [sessionChecked, isLoading, isLoggedIn, router]);
 
   const handleLogout = () => {
     logout();
@@ -41,6 +58,26 @@ export default function DashboardLayout({
 
   const isAdmin = currentUser.role === 'admin';
   const allLinks = isAdmin ? adminLinks : userLinks;
+
+  // Show a premium loading screen while verifying auth to prevent content flash/leak
+  if (isLoading || !isLoggedIn || !sessionChecked) {
+    return (
+      <div style={{
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        minHeight: "100vh", background: "#f0ece4", gap: "16px",
+        fontFamily: "'Inter', sans-serif"
+      }}>
+        <Loader2 style={{ width: "40px", height: "40px", color: "#c6a55c", animation: "spin 1s linear infinite" }} />
+        <p style={{ fontSize: "14px", color: "#1e2a44", fontWeight: 500 }}>Securing session...</p>
+        <style>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#f0ece4", display: "flex" }}>
