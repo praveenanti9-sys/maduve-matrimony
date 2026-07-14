@@ -347,10 +347,6 @@ interface AppState {
   uploadPhoto: (file: File) => Promise<string | null>;
 }
 
-// ── Admin credentials ──
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@maduvedibbana.com';
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123';
-
 // ── Module-level subscription variables ──
 let messageSubscriptionUnsubscribe: (() => void) | null = null;
 let interestSubscriptionUnsubscribe: (() => void) | null = null;
@@ -480,7 +476,8 @@ export const useStore = create<AppState>((set, get) => ({
       set({ isLoading: true, error: null });
 
       // If logging in as admin, trigger admin setup API route first to ensure admin exists in DB
-      if (email === ADMIN_EMAIL) {
+      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@maduvedibbana.com';
+      if (email === adminEmail) {
         try {
           await fetch('/api/admin/setup', { method: 'POST' });
         } catch (err) {

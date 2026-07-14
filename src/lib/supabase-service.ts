@@ -91,18 +91,17 @@ export interface DbContactInquiry {
 
 // ── Supabase Clients ──
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
 // Client-side Supabase (uses anon key, respects RLS)
 let _supabase: SupabaseClient | null = null;
 export function getSupabase(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
   if (!_supabase) {
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!url || !key) {
       throw new Error('Missing Supabase environment variables. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
     }
-    _supabase = createClient(supabaseUrl, supabaseAnonKey);
+    _supabase = createClient(url, key);
   }
   return _supabase;
 }
@@ -110,11 +109,14 @@ export function getSupabase(): SupabaseClient {
 // Server-side Supabase (uses service role key, bypasses RLS — for admin operations)
 let _supabaseAdmin: SupabaseClient | null = null;
 export function getSupabaseAdmin(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
   if (!_supabaseAdmin) {
-    if (!supabaseUrl || !supabaseServiceKey) {
+    if (!url || !serviceKey) {
       throw new Error('Missing Supabase service role key. Check SUPABASE_SERVICE_ROLE_KEY.');
     }
-    _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    _supabaseAdmin = createClient(url, serviceKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
   }
@@ -662,7 +664,7 @@ export async function deleteUserByAdmin(profileId: string, adminId: string): Pro
     await logAdminAction(adminId, 'delete', profileId);
 
     // Delete from auth.users (requires service role key — server-side only)
-    if (profile?.auth_id && supabaseServiceKey) {
+    if (profile?.auth_id && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       const adminClient = getSupabaseAdmin();
       await adminClient.auth.admin.deleteUser(profile.auth_id);
     }
