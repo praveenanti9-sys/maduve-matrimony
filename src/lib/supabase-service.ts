@@ -94,8 +94,19 @@ export interface DbContactInquiry {
 // Client-side Supabase (uses anon key, respects RLS)
 let _supabase: SupabaseClient | null = null;
 export function getSupabase(): SupabaseClient {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Build-time values (baked by Next.js compiler)
+  let url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  let key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // Fallback: read runtime-injected values from the server via window.__ENV__
+  // This handles the case where env vars were added to Vercel AFTER the build
+  if ((!url || !key) && typeof window !== 'undefined') {
+    const injected = (window as unknown as Record<string, unknown>).__ENV__ as Record<string, string> | undefined;
+    if (injected) {
+      url = url || injected.NEXT_PUBLIC_SUPABASE_URL;
+      key = key || injected.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    }
+  }
 
   if (!_supabase) {
     if (!url || !key) {

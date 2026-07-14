@@ -122,11 +122,21 @@ export default function RootLayout({
     );
   }
 
+  // Inject runtime env vars into the page so client-side code can use them
+  // even if the NEXT_PUBLIC_ vars weren't baked at build time
+  const envScript = `window.__ENV__=${JSON.stringify({
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+  })};`;
+
   return (
     <html
       lang="en"
       className={`${inter.variable} ${playfair.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: envScript }} />
+      </head>
       <body style={{ margin: 0, padding: 0 }}>
         <Navbar />
         <main style={{ paddingTop: "80px" }}>{children}</main>
