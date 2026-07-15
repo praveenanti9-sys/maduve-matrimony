@@ -18,12 +18,13 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  line-height: 1.5;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Playfair Display', var(--font-playfair), serif;
   color: #1e2a44;
-  line-height: 1.25;
+  line-height: 1.35;
 }
 
 /* ── Scrollbar ── */
@@ -111,7 +112,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #1e2a44;
   transition: all 0.25s ease;
   outline: none;
-  height: 48px;
+  min-height: 48px;
 }
 .input:focus {
   border-color: #1e2a44;

@@ -516,7 +516,7 @@ export default function RegisterPage() {
   const selectStyle: React.CSSProperties = {
     width: "100%", padding: "10px 14px", background: "#fafcff",
     border: "1px solid #e3e8f0", borderRadius: "12px",
-    fontSize: "14px", color: "#1e2a44", outline: "none", height: "46px",
+    fontSize: "14px", color: "#1e2a44", outline: "none", minHeight: "46px",
     cursor: "pointer", appearance: "none" as const,
     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
     backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center",
@@ -674,7 +674,7 @@ export default function RegisterPage() {
                 <ErrorMsg field="gender" />
               </div>
 
-              <button type="submit" className="btn-primary" style={{ width: "100%", height: "48px", marginTop: "10px" }}>
+              <button type="submit" className="btn-primary" style={{ width: "100%", minHeight: "48px", marginTop: "10px" }}>
                 <span>Continue to Step 2</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
               </button>
             </form>
@@ -859,10 +859,10 @@ export default function RegisterPage() {
               </div>
 
               <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
-                <button type="button" onClick={() => setStep(1)} className="btn-outline" style={{ flex: 1, height: "48px" }}>
+                <button type="button" onClick={() => setStep(1)} className="btn-outline" style={{ flex: 1, minHeight: "48px" }}>
                   <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
                 </button>
-                <button type="submit" className="btn-primary" style={{ flex: 2, height: "48px" }}>
+                <button type="submit" className="btn-primary" style={{ flex: 2, minHeight: "48px" }}>
                   <span>Continue to Step 3</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
                 </button>
               </div>
@@ -1042,10 +1042,10 @@ export default function RegisterPage() {
               </div>
 
               <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
-                <button type="button" onClick={() => setStep(2)} className="btn-outline" style={{ flex: 1, height: "48px" }}>
+                <button type="button" onClick={() => setStep(2)} className="btn-outline" style={{ flex: 1, minHeight: "48px" }}>
                   <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
                 </button>
-                <button type="submit" className="btn-primary" style={{ flex: 2, height: "48px" }}>
+                <button type="submit" className="btn-primary" style={{ flex: 2, minHeight: "48px" }}>
                   <span>Continue to Step 4</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
                 </button>
               </div>
@@ -1099,14 +1099,14 @@ export default function RegisterPage() {
                   <a href={upiUri} style={{
                     display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                     background: "linear-gradient(135deg, #1a73e8, #1557b0)", color: "#fff",
-                    textDecoration: "none", height: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
+                    textDecoration: "none", minHeight: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
                   }}>
                     <Smartphone style={{ width: "16px", height: "16px" }} /> Google Pay / UPI
                   </a>
                   <a href={upiUri} style={{
                     display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                     background: "linear-gradient(135deg, #5f259f, #4d1c82)", color: "#fff",
-                    textDecoration: "none", height: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
+                    textDecoration: "none", minHeight: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
                   }}>
                     <Smartphone style={{ width: "16px", height: "16px" }} /> PhonePe / BHIM
                   </a>
@@ -1180,10 +1180,10 @@ export default function RegisterPage() {
 
               {/* Action Buttons */}
               <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
-                <button type="button" onClick={() => setStep(3)} className="btn-outline" style={{ flex: 1, height: "48px" }}>
+                <button type="button" onClick={() => setStep(3)} className="btn-outline" style={{ flex: 1, minHeight: "48px" }}>
                   <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
                 </button>
-                <button type="submit" className="btn-primary" style={{ flex: 2, height: "48px" }}>
+                <button type="submit" className="btn-primary" style={{ flex: 2, minHeight: "48px" }}>
                   <span>Continue to Step 5</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
                 </button>
               </div>
@@ -1279,10 +1279,10 @@ export default function RegisterPage() {
               )}
 
               <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
-                <button type="button" onClick={() => setStep(4)} className="btn-outline" style={{ flex: 1, height: "48px" }}>
+                <button type="button" onClick={() => setStep(4)} className="btn-outline" style={{ flex: 1, minHeight: "48px" }}>
                   <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
                 </button>
-                <button type="submit" disabled={isSubmitting} className="btn-primary-gold" style={{ flex: 2, height: "48px", opacity: isSubmitting ? 0.7 : 1 }}>
+                <button type="submit" disabled={isSubmitting} className="btn-primary-gold" style={{ flex: 2, minHeight: "48px", opacity: isSubmitting ? 0.7 : 1 }}>
                   <span>{isSubmitting ? "Submitting..." : "Submit Registration"}</span> <CheckCircle2 style={{ width: "16px", height: "16px" }} />
                 </button>
               </div>
@@ -1314,7 +1314,7 @@ export default function RegisterPage() {
             <button 
               onClick={() => router.push("/login")}
               className="btn-primary"
-              style={{ width: "100%", height: "48px" }}
+              style={{ width: "100%", minHeight: "48px" }}
             >
               Go to Login
             </button>
