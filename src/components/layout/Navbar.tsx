@@ -130,7 +130,7 @@ export function Navbar() {
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }} className="hidden md:flex">
             {[
               { label: "Home", href: "/" },
-              { label: "About Sangama", href: "/about" },
+              { label: "About", href: "/about" },
               { label: "Contact Us", href: "/contact" },
             ].map((link) => (
               <Link
