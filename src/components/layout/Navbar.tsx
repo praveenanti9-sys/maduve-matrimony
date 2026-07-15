@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, ChevronDown, Bell, Heart } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, ChevronDown, Bell, Heart, Search, MessageSquare, Shield } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { ADMIN_UUID, SYSTEM_UUID } from "@/lib/supabase-service";
 
@@ -226,27 +226,29 @@ export function Navbar() {
             display: "flex",
             alignItems: "center",
             gap: "2px",
-            background: "#f1f5f9",
-            padding: "2px",
-            borderRadius: "6px",
-            fontSize: "10px",
+            background: "rgba(255, 255, 255, 0.95)",
+            padding: "3px",
+            borderRadius: "8px",
+            fontSize: "11px",
             fontWeight: 700,
-            border: "1px solid #cbd5e1",
+            border: "1px solid rgba(30, 42, 68, 0.12)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
             flexShrink: 0,
             marginRight: "4px"
           }}>
             <button
               onClick={() => triggerGoogleTranslate('en')}
               style={{
-                padding: "4px 8px",
-                borderRadius: "4px",
+                padding: "6px 12px",
+                borderRadius: "6px",
                 border: "none",
-                background: currentLang === 'en' ? "#1e2a44" : "transparent",
+                background: currentLang === 'en' ? "linear-gradient(135deg, #1e2a44, #2a3a6a)" : "transparent",
                 color: currentLang === 'en' ? "#fff" : "#5f6368",
                 cursor: "pointer",
                 fontWeight: 700,
-                fontSize: "10px",
-                transition: "all 0.15s"
+                fontSize: "11px",
+                transition: "all 0.2s ease",
+                boxShadow: currentLang === 'en' ? "0 2px 6px rgba(30,42,68,0.2)" : "none"
               }}
             >
               EN
@@ -254,15 +256,16 @@ export function Navbar() {
             <button
               onClick={() => triggerGoogleTranslate('kn')}
               style={{
-                padding: "4px 8px",
-                borderRadius: "4px",
+                padding: "6px 12px",
+                borderRadius: "6px",
                 border: "none",
-                background: currentLang === 'kn' ? "#1e2a44" : "transparent",
+                background: currentLang === 'kn' ? "linear-gradient(135deg, #1e2a44, #2a3a6a)" : "transparent",
                 color: currentLang === 'kn' ? "#fff" : "#5f6368",
                 cursor: "pointer",
                 fontWeight: 700,
-                fontSize: "10px",
-                transition: "all 0.15s"
+                fontSize: "11px",
+                transition: "all 0.2s ease",
+                boxShadow: currentLang === 'kn' ? "0 2px 6px rgba(30,42,68,0.2)" : "none"
               }}
             >
               ಕನ್ನಡ
@@ -286,7 +289,7 @@ export function Navbar() {
               </Link>
 
               {/* Notification Bell Dropdown */}
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative" }} className="hidden md:block">
                 <button
                   onClick={(e) => { e.stopPropagation(); setNotifMenuOpen(!notifMenuOpen); setUserMenuOpen(false); }}
                   style={{
@@ -394,7 +397,7 @@ export function Navbar() {
               </div>
 
               {/* User Avatar Dropdown */}
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative" }} className="hidden md:block">
                 <button
                   onClick={(e) => { e.stopPropagation(); setUserMenuOpen(!userMenuOpen); }}
                   style={{
@@ -527,10 +530,11 @@ export function Navbar() {
         <div style={{
           position: "absolute", top: "80px", left: 0, right: 0,
           background: "#fff", borderTop: "1px solid #e5e7eb",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.1)",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
           animation: "slideDown 0.2s ease-out",
+          zIndex: 49,
         }} className="md:hidden">
-          <ul style={{ padding: "8px 0", margin: 0, listStyle: "none" }}>
+          <ul style={{ padding: "0 0 16px 0", margin: 0, listStyle: "none" }}>
             {showPublicLinks && [
               { name: "Home", href: "/" },
               { name: "About", href: "/about" },
@@ -552,44 +556,136 @@ export function Navbar() {
                 </Link>
               </li>
             ))}
+
             {isLoggedIn ? (
               <>
-                <li style={{ borderTop: "1px solid #e5e7eb" }}>
-                  <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} style={{
-                    display: "flex", alignItems: "center", gap: "10px",
-                    padding: "14px 24px", fontSize: "15px", fontWeight: 600,
-                    color: "#1e2a44", textDecoration: "none",
+                {/* User Profile Card Header */}
+                <div style={{
+                  padding: "20px 24px",
+                  background: "linear-gradient(135deg, rgba(30,42,68,0.02), rgba(198,165,92,0.04))",
+                  borderBottom: "1px solid #f1f5f9",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "14px",
+                  marginBottom: "8px"
+                }}>
+                  <div style={{
+                    width: "48px", height: "48px", borderRadius: "50%",
+                    backgroundImage: currentUser.profilePhoto ? `url('${currentUser.profilePhoto}')` : "none",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    background: currentUser.profilePhoto ? undefined : (currentUser.role === 'admin' ? "linear-gradient(135deg, #c6a55c, #d4b36a)" : "linear-gradient(135deg, #1e2a44, #c6a55c)"),
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "#fff", fontSize: "18px", fontWeight: 700,
+                    border: "2px solid #fff",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    flexShrink: 0,
                   }}>
-                    <LayoutDashboard style={{ width: "18px", height: "18px" }} />
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <button onClick={() => { logout(); setMobileMenuOpen(false); }} style={{
-                    display: "flex", alignItems: "center", gap: "10px", width: "100%",
-                    padding: "14px 24px", fontSize: "15px", fontWeight: 600,
-                    color: "#dc2626", background: "none", border: "none",
-                    cursor: "pointer", textAlign: "left",
-                  }}>
+                    {currentUser.profilePhoto ? null : (currentUser.role === 'admin' ? "🛡️" : (currentUser.fullName ? currentUser.fullName[0].toUpperCase() : "U"))}
+                  </div>
+                  <div style={{ overflow: "hidden" }}>
+                    <h4 style={{ fontSize: "15px", fontWeight: 700, color: "#1e2a44", margin: 0, lineHeight: 1.2 }}>
+                      {currentUser.fullName || "Member"}
+                    </h4>
+                    <p style={{ fontSize: "12px", color: "#5f6368", margin: "3px 0 0", wordBreak: "break-all", opacity: 0.8 }}>
+                      {currentUser.email}
+                    </p>
+                    {currentUser.role === 'admin' && (
+                      <span style={{ display: "inline-block", marginTop: "6px", fontSize: "9px", fontWeight: 700, padding: "1px 6px", borderRadius: "4px", background: "rgba(198,165,92,0.15)", color: "#c6a55c" }}>
+                        🛡️ Administrator
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Dashboard Nav Items */}
+                {[
+                  ...(currentUser.role === 'admin' ? [
+                    { name: "Admin Panel", href: "/dashboard/admin", icon: Shield, badge: pendingProfiles.length }
+                  ] : []),
+                  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+                  { name: "Browse Matches", href: "/dashboard/browse", icon: Search },
+                  { name: "Interests", href: "/dashboard/interests", icon: Heart, badge: pendingInterests.length },
+                  { name: "Messages", href: "/dashboard/messages", icon: MessageSquare, badge: unreadMessages.length },
+                  ...(currentUser.role !== 'admin' ? [
+                    { name: "My Profile", href: "/dashboard/profile", icon: User }
+                  ] : []),
+                ].map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "14px 24px",
+                        fontSize: "15px",
+                        fontWeight: 600,
+                        color: isActive(item.href) ? "#1e2a44" : "#5f6368",
+                        background: isActive(item.href) ? "rgba(30,42,68,0.04)" : "transparent",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <item.icon style={{ width: "18px", height: "18px", color: isActive(item.href) ? "#c6a55c" : "#5f6368" }} />
+                        <span>{item.name}</span>
+                      </div>
+                      {item.badge !== undefined && item.badge > 0 && (
+                        <span style={{
+                          background: item.name === "Admin Panel" ? "#d97706" : "#dc2626",
+                          color: "#fff", fontSize: "10px", fontWeight: 700,
+                          padding: "2px 6px", borderRadius: "999px",
+                        }}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+
+                <li style={{ borderTop: "1px solid #e5e7eb", marginTop: "12px", paddingTop: "8px" }}>
+                  <button
+                    onClick={() => { logout(); setMobileMenuOpen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "12px", width: "100%",
+                      padding: "14px 24px", fontSize: "15px", fontWeight: 600,
+                      color: "#dc2626", background: "none", border: "none",
+                      cursor: "pointer", textAlign: "left",
+                    }}
+                  >
                     <LogOut style={{ width: "18px", height: "18px" }} />
-                    Logout
+                    <span>Logout</span>
                   </button>
                 </li>
               </>
             ) : (
-              <li style={{ padding: "12px 24px", display: "flex", gap: "10px", borderTop: "1px solid #e5e7eb" }}>
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
-                  flex: 1, display: "block", textAlign: "center",
-                  padding: "12px", borderRadius: "10px", border: "1px solid #e3e8f0",
-                  fontSize: "14px", fontWeight: 600, color: "#1e2a44",
-                  textDecoration: "none",
-                }}>Login</Link>
-                <Link href="/register" onClick={() => setMobileMenuOpen(false)} style={{
-                  flex: 1, display: "block", textAlign: "center",
-                  padding: "12px", borderRadius: "10px",
-                  background: "#1e2a44", color: "#fff",
-                  fontSize: "14px", fontWeight: 600, textDecoration: "none",
-                }}>Register Free</Link>
+              <li style={{ padding: "16px 24px", display: "flex", gap: "10px", borderTop: "1px solid #e5e7eb", marginTop: "8px" }}>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    flex: 1, display: "block", textAlign: "center",
+                    padding: "12px", borderRadius: "10px", border: "1px solid #e3e8f0",
+                    fontSize: "14px", fontWeight: 600, color: "#1e2a44",
+                    textDecoration: "none", background: "#fff",
+                  }}
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    flex: 1, display: "block", textAlign: "center",
+                    padding: "12px", borderRadius: "10px",
+                    background: "linear-gradient(135deg, #1e2a44, #2a3a6a)", color: "#fff",
+                    fontSize: "14px", fontWeight: 600, textDecoration: "none",
+                  }}
+                >
+                  Register Free
+                </Link>
               </li>
             )}
           </ul>
