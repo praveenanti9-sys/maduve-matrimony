@@ -1038,7 +1038,7 @@ export default function RegisterPage() {
 
               <div>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Parents/Guardian Contact No.</label>
-                <input type="tel" value={guardianPhone} onChange={(e) => setGuardianPhone(e.target.value)} className="input" placeholder="Publicly visible (Leave empty to keep hidden)" />
+                <input type="tel" value={guardianPhone} onChange={(e) => setGuardianPhone(e.target.value)} className="input" placeholder="Will be kept confidential" />
               </div>
 
               <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>

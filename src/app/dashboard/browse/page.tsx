@@ -664,7 +664,9 @@ export default function BrowseMatchesPage() {
                         { label: "Family Status", value: detailProfile.familyStatus, icon: Heart },
                         { label: "Family Location", value: detailProfile.familyLocation, icon: MapPin },
                         { label: "Ancestral Origin", value: detailProfile.familyOrigin, icon: MapPin },
-                        { label: "Parents/Guardian Contact", value: detailProfile.guardianPhone, icon: Phone },
+                        ...(currentUser?.role === 'admin' || currentUser?.id === detailProfile.id ? [
+                          { label: "Parents/Guardian Contact", value: detailProfile.guardianPhone, icon: Phone }
+                        ] : []),
                       ].map((item, i) => (
                         <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
                           <item.icon style={{ width: "16px", height: "16px", color: "#a0aec0", marginTop: "2px", flexShrink: 0 }} />
