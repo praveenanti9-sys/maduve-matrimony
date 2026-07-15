@@ -17,7 +17,8 @@ export default function AdminPage() {
   const { 
     currentUser, profiles, messages, interests, blockUser, suspendUser, 
     activateUser, deleteUser, approveUser, rejectUser, verifyUser, 
-    registeredUser, systemSettings, fetchSystemSettings, updateSystemSettings 
+    registeredUser, systemSettings, fetchSystemSettings, updateSystemSettings,
+    markMessagesRead
   } = useStore();
   
   const [activeView, setActiveView] = useState<AdminView>('overview');
@@ -47,6 +48,13 @@ export default function AdminPage() {
       setAutoApprove(systemSettings.autoApproveProfiles);
     }
   }, [systemSettings]);
+
+  useEffect(() => {
+    if (selectedConvoPartners && markMessagesRead) {
+      markMessagesRead(selectedConvoPartners[0]);
+      markMessagesRead(selectedConvoPartners[1]);
+    }
+  }, [selectedConvoPartners, markMessagesRead]);
 
   // Redirect non-admins
   if (currentUser.role !== 'admin') {
@@ -873,7 +881,7 @@ export default function AdminPage() {
       {activeView === 'messages' && (
         <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: "20px", minHeight: "500px" }} className="messages-grid">
           {/* Conversations List */}
-          <div className="card" style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className={`card ${!selectedConvoPartners ? "flex" : "hidden sm:flex"}`} style={{ padding: 0, overflow: "hidden", flexDirection: "column" }}>
             <div style={{ padding: "16px 20px", borderBottom: "1px solid #e3e8f0" }}>
               <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#1e2a44" }}>All Conversations ({allConversationPairs.length})</h3>
             </div>
@@ -930,11 +938,14 @@ export default function AdminPage() {
           </div>
 
           {/* Conversation Detail */}
-          <div className="card" style={{ padding: 0, display: "flex", flexDirection: "column", background: "#fafcff" }}>
+          <div className={`card ${selectedConvoPartners ? "flex" : "hidden sm:flex"}`} style={{ padding: 0, flexDirection: "column", background: "#fafcff" }}>
             {selectedConvoPartners ? (
               <>
                 <div style={{ padding: "16px 20px", borderBottom: "1px solid #e3e8f0", background: "#fff", display: "flex", alignItems: "center", gap: "10px" }}>
-                  <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#1e2a44" }}>
+                  <button onClick={() => setSelectedConvoPartners(null)} className="sm:hidden" style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", display: "flex", alignItems: "center", color: "#5f6368" }}>
+                    <ArrowLeft style={{ width: "18px", height: "18px" }} />
+                  </button>
+                  <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#1e2a44", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     Conversation: {getProfileName(selectedConvoPartners[0])} ↔ {getProfileName(selectedConvoPartners[1])}
                   </h3>
                 </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyServerAuth } from '@/lib/server-auth';
 
 // Dynamic access prevents Next.js from statically inlining at build time
 function env(key: string): string { return process.env[key] || ''; }
@@ -11,6 +12,12 @@ export async function POST(request: Request) {
     if (!profileId) {
       return NextResponse.json({ error: 'Missing profileId' }, { status: 400 });
     }
+
+    const auth = await verifyServerAuth(request, {
+      requireAdmin: !selfDelete,
+      allowSelfForProfileId: selfDelete ? profileId : undefined,
+    });
+    if (!auth.authorized) return auth.errorResponse!;
 
     const supabaseUrl = env('NEXT_PUBLIC_SUPABASE_URL');
     const serviceRoleKey = env('SUPABASE_SERVICE_ROLE_KEY');

@@ -317,11 +317,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Interest Limit Card */}
-      <div className="card" style={{ padding: "20px", display: "flex", alignItems: "center", gap: "20px" }}>
+      <div className="card flex-col-mobile" style={{ padding: "20px", display: "flex", alignItems: "center", gap: "20px" }}>
         <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "linear-gradient(135deg, rgba(198,165,92,0.15), rgba(198,165,92,0.05))", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <Zap style={{ width: "22px", height: "22px", color: "#c6a55c" }} />
         </div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, width: "100%" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
             <span style={{ fontSize: "14px", fontWeight: 600, color: "#1e2a44" }}>Daily Interests</span>
             <span style={{ fontSize: "13px", fontWeight: 700, color: remainingInterests <= 2 ? "#dc2626" : "#16a34a" }}>

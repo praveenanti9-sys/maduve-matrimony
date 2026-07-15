@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, LogOut, LayoutDashboard, ChevronDown, Bell } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, ChevronDown, Bell, Heart } from "lucide-react";
 import { useStore } from "@/store/useStore";
+import { ADMIN_UUID, SYSTEM_UUID } from "@/lib/supabase-service";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -14,7 +15,7 @@ export function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   
-  const { isLoggedIn, currentUser, logout, messages, interests, profiles } = useStore();
+  const { isLoggedIn, currentUser, logout, messages, interests, profiles, readNotificationIds, markNotificationAsRead, markAllNotificationsAsRead, markMessagesRead } = useStore();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -35,35 +36,49 @@ export function Navbar() {
   }, [userMenuOpen, notifMenuOpen]);
 
   // Calculate notifications
-  const isAdmin = currentUser.role === 'admin';
-  const myIds = isAdmin ? [currentUser.id, 'admin'] : [currentUser.id];
+  const isAdmin = currentUser?.role === 'admin';
+  const myIds = isAdmin ? [currentUser?.id, 'admin', ADMIN_UUID] : [currentUser?.id];
   const isMyId = (id: string) => myIds.includes(id);
 
   const pendingInterests = interests.filter(i => isMyId(i.toId) && i.status === 'pending');
   const unreadMessages = messages.filter(m => isMyId(m.receiverId) && !m.read);
-  
+  const pendingProfiles = isAdmin ? profiles.filter(p => p.status === 'pending') : [];
+
   const getSenderName = (senderId: string, type?: string) => {
-    if (type === 'system') return '🔔 System';
-    if (type === 'admin') return '🛡️ Admin';
+    if (type === 'system' || senderId === SYSTEM_UUID || senderId === 'system') return '🔔 System';
+    if (type === 'admin' || senderId === ADMIN_UUID || senderId === 'admin') return '🛡️ Admin';
     return profiles.find(p => p.id === senderId)?.name || 'Someone';
   };
 
   const notificationList = [
+    ...pendingProfiles.map(p => ({
+      id: `profile-${p.id}`,
+      senderId: p.id,
+      isMessage: false,
+      text: `⚠️ New profile pending approval: ${p.name || 'New User'}`,
+      link: '/dashboard/admin',
+      time: p.joinDate || new Date().toISOString(),
+    })),
     ...pendingInterests.map(i => ({
-      id: i.id,
+      id: `interest-${i.id}`,
+      senderId: i.fromId,
+      isMessage: false,
       text: `${getSenderName(i.fromId)} sent you an interest!`,
       link: '/dashboard/interests',
       time: i.timestamp,
     })),
     ...unreadMessages.map(m => ({
-      id: m.id,
+      id: `msg-${m.id}`,
+      senderId: m.senderId,
+      isMessage: true,
       text: `New message from ${getSenderName(m.senderId, m.senderType)}: "${m.text.length > 30 ? m.text.substring(0, 30) + '...' : m.text}"`,
       link: '/dashboard/messages',
       time: m.timestamp,
     })),
   ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-  const notifCount = notificationList.length;
+  const unreadNotificationList = notificationList.filter(item => !(readNotificationIds || []).includes(item.id));
+  const notifCount = unreadNotificationList.length;
 
   const showPublicLinks = !isLoggedIn && !pathname.startsWith('/dashboard');
 
@@ -81,79 +96,73 @@ export function Navbar() {
       height: "80px",
     }}>
       <div style={{
-        maxWidth: "1280px", margin: "0 auto", padding: "0 24px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        height: "100%",
+        maxWidth: "1280px", margin: "0 auto", padding: "0 20px",
+        height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         {/* Logo */}
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
-          <div style={{ width: "52px", height: "52px", position: "relative" }}>
-            <Image
-              src="https://maduvedibbana.com/wp-content/uploads/2026/04/cropped-Untitled-design-22.png"
-              alt="Maduvedibbana"
-              fill
-              style={{ objectFit: "contain" }}
-            />
+        <Link href={isLoggedIn ? "/dashboard" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{
+            width: "38px", height: "38px", borderRadius: "10px",
+            background: "linear-gradient(135deg, #1e2a44, #2b3c61)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 4px 10px rgba(30,42,68,0.2)",
+          }}>
+            <Heart style={{ width: "20px", height: "20px", color: "#c6a55c" }} fill="#c6a55c" />
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "18px", fontWeight: 700, color: "#1e2a44", letterSpacing: "0.5px", lineHeight: 1.2 }}>
+          <div>
+            <span style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "20px", fontWeight: 700, color: "#1e2a44",
+              letterSpacing: "-0.3px", display: "block", lineHeight: 1.1,
+            }}>
               Maduvedibbana
             </span>
-            <span style={{ fontSize: "10px", fontWeight: 500, color: "#c6a55c", letterSpacing: "1.5px", textTransform: "uppercase" as const }}>
+            <span style={{
+              fontSize: "10px", fontWeight: 600, color: "#c6a55c",
+              letterSpacing: "1.5px", textTransform: "uppercase",
+            }}>
               Matrimony
             </span>
           </div>
         </Link>
 
-        {/* Desktop Nav */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }} className="hidden md:flex">
-          {showPublicLinks && (
-            <ul style={{ display: "flex", alignItems: "center", gap: "4px", listStyle: "none", padding: 0, margin: 0 }}>
-              {[
-                { name: "Home", href: "/" },
-                { name: "About", href: "/about" },
-                { name: "Contact", href: "/contact" },
-              ].map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    style={{
-                      display: "block",
-                      padding: "8px 16px",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      color: isActive(link.href) ? "#1e2a44" : "#5f6368",
-                      background: isActive(link.href) ? "rgba(30,42,68,0.06)" : "transparent",
-                      textDecoration: "none",
-                      letterSpacing: "0.3px",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {/* Desktop Navigation Links (Public) */}
+        {showPublicLinks && (
+          <div style={{ display: "flex", alignItems: "center", gap: "32px" }} className="hidden md:flex">
+            {[
+              { label: "Home", href: "/" },
+              { label: "Browse Profiles", href: "/dashboard/browse" },
+              { label: "About Sangama", href: "/about" },
+              { label: "Contact Us", href: "/contact" },
+            ].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  textDecoration: "none", fontSize: "14px", fontWeight: isActive(link.href) ? 600 : 500,
+                  color: isActive(link.href) ? "#1e2a44" : "#5f6368",
+                  transition: "color 0.2s",
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        )}
 
-        {/* Right Actions */}
+        {/* Right Side Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {isLoggedIn ? (
             <>
               <Link
                 href="/dashboard"
                 style={{
-                  display: "inline-flex", alignItems: "center", gap: "8px",
-                  padding: "8px 16px", borderRadius: "10px",
-                  background: "rgba(30,42,68,0.06)", color: "#1e2a44",
-                  fontSize: "14px", fontWeight: 600, textDecoration: "none",
-                  transition: "all 0.2s ease",
+                  textDecoration: "none", fontSize: "13px", fontWeight: 600,
+                  color: "#1e2a44", padding: "8px 16px", borderRadius: "999px",
+                  background: "#f1f5f9", transition: "all 0.2s",
                 }}
-                className="hidden md:inline-flex"
+                className="hidden md:block"
               >
-                <LayoutDashboard style={{ width: "16px", height: "16px" }} />
                 Dashboard
               </Link>
 
@@ -182,45 +191,77 @@ export function Navbar() {
                     </span>
                   )}
                 </button>
-
                 {notifMenuOpen && (
                   <div style={{
-                    position: "absolute", top: "calc(100% + 8px)", right: "-60px",
-                    width: "320px", background: "#fff", borderRadius: "12px",
+                    position: "absolute", top: "calc(100% + 8px)", right: 0,
+                    width: "min(340px, calc(100vw - 32px))", background: "#fff", borderRadius: "12px",
                     boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: "1px solid #e3e8f0",
                     overflow: "hidden", zIndex: 100,
                   }}>
                     <div style={{ padding: "14px 16px", borderBottom: "1px solid #e3e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>Notifications</span>
-                      {notifCount > 0 && (
-                        <span style={{ fontSize: "11px", fontWeight: 600, color: "#dc2626", background: "rgba(220,38,38,0.08)", padding: "2px 8px", borderRadius: "999px" }}>
-                          {notifCount} New
-                        </span>
-                      )}
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        {notifCount > 0 && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAllNotificationsAsRead(notificationList.map(n => n.id));
+                              unreadMessages.forEach(m => markMessagesRead(m.senderId));
+                            }}
+                            style={{
+                              fontSize: "11px", fontWeight: 600, color: "#1d4ed8", background: "rgba(29,78,216,0.08)",
+                              border: "none", padding: "4px 8px", borderRadius: "6px", cursor: "pointer"
+                            }}
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                        {notifCount > 0 && (
+                          <span style={{ fontSize: "11px", fontWeight: 600, color: "#dc2626", background: "rgba(220,38,38,0.08)", padding: "2px 8px", borderRadius: "999px" }}>
+                            {notifCount} New
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div style={{ maxHeight: "280px", overflowY: "auto" }}>
                       {notificationList.length > 0 ? (
-                        notificationList.map((item) => (
-                          <Link
-                            key={item.id}
-                            href={item.link}
-                            onClick={() => setNotifMenuOpen(false)}
-                            style={{
-                              display: "block", padding: "12px 16px",
-                              borderBottom: "1px solid #f1f5f9", textDecoration: "none",
-                              transition: "background 0.2s", color: "#1e2a44",
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#fafcff"}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                          >
-                            <p style={{ fontSize: "12px", lineHeight: 1.4, margin: 0, fontWeight: 500 }}>
-                              {item.text}
-                            </p>
-                            <span style={{ fontSize: "10px", color: "#a0aec0", marginTop: "4px", display: "block" }}>
-                              {new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </Link>
-                        ))
+                        notificationList.map((item) => {
+                          const isUnread = !(readNotificationIds || []).includes(item.id);
+                          return (
+                            <Link
+                              key={item.id}
+                              href={item.link}
+                              onClick={() => {
+                                setNotifMenuOpen(false);
+                                markNotificationAsRead(item.id);
+                                if (item.isMessage) {
+                                  markMessagesRead(item.senderId);
+                                }
+                              }}
+                              style={{
+                                display: "block", padding: "12px 16px",
+                                borderBottom: "1px solid #f1f5f9", textDecoration: "none",
+                                transition: "background 0.2s", color: "#1e2a44",
+                                background: isUnread ? "rgba(198,165,92,0.12)" : "transparent",
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isUnread ? "rgba(198,165,92,0.18)" : "#fafcff"}
+                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isUnread ? "rgba(198,165,92,0.12)" : "transparent"}
+                            >
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                                <p style={{ fontSize: "12px", lineHeight: 1.4, margin: 0, fontWeight: isUnread ? 600 : 500 }}>
+                                  {item.text}
+                                </p>
+                                {isUnread && (
+                                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#dc2626", flexShrink: 0, marginTop: "4px" }} />
+                                )}
+                              </div>
+                              <span style={{ fontSize: "10px", color: "#a0aec0", marginTop: "4px", display: "block" }}>
+                                {new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </Link>
+                          );
+                        })
                       ) : (
                         <div style={{ padding: "32px 16px", textAlign: "center" }}>
                           <Bell style={{ width: "24px", height: "24px", color: "#a0aec0", margin: "0 auto 8px" }} />
@@ -250,27 +291,22 @@ export function Navbar() {
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     backgroundRepeat: "no-repeat",
-                    background: currentUser.profilePhoto ? undefined : "linear-gradient(135deg, #1e2a44, #c6a55c)",
+                    background: currentUser.profilePhoto ? undefined : (currentUser.role === 'admin' ? "linear-gradient(135deg, #c6a55c, #d4b36a)" : "linear-gradient(135deg, #1e2a44, #c6a55c)"),
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#fff", fontSize: "14px", fontWeight: 700,
-                    flexShrink: 0,
                   }}>
-                    {currentUser.profilePhoto ? null : (currentUser.fullName ? currentUser.fullName[0].toUpperCase() : "U")}
+                    {currentUser.profilePhoto ? null : (currentUser.role === 'admin' ? "🛡️" : (currentUser.fullName ? currentUser.fullName[0].toUpperCase() : "U"))}
                   </div>
-                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44", maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                    className="hidden md:inline"
-                  >
-                    {currentUser.fullName || "User"}
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44" }} className="hidden sm:inline">
+                    {currentUser.role === 'admin' ? "Super Admin" : (currentUser.fullName ? currentUser.fullName.split(" ")[0] : "Account")}
                   </span>
-                  <ChevronDown style={{ width: "14px", height: "14px", color: "#5f6368", transition: "transform 0.2s", transform: userMenuOpen ? "rotate(180deg)" : "rotate(0)" }}
-                    className="hidden md:inline"
-                  />
+                  <ChevronDown style={{ width: "14px", height: "14px", color: "#5f6368" }} />
                 </button>
 
                 {userMenuOpen && (
                   <div style={{
                     position: "absolute", top: "calc(100% + 8px)", right: 0,
-                    width: "220px", background: "#fff", borderRadius: "12px",
+                    width: "min(220px, calc(100vw - 32px))", background: "#fff", borderRadius: "12px",
                     boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: "1px solid #e3e8f0",
                     overflow: "hidden", zIndex: 100,
                   }}>

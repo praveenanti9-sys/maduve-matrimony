@@ -4,12 +4,12 @@ import { createClient } from '@supabase/supabase-js';
 // Dynamic access prevents Next.js from statically inlining at build time
 function env(key: string): string { return process.env[key] || ''; }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const supabaseUrl = env('NEXT_PUBLIC_SUPABASE_URL');
     const serviceRoleKey = env('SUPABASE_SERVICE_ROLE_KEY');
-    const adminEmail = env('NEXT_PUBLIC_ADMIN_EMAIL') || 'admin@maduvedibbana.com';
-    const adminPassword = env('NEXT_PUBLIC_ADMIN_PASSWORD') || 'admin123';
+    const adminEmail = env('NEXT_PUBLIC_ADMIN_EMAIL') || env('ADMIN_EMAIL') || 'admin@maduvedibbana.com';
+    const adminPassword = env('ADMIN_PASSWORD') || env('NEXT_PUBLIC_ADMIN_PASSWORD') || 'admin123';
 
     if (!supabaseUrl || !serviceRoleKey) {
       return NextResponse.json({ error: 'Missing Supabase credentials' }, { status: 500 });
@@ -19,15 +19,33 @@ export async function POST() {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // 1. Check if profile exists
+    // 0. Security Check: If any admin exists, require x-setup-secret header to prevent unauthorized re-execution
+    const { data: existingAdmins } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('role', 'admin')
+      .limit(1);
+
+    if (existingAdmins && existingAdmins.length > 0) {
+      const setupSecret = env('ADMIN_SETUP_SECRET');
+      const headerSecret = request.headers.get('x-setup-secret');
+      if (!setupSecret || headerSecret !== setupSecret) {
+        return NextResponse.json({ 
+          error: 'Forbidden: Super Admin is already configured. Setup endpoint locked.' 
+        }, { status: 403 });
+      }
+    }
+
+    // 1. Check if profile exists by email
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
-      .select('*')
+      .select('id, email, role')
       .eq('email', adminEmail)
       .maybeSingle();
 
     if (existingProfile) {
-      return NextResponse.json({ message: 'Admin already configured', profile: existingProfile });
+      // Do NOT disclose sensitive profile objects or auth IDs to callers
+      return NextResponse.json({ message: 'Admin already configured' });
     }
 
     // 2. Check if auth user exists in auth.users by email (if they exist but profile was deleted)

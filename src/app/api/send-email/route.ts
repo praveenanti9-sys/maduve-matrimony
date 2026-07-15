@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { verifyServerAuth } from '@/lib/server-auth';
 
 export async function POST(request: Request) {
   try {
@@ -8,6 +9,9 @@ export async function POST(request: Request) {
     if (!to || !subject || !html) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    const auth = await verifyServerAuth(request, { requireAdmin: true });
+    if (!auth.authorized) return auth.errorResponse!;
 
     if (!process.env.RESEND_API_KEY) {
       console.warn('RESEND_API_KEY is not set. Email dispatch aborted.');

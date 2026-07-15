@@ -55,7 +55,7 @@ export default function BrowseMatchesPage() {
             !p.education.toLowerCase().includes(term) &&
             !p.email.toLowerCase().includes(term)) return false;
       }
-      if (filterGender && p.gender !== filterGender) return false;
+      if ((isAdmin || !currentUser.gender) && filterGender && p.gender !== filterGender) return false;
       if (filterAgeMin && p.age < parseInt(filterAgeMin)) return false;
       if (filterAgeMax && p.age > parseInt(filterAgeMax)) return false;
       if (filterDistrict && p.district !== filterDistrict) return false;
@@ -276,10 +276,10 @@ export default function BrowseMatchesPage() {
       </div>
 
       {/* Search + Filter Bar */}
-      <div className="card" style={{ padding: "12px 16px", display: "flex", gap: "12px", alignItems: "center" }}>
-        <div style={{ position: "relative", flex: 1 }}>
+      <div className="card flex-col-mobile" style={{ padding: "12px 16px", display: "flex", gap: "12px", alignItems: "center" }}>
+        <div style={{ position: "relative", flex: 1, width: "100%" }}>
           <Search style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", color: "#a0aec0" }} />
-          <input type="text" placeholder={isAdmin ? "Search by name, email, location..." : "Search by name, location, education..."} className="input" style={{ paddingLeft: "40px", height: "44px" }} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          <input type="text" placeholder={isAdmin ? "Search by name, email, location..." : "Search by name, location, education..."} className="input" style={{ paddingLeft: "40px", height: "44px", width: "100%" }} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
         <button onClick={() => setShowFilters(!showFilters)} className="btn-outline" style={{ height: "44px", padding: "0 16px", display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, position: "relative" }}>
           <SlidersHorizontal style={{ width: "16px", height: "16px" }} />
@@ -306,11 +306,22 @@ export default function BrowseMatchesPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "12px" }}>
             <div>
               <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Gender</label>
-              <select value={filterGender} onChange={(e) => setFilterGender(e.target.value)} style={{ ...selectStyle, width: "100%" }}>
-                <option value="">All</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-              </select>
+              {isAdmin || !currentUser.gender ? (
+                <select value={filterGender} onChange={(e) => setFilterGender(e.target.value)} style={{ ...selectStyle, width: "100%" }}>
+                  <option value="">All</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                </select>
+              ) : (
+                <div style={{
+                  padding: "8px 12px", background: "linear-gradient(135deg, rgba(198,165,92,0.12), rgba(30,42,68,0.06))",
+                  border: "1px solid rgba(198,165,92,0.3)", borderRadius: "8px",
+                  fontSize: "13px", fontWeight: 600, color: "#1e2a44", height: "38px",
+                  display: "flex", alignItems: "center", gap: "6px"
+                }}>
+                  {currentUser.gender === 'MALE' ? '👩 Brides Only' : '👨 Grooms Only'}
+                </div>
+              )}
             </div>
             <div>
               <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Age From</label>
@@ -358,7 +369,7 @@ export default function BrowseMatchesPage() {
       )}
 
       {/* Profile Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" style={{ display: "grid", gap: "20px" }}>
         {paginatedProfiles.map((profile) => {
           const sent = hasSentInterest(profile.id);
           const matched = isMutualMatch(profile.id);

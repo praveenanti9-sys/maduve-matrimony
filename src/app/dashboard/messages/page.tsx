@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useStore } from "@/store/useStore";
-import { Send, User, Search, Phone, Video, MoreVertical, MessageCircle, CheckCheck, Check } from "lucide-react";
+import { ADMIN_UUID, SYSTEM_UUID } from "@/lib/supabase-service";
+import { Send, User, Search, Phone, Video, MoreVertical, MessageCircle, CheckCheck, Check, ArrowLeft } from "lucide-react";
 
 export default function MessagesPage() {
   const { messages, currentUser, profiles, sendMessage, markMessagesRead } = useStore();
@@ -12,7 +13,7 @@ export default function MessagesPage() {
 
   const isAdmin = currentUser.role === 'admin';
   const myId = currentUser.id;
-  const myIds = isAdmin ? [myId, 'admin'] : [myId];
+  const myIds = isAdmin ? [myId, 'admin', ADMIN_UUID] : [myId];
   const isMyId = (id: string) => myIds.includes(id);
 
   const rawPartnerIds = Array.from(
@@ -28,9 +29,15 @@ export default function MessagesPage() {
     : Array.from(new Set(['admin', ...rawPartnerIds]));
 
   const getProfile = (id: string) => {
-    if (id === 'system') return { id: 'system', name: '🔔 System Notifications', profilePhoto: '', age: 0, height: '', location: '', education: '', occupation: '', gothra: '', gender: '', nakshatra: '', rashi: '', maritalStatus: '', annualIncome: '', bio: '', district: '', phone: '', email: '', weight: '', complexion: '', fatherName: '', fatherOccupation: '', motherName: '', motherOccupation: '', siblings: '', prefAgeMin: '', prefAgeMax: '', prefHeightMin: '', prefDistrict: '', prefEducation: '', nativePlace: '', state: '', status: 'active' as const, statusReason: '', joinDate: '' }
-    if (id === 'admin') return { id: 'admin', name: '🛡️ Super Admin', profilePhoto: '', age: 0, height: '', location: '', education: '', occupation: '', gothra: '', gender: '', nakshatra: '', rashi: '', maritalStatus: '', annualIncome: '', bio: '', district: '', phone: '', email: '', weight: '', complexion: '', fatherName: '', fatherOccupation: '', motherName: '', motherOccupation: '', siblings: '', prefAgeMin: '', prefAgeMax: '', prefHeightMin: '', prefDistrict: '', prefEducation: '', nativePlace: '', state: '', status: 'active' as const, statusReason: '', joinDate: '' }
+    if (id === 'system' || id === SYSTEM_UUID) return { id: 'system', name: '🔔 System Notifications', profilePhoto: '', age: 0, height: '', location: '', education: '', occupation: '', gothra: '', gender: '', nakshatra: '', rashi: '', maritalStatus: '', annualIncome: '', bio: '', district: '', phone: '', email: '', weight: '', complexion: '', fatherName: '', fatherOccupation: '', motherName: '', motherOccupation: '', siblings: '', prefAgeMin: '', prefAgeMax: '', prefHeightMin: '', prefDistrict: '', prefEducation: '', nativePlace: '', state: '', status: 'active' as const, statusReason: '', joinDate: '' }
+    if (id === 'admin' || id === ADMIN_UUID) return { id: 'admin', name: '🛡️ Super Admin', profilePhoto: '', age: 0, height: '', location: '', education: '', occupation: '', gothra: '', gender: '', nakshatra: '', rashi: '', maritalStatus: '', annualIncome: '', bio: '', district: '', phone: '', email: '', weight: '', complexion: '', fatherName: '', fatherOccupation: '', motherName: '', motherOccupation: '', siblings: '', prefAgeMin: '', prefAgeMax: '', prefHeightMin: '', prefDistrict: '', prefEducation: '', nativePlace: '', state: '', status: 'active' as const, statusReason: '', joinDate: '' }
     return profiles.find((p) => p.id === id);
+  };
+
+  const isPartnerMatch = (id: string, targetId: string) => {
+    if (targetId === 'admin') return id === 'admin' || id === ADMIN_UUID;
+    if (targetId === 'system') return id === 'system' || id === SYSTEM_UUID;
+    return id === targetId;
   };
 
   const activeChatMessages = activeChat
@@ -38,8 +45,8 @@ export default function MessagesPage() {
         .filter((m) => {
           const senderIsMe = isMyId(m.senderId);
           const receiverIsMe = isMyId(m.receiverId);
-          const senderIsPartner = m.senderId === activeChat;
-          const receiverIsPartner = m.receiverId === activeChat;
+          const senderIsPartner = isPartnerMatch(m.senderId, activeChat);
+          const receiverIsPartner = isPartnerMatch(m.receiverId, activeChat);
           return (senderIsMe && receiverIsPartner) || (senderIsPartner && receiverIsMe);
         })
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
@@ -98,9 +105,8 @@ export default function MessagesPage() {
     }}>
       {/* Left: Chat List */}
       <div style={{
-        width: "340px", display: "flex", flexDirection: "column",
         borderRight: "1px solid #e3e8f0", background: "#fff", flexShrink: 0,
-      }}>
+      }} className={activeChat ? "hidden md:flex md:flex-col md:w-[340px]" : "flex flex-col w-full md:w-[340px]"}>
         <div style={{ padding: "20px", borderBottom: "1px solid #e3e8f0" }}>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "20px", fontWeight: 700, color: "#1e2a44", marginBottom: "16px" }}>
             Messages
@@ -125,8 +131,8 @@ export default function MessagesPage() {
                 .filter((m) => {
                   const senderIsMe = isMyId(m.senderId);
                   const receiverIsMe = isMyId(m.receiverId);
-                  const senderIsPartner = m.senderId === partnerId;
-                  const receiverIsPartner = m.receiverId === partnerId;
+                  const senderIsPartner = isPartnerMatch(m.senderId, partnerId);
+                  const receiverIsPartner = isPartnerMatch(m.receiverId, partnerId);
                   return (senderIsMe && receiverIsPartner) || (senderIsPartner && receiverIsMe);
                 })
                 .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -197,7 +203,7 @@ export default function MessagesPage() {
       </div>
 
       {/* Right: Chat Window */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#fafcff" }}>
+      <div style={{ background: "#fafcff" }} className={!activeChat ? "hidden md:flex md:flex-col md:flex-1" : "flex flex-col flex-1 w-full"}>
         {activeProfile ? (
           <>
             {/* Chat Header */}
@@ -207,6 +213,18 @@ export default function MessagesPage() {
               flexShrink: 0,
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <button
+                  onClick={() => setActiveChat(null)}
+                  style={{
+                    padding: "6px", background: "rgba(30,42,68,0.06)", borderRadius: "8px",
+                    border: "none", cursor: "pointer", color: "#1e2a44", display: "flex",
+                    alignItems: "center", justifyContent: "center",
+                  }}
+                  className="md:hidden"
+                  title="Back to conversations"
+                >
+                  <ArrowLeft style={{ width: "18px", height: "18px" }} />
+                </button>
                 <div style={{ position: "relative" }}>
                   <div style={{
                     width: "40px", height: "40px", borderRadius: "50%",

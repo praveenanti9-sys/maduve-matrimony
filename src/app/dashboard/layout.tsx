@@ -181,7 +181,7 @@ export default function DashboardLayout({
         position: "fixed", bottom: 0, left: 0, right: 0,
         background: "#fff", borderTop: "1px solid #e3e8f0",
         zIndex: 40, display: "flex", alignItems: "center",
-        justifyContent: "space-around", padding: "8px",
+        justifyContent: "space-around", padding: "8px 8px max(8px, env(safe-area-inset-bottom)) 8px",
       }} className="lg:!hidden">
         {allLinks.slice(0, 5).map((link) => {
           const isActive = pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href));
@@ -205,8 +205,8 @@ export default function DashboardLayout({
       </nav>
 
       {/* Main Content */}
-      <main style={{ flex: 1, minHeight: "calc(100vh - 80px)", paddingBottom: "24px" }}>
-        <div style={{ padding: "32px", maxWidth: "1200px", margin: "0 auto" }}>
+      <main style={{ flex: 1, minHeight: "calc(100vh - 80px)", paddingBottom: "24px" }} className="dashboard-main-content">
+        <div style={{ padding: "32px", maxWidth: "1200px", margin: "0 auto" }} className="responsive-pad">
           {children}
         </div>
       </main>

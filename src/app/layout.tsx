@@ -88,15 +88,14 @@ export default function RootLayout({
 
             <div style={{ textAlign: "left", background: "#f8fafc", borderRadius: "16px", padding: "20px", marginBottom: "28px", border: "1px solid #e2e8f0" }}>
               <h3 style={{ fontSize: "14px", fontWeight: 600, color: "#1e2a44", margin: "0 0 12px 0" }}>
-                Add these 5 keys to your Environment:
+                Add these keys to your Environment:
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {[
                   "NEXT_PUBLIC_SUPABASE_URL",
                   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
                   "SUPABASE_SERVICE_ROLE_KEY",
-                  "NEXT_PUBLIC_ADMIN_EMAIL",
-                  "NEXT_PUBLIC_ADMIN_PASSWORD"
+                  "ADMIN_PASSWORD"
                 ].map(key => (
                   <code key={key} style={{ 
                     display: "block", background: "#fff", padding: "8px 12px", 
@@ -134,8 +133,7 @@ export default function RootLayout({
   const envScript = `window.__ENV__=${JSON.stringify({
     NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnon,
-    NEXT_PUBLIC_ADMIN_EMAIL: getRuntimeEnv('NEXT_PUBLIC_ADMIN_EMAIL'),
-    NEXT_PUBLIC_ADMIN_PASSWORD: getRuntimeEnv('NEXT_PUBLIC_ADMIN_PASSWORD'),
+    NEXT_PUBLIC_ADMIN_EMAIL: getRuntimeEnv('NEXT_PUBLIC_ADMIN_EMAIL') || 'admin@maduvedibbana.com',
   })};`;
 
   return (

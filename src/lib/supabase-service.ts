@@ -1,5 +1,14 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+export const ADMIN_UUID = '00000000-0000-0000-0000-00000000a111';
+export const SYSTEM_UUID = '00000000-0000-0000-0000-000000005111';
+
+export function normalizeMessageId(id: string): string {
+  if (id === 'admin') return ADMIN_UUID;
+  if (id === 'system') return SYSTEM_UUID;
+  return id;
+}
+
 // ── Types ──
 export interface DbProfile {
   id: string;
@@ -213,12 +222,24 @@ export async function updatePassword(newPassword: string): Promise<{ error: stri
   return { error: error?.message || null };
 }
 
+/** Get auth headers including Bearer token if available */
+export async function getAuthHeader(): Promise<Record<string, string>> {
+  const supabase = getSupabase();
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+  return headers;
+}
+
 /** Delete own account — uses server API route to also clean up auth user */
 export async function deleteSelfAccount(profileId: string): Promise<{ error: string | null }> {
   try {
+    const headers = await getAuthHeader();
     const res = await fetch('/api/admin/delete-user', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ profileId, selfDelete: true }),
     });
     const result = await res.json();
@@ -254,15 +275,20 @@ export async function fetchMyProfile(): Promise<DbProfile | null> {
 }
 
 /** Fetch all active profiles (for browse page) */
-export async function fetchActiveProfiles(): Promise<DbProfile[]> {
+export async function fetchActiveProfiles(targetGender?: string): Promise<DbProfile[]> {
   const supabase = getSupabase();
-  const { data } = await supabase
+  let query = supabase
     .from('profiles')
     .select('*')
     .eq('status', 'active')
     .eq('profile_visible', true)
     .order('created_at', { ascending: false });
 
+  if (targetGender) {
+    query = query.eq('gender', targetGender);
+  }
+
+  const { data } = await query;
   return (data || []) as DbProfile[];
 }
 
@@ -341,11 +367,14 @@ export async function sendMessage(
   senderType: 'user' | 'admin' | 'system' = 'user'
 ): Promise<{ message: DbMessage | null; error: string | null }> {
   const supabase = getSupabase();
+  const actualSender = normalizeMessageId(senderId);
+  const actualReceiver = normalizeMessageId(receiverId);
+
   const { data, error } = await supabase
     .from('messages')
     .insert({
-      sender_id: senderId,
-      receiver_id: receiverId,
+      sender_id: actualSender,
+      receiver_id: actualReceiver,
       text,
       sender_type: senderType,
     })
@@ -358,9 +387,10 @@ export async function sendMessage(
 /** Send a system message — uses server API route to bypass RLS */
 export async function sendSystemMessage(receiverId: string, text: string): Promise<void> {
   try {
+    const headers = await getAuthHeader();
     await fetch('/api/messages/system', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ receiverId, text, senderType: 'system' }),
     });
   } catch (err) {
@@ -391,23 +421,21 @@ export async function fetchAllMessages(): Promise<DbMessage[]> {
   return (data || []) as DbMessage[];
 }
 
-/** Mark messages as read */
+/** Mark messages as read — uses server API route to ensure RLS bypass and persistence */
 export async function markMessagesRead(
   receiverId: string,
   senderId: string,
   isAdmin: boolean = false
 ): Promise<void> {
-  const supabase = getSupabase();
-  let query = supabase
-    .from('messages')
-    .update({ read: true })
-    .eq('sender_id', senderId)
-    .eq('read', false);
-
-  if (isAdmin) {
-    await query.in('receiver_id', [receiverId, 'admin']);
-  } else {
-    await query.eq('receiver_id', receiverId);
+  try {
+    const headers = await getAuthHeader();
+    await fetch('/api/messages/mark-read', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ receiverId, senderId, isAdmin }),
+    });
+  } catch (err) {
+    console.error('Failed to mark messages as read:', err);
   }
 }
 
@@ -609,9 +637,10 @@ export async function verifyUser(
 /** Delete a user (admin action) — uses server API route to also clean up auth user */
 export async function deleteUserByAdmin(profileId: string, adminId: string): Promise<{ error: string | null }> {
   try {
+    const headers = await getAuthHeader();
     const res = await fetch('/api/admin/delete-user', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ profileId, adminId }),
     });
     const result = await res.json();
@@ -717,6 +746,33 @@ export function subscribeToMessages(
   };
 }
 
+/** Subscribe to profile changes across platform (for Admin real-time notifications) */
+export function subscribeToProfiles(
+  onProfileChange: (profile: DbProfile) => void
+) {
+  const supabase = getSupabase();
+  const channel = supabase
+    .channel('profiles:admin')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'profiles',
+      },
+      (payload) => {
+        if (payload.new) {
+          onProfileChange(payload.new as DbProfile);
+        }
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
 /** Subscribe to interest updates for a user */
 export function subscribeToInterests(
   profileId: string,
@@ -765,9 +821,10 @@ export function subscribeToInterests(
 /** Send message from admin — uses server API route to bypass RLS */
 async function sendAdminMessage(receiverId: string, text: string): Promise<void> {
   try {
+    const headers = await getAuthHeader();
     await fetch('/api/messages/system', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ receiverId, text, senderType: 'admin' }),
     });
   } catch (err) {

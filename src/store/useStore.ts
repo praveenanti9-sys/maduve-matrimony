@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import * as svc from '@/lib/supabase-service';
+import { ADMIN_UUID, SYSTEM_UUID } from '@/lib/supabase-service';
 import type { DbProfile, DbMessage, DbInterest, DbSystemSettings } from '@/lib/supabase-service';
 
 // Read NEXT_PUBLIC_ env vars with fallback to server-injected runtime values
@@ -237,10 +238,15 @@ function dbProfileToMatchProfile(db: DbProfile): MatchProfile {
 }
 
 function dbMessageToMessage(db: DbMessage): Message {
+  const isSenderAdmin = db.sender_type === 'admin' || db.sender_id === ADMIN_UUID || db.sender_id === 'admin';
+  const isSenderSystem = db.sender_type === 'system' || db.sender_id === SYSTEM_UUID || db.sender_id === 'system';
+  const isReceiverAdmin = db.receiver_id === ADMIN_UUID || db.receiver_id === 'admin';
+  const isReceiverSystem = db.receiver_id === SYSTEM_UUID || db.receiver_id === 'system';
+
   return {
     id: db.id,
-    senderId: db.sender_type === 'system' ? 'system' : (db.sender_type === 'admin' ? 'admin' : db.sender_id),
-    receiverId: db.receiver_id,
+    senderId: isSenderSystem ? 'system' : (isSenderAdmin ? 'admin' : db.sender_id),
+    receiverId: isReceiverSystem ? 'system' : (isReceiverAdmin ? 'admin' : db.receiver_id),
     text: db.text,
     timestamp: db.created_at,
     read: db.read,
@@ -330,6 +336,11 @@ interface AppState {
   markMessagesRead: (partnerId: string) => Promise<void>;
   fetchMessages: () => Promise<void>;
 
+  // Notifications
+  readNotificationIds: string[];
+  markNotificationAsRead: (id: string) => void;
+  markAllNotificationsAsRead: (ids: string[]) => void;
+
   // Interests
   interests: Interest[];
   sendInterest: (toId: string) => Promise<boolean>;
@@ -364,11 +375,13 @@ interface AppState {
 // ── Module-level subscription variables ──
 let messageSubscriptionUnsubscribe: (() => void) | null = null;
 let interestSubscriptionUnsubscribe: (() => void) | null = null;
+let profileSubscriptionUnsubscribe: (() => void) | null = null;
 
 const setupSubscriptions = (profileId: string, set: any, get: any) => {
   // Clean up any existing subscriptions first
   if (messageSubscriptionUnsubscribe) messageSubscriptionUnsubscribe();
   if (interestSubscriptionUnsubscribe) interestSubscriptionUnsubscribe();
+  if (profileSubscriptionUnsubscribe) profileSubscriptionUnsubscribe();
 
   const isAdmin = get().currentUser.role === 'admin';
 
@@ -392,6 +405,21 @@ const setupSubscriptions = (profileId: string, set: any, get: any) => {
       set({ interests: [...state.interests, formattedInterest] });
     }
   });
+
+  if (isAdmin) {
+    profileSubscriptionUnsubscribe = svc.subscribeToProfiles((newProfile) => {
+      const state = get();
+      const formatted = dbProfileToMatchProfile(newProfile);
+      const index = state.profiles.findIndex((p: any) => p.id === formatted.id);
+      if (index !== -1) {
+        const updated = [...state.profiles];
+        updated[index] = formatted;
+        set({ profiles: updated });
+      } else {
+        set({ profiles: [...state.profiles, formatted] });
+      }
+    });
+  }
 };
 
 const clearSubscriptions = () => {
@@ -405,6 +433,25 @@ const clearSubscriptions = () => {
   }
 };
 
+function loadReadNotifs(userId: string): string[] {
+  if (typeof window === 'undefined' || !userId) return [];
+  try {
+    const raw = localStorage.getItem(`md_read_notifs_${userId}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveReadNotifs(userId: string, ids: string[]): void {
+  if (typeof window === 'undefined' || !userId) return;
+  try {
+    localStorage.setItem(`md_read_notifs_${userId}`, JSON.stringify(ids));
+  } catch {
+    // ignore
+  }
+}
+
 export const useStore = create<AppState>((set, get) => ({
   currentUser: defaultUser,
   registeredUser: null,
@@ -414,6 +461,20 @@ export const useStore = create<AppState>((set, get) => ({
   profiles: [],
   messages: [],
   interests: [],
+  readNotificationIds: [],
+  markNotificationAsRead: (id: string) => {
+    const state = get();
+    if (state.readNotificationIds.includes(id)) return;
+    const next = [...state.readNotificationIds, id];
+    set({ readNotificationIds: next });
+    if (state.currentUser.id) saveReadNotifs(state.currentUser.id, next);
+  },
+  markAllNotificationsAsRead: (ids: string[]) => {
+    const state = get();
+    const next = Array.from(new Set([...state.readNotificationIds, ...ids]));
+    set({ readNotificationIds: next });
+    if (state.currentUser.id) saveReadNotifs(state.currentUser.id, next);
+  },
   systemSettings: { dailyInterestLimit: 10, autoApproveProfiles: false },
 
   // ── Initialize session on app load ──
@@ -442,6 +503,7 @@ export const useStore = create<AppState>((set, get) => ({
           registeredUser: userProfile,
           isLoggedIn: true,
           isLoading: false,
+          readNotificationIds: loadReadNotifs(profile.id),
         });
         
         // Setup subscriptions for realtime updates
@@ -537,6 +599,7 @@ export const useStore = create<AppState>((set, get) => ({
         isLoggedIn: true,
         isLoading: false,
         error: null,
+        readNotificationIds: loadReadNotifs(profile.id),
       });
 
       // Setup subscriptions for realtime updates
@@ -567,6 +630,7 @@ export const useStore = create<AppState>((set, get) => ({
       profiles: [],
       messages: [],
       interests: [],
+      readNotificationIds: [],
     });
   },
 
@@ -601,7 +665,17 @@ export const useStore = create<AppState>((set, get) => ({
 
   // ── Profiles ──
   getActiveProfiles: () => {
-    return get().profiles.filter(p => p.status === 'active');
+    const state = get();
+    const isAdmin = state.currentUser.role === 'admin';
+    const myGender = state.currentUser.gender;
+    return state.profiles.filter(p => {
+      if (p.status !== 'active') return false;
+      if (isAdmin) return true;
+      if (p.id === state.currentUser.id) return false;
+      if (myGender === 'MALE') return p.gender === 'FEMALE';
+      if (myGender === 'FEMALE') return p.gender === 'MALE';
+      return true;
+    });
   },
 
   fetchProfiles: async () => {
@@ -610,7 +684,9 @@ export const useStore = create<AppState>((set, get) => ({
     if (state.currentUser.role === 'admin') {
       dbProfiles = await svc.fetchAllProfiles();
     } else {
-      dbProfiles = await svc.fetchActiveProfiles();
+      const myGender = state.currentUser.gender;
+      const targetGender = myGender === 'MALE' ? 'FEMALE' : myGender === 'FEMALE' ? 'MALE' : undefined;
+      dbProfiles = await svc.fetchActiveProfiles(targetGender);
     }
     const profiles = dbProfiles
       .filter(p => p.id !== state.currentUser.id && (state.currentUser.role === 'admin' || p.role !== 'admin'))
@@ -668,9 +744,10 @@ export const useStore = create<AppState>((set, get) => ({
     let message: DbMessage | null = null;
     if (isAdmin && senderId !== 'system') {
       try {
+        const headers = await svc.getAuthHeader();
         const res = await fetch('/api/messages/system', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ receiverId, text, senderType: 'admin' }),
         });
         const data = await res.json();
@@ -693,11 +770,11 @@ export const useStore = create<AppState>((set, get) => ({
     const state = get();
     const isAdmin = state.currentUser.role === 'admin';
     const myId = isAdmin ? 'admin' : state.currentUser.id;
-    const myIds = isAdmin ? [state.currentUser.id, 'admin'] : [state.currentUser.id];
+    const myIds = isAdmin ? [state.currentUser.id, 'admin', ADMIN_UUID] : [state.currentUser.id];
     await svc.markMessagesRead(myId, partnerId, isAdmin);
 
     const newMessages = state.messages.map(m =>
-      m.senderId === partnerId && myIds.includes(m.receiverId) && !m.read ? { ...m, read: true } : m
+      (m.senderId === partnerId || (partnerId === 'admin' && m.senderId === ADMIN_UUID)) && myIds.includes(m.receiverId) && !m.read ? { ...m, read: true } : m
     );
     set({ messages: newMessages });
   },
@@ -773,9 +850,10 @@ export const useStore = create<AppState>((set, get) => ({
     const profile = state.profiles.find(p => p.id === userId);
     if (profile && profile.email) {
       try {
+        const headers = await svc.getAuthHeader();
         await fetch('/api/send-email', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             to: profile.email,
             subject: 'Account Suspension Update — Maduvedibbana Matrimony ⚠️',
@@ -830,9 +908,10 @@ export const useStore = create<AppState>((set, get) => ({
     if (profile && profile.email) {
       try {
         const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://maduvedibbana.com';
+        const headers = await svc.getAuthHeader();
         await fetch('/api/send-email', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             to: profile.email,
             subject: 'Profile Approved — Maduvedibbana Matrimony 🎉',
@@ -872,9 +951,10 @@ export const useStore = create<AppState>((set, get) => ({
     const profile = state.profiles.find(p => p.id === userId);
     if (profile && profile.email) {
       try {
+        const headers = await svc.getAuthHeader();
         await fetch('/api/send-email', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             to: profile.email,
             subject: 'Profile Registration Update — Maduvedibbana Matrimony',

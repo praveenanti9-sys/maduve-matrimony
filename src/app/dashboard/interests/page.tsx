@@ -141,7 +141,7 @@ export default function InterestsPage() {
               if (!profile) return null;
 
               return (
-                <div key={interest.id} className="card-premium" style={{
+                <div key={interest.id} className="card-premium flex-col-mobile" style={{
                   display: "flex", alignItems: "center", gap: "16px",
                   padding: "18px 20px",
                   animation: `fadeInUp 0.4s ease ${idx * 0.05}s both`,
@@ -158,7 +158,7 @@ export default function InterestsPage() {
                   </div>
 
                   {/* Info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ flex: 1, minWidth: 0, width: "100%" }}>
                     <h4 style={{ fontWeight: 600, fontSize: "16px", color: "#1e2a44", marginBottom: "4px" }}>{profile.name}</h4>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "4px" }}>
                       <span style={{ fontSize: "12px", color: "#5f6368", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -171,7 +171,7 @@ export default function InterestsPage() {
                         <Briefcase style={{ width: "10px", height: "10px", color: "#a0aec0" }} /> {profile.occupation}
                       </span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                       <span style={{ fontSize: "11px", color: "#a0aec0", display: "flex", alignItems: "center", gap: "4px" }}>
                         <MapPin style={{ width: "10px", height: "10px" }} /> {profile.location}
                       </span>
@@ -183,7 +183,7 @@ export default function InterestsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: "flex", gap: "8px", flexShrink: 0, alignItems: "center" }}>
+                  <div style={{ display: "flex", gap: "8px", flexShrink: 0, alignItems: "center", flexWrap: "wrap" }}>
                     {activeTab === "received" && (
                       <>
                         <button
