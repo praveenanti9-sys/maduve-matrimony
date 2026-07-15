@@ -1144,27 +1144,6 @@ export default function AdminPage() {
                               {inquiry.message}
                             </div>
                           </div>
-
-                          {/* Actions */}
-                          <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
-                            <a href={`mailto:${inquiry.email}?subject=Re: Inquiry on Maduvedibbana Matrimony`} style={{
-                              padding: "10px 20px", borderRadius: "8px", background: "#1e2a44", color: "#fff",
-                              fontSize: "13px", fontWeight: 600, textDecoration: "none", display: "inline-flex",
-                              alignItems: "center", gap: "8px", transition: "all 0.2s",
-                            }}>
-                              <Send style={{ width: "14px", height: "14px" }} /> Reply via Email
-                            </a>
-                            {inquiry.phone && (
-                              <a href={`tel:${inquiry.phone}`} style={{
-                                padding: "10px 20px", borderRadius: "8px", border: "1px solid #e3e8f0",
-                                color: "#1e2a44", background: "#fff", fontSize: "13px", fontWeight: 600,
-                                textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px",
-                                transition: "all 0.2s",
-                              }}>
-                                <Phone style={{ width: "14px", height: "14px" }} /> Call Sender
-                              </a>
-                            )}
-                          </div>
                         </div>
                       </div>
                     )}
