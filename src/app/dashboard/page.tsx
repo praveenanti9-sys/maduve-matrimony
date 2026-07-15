@@ -345,20 +345,42 @@ export default function DashboardPage() {
                 View All <ArrowRight style={{ width: "12px", height: "12px" }} />
               </Link>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }} className="home-section-grid">
-              {contactInquiries.slice(0, 3).map((inquiry) => (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {contactInquiries.slice(0, 4).map((inquiry) => (
                 <div key={inquiry.id} style={{
-                  padding: "16px", borderRadius: "12px",
-                  border: inquiry.isRead ? "1px solid #e3e8f0" : "1px solid rgba(198,165,92,0.3)",
-                  background: inquiry.isRead ? "#fff" : "rgba(198,165,92,0.03)",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                    <Mail style={{ width: "14px", height: "14px", color: inquiry.isRead ? "#a0aec0" : "#c6a55c" }} />
-                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44" }}>{inquiry.name}</span>
-                    {!inquiry.isRead && <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#dc2626" }} />}
+                  padding: "14px 20px", borderRadius: "12px",
+                  border: inquiry.isRead ? "1px solid #e3e8f0" : "1px solid rgba(198,165,92,0.25)",
+                  background: inquiry.isRead ? "#fff" : "rgba(198,165,92,0.02)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "16px",
+                  transition: "all 0.2s",
+                }} className="flex-col-mobile">
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      width: "36px", height: "36px", borderRadius: "50%",
+                      background: inquiry.isRead ? "#f0ece4" : "rgba(198,165,92,0.15)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: inquiry.isRead ? "#5f6368" : "#8B6914",
+                      fontWeight: 700, fontSize: "14px", flexShrink: 0
+                    }}>
+                      {inquiry.name[0]?.toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "14px", fontWeight: inquiry.isRead ? 600 : 700, color: "#1e2a44" }}>{inquiry.name}</span>
+                        {!inquiry.isRead && <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#dc2626" }} />}
+                      </div>
+                      <p style={{ fontSize: "13px", color: inquiry.isRead ? "#5f6368" : "#1e2a44", fontWeight: inquiry.isRead ? 400 : 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {inquiry.message}
+                      </p>
+                    </div>
                   </div>
-                  <p style={{ fontSize: "12px", color: "#5f6368", lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const }}>{inquiry.message}</p>
-                  <p style={{ fontSize: "10px", color: "#a0aec0", marginTop: "8px" }}>{inquiry.email} · {timeAgo(inquiry.createdAt)}</p>
+                  <div style={{ textAlign: "right", fontSize: "11px", color: "#a0aec0", flexShrink: 0 }}>
+                    <div>{inquiry.email} {inquiry.phone && `· ${inquiry.phone}`}</div>
+                    <div style={{ marginTop: "2px" }}>{timeAgo(inquiry.createdAt)}</div>
+                  </div>
                 </div>
               ))}
             </div>

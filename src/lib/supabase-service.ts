@@ -93,6 +93,7 @@ export interface DbContactInquiry {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   message: string;
   is_read: boolean;
   created_at: string;
@@ -690,12 +691,13 @@ export async function updateSystemSettings(
 export async function submitContactInquiry(
   name: string,
   email: string,
-  message: string
+  message: string,
+  phone?: string
 ): Promise<{ error: string | null }> {
   const supabase = getSupabase();
   const { error } = await supabase
     .from('contact_inquiries')
-    .insert({ name, email, message });
+    .insert({ name, email, message, phone });
 
   return { error: error?.message || null };
 }

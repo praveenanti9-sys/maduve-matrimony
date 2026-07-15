@@ -10,6 +10,7 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,7 +18,7 @@ export default function ContactPage() {
     setSubmitError("");
     setIsSubmitting(true);
     try {
-      const result = await submitContactInquiry(name, email, message);
+      const result = await submitContactInquiry(name, email, message, phone);
       if (result?.error) {
         setSubmitError("Failed to send message. Please try again or email us directly.");
       } else {
@@ -78,7 +79,7 @@ export default function ContactPage() {
                 </div>
                 <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "20px", fontWeight: 700, marginBottom: "8px" }}>Message Sent!</h3>
                 <p style={{ fontSize: "14px", color: "#5f6368" }}>Thank you for reaching out. We&apos;ll get back to you within 24 hours.</p>
-                <button onClick={() => { setSubmitted(false); setName(""); setEmail(""); setMessage(""); }} className="btn-outline" style={{ marginTop: "24px", fontSize: "14px" }}>
+                <button onClick={() => { setSubmitted(false); setName(""); setEmail(""); setPhone(""); setMessage(""); }} className="btn-outline" style={{ marginTop: "24px", fontSize: "14px" }}>
                   Send Another Message
                 </button>
               </div>
@@ -106,13 +107,17 @@ export default function ContactPage() {
                       <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input" placeholder="Full name" required />
                     </div>
                     <div>
-                      <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Email Address</label>
-                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="you@example.com" required />
+                      <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Contact Number</label>
+                      <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input" placeholder="10-digit mobile number" required />
                     </div>
                   </div>
                   <div>
+                    <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Email Address</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="you@example.com" required />
+                  </div>
+                  <div>
                     <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Message</label>
-                    <textarea value={message} onChange={(e) => setMessage(e.target.value)} className="input" style={{ minHeight: "140px", resize: "none", height: "auto" }} placeholder="How can we help you?" rows={5} required />
+                    <textarea value={message} onChange={(e) => setMessage(e.target.value)} className="input" style={{ minHeight: "120px", resize: "none", height: "auto" }} placeholder="How can we help you?" rows={4} required />
                   </div>
                   <button type="submit" className="btn-primary" style={{ height: "50px", opacity: isSubmitting ? 0.7 : 1 }} disabled={isSubmitting}>
                     <Send style={{ width: "16px", height: "16px" }} /> <span>{isSubmitting ? "Sending..." : "Send Message"}</span>

@@ -136,6 +136,7 @@ export interface ContactInquiry {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   message: string;
   isRead: boolean;
   createdAt: string;
@@ -1023,6 +1024,7 @@ export const useStore = create<AppState>((set, get) => ({
       id: d.id,
       name: d.name,
       email: d.email,
+      phone: d.phone || '',
       message: d.message,
       isRead: d.is_read,
       createdAt: d.created_at,

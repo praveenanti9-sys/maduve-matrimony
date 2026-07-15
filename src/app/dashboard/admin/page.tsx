@@ -1024,7 +1024,15 @@ export default function AdminPage() {
                         <div>
                           <span style={{ fontWeight: 600, fontSize: "14px", color: "#1e2a44" }}>{inquiry.name}</span>
                           {!inquiry.isRead && <span style={{ marginLeft: "8px", width: "8px", height: "8px", borderRadius: "50%", background: "#dc2626", display: "inline-block" }} />}
-                          <div style={{ fontSize: "12px", color: "#5f6368" }}>{inquiry.email}</div>
+                          <div style={{ fontSize: "12px", color: "#5f6368", display: "flex", gap: "8px" }}>
+                            <span>{inquiry.email}</span>
+                            {inquiry.phone && (
+                              <>
+                                <span style={{ color: "#a0aec0" }}>·</span>
+                                <span style={{ color: "#c6a55c", fontWeight: 500 }}>📞 {inquiry.phone}</span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <p style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6, margin: "8px 0", padding: "12px", background: "#f8f6f3", borderRadius: "10px" }}>{inquiry.message}</p>
