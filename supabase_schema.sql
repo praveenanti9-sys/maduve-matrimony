@@ -42,6 +42,41 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   native_place text DEFAULT '',
   state text DEFAULT 'Karnataka',
 
+  -- ARMember custom fields
+  username text DEFAULT '',
+  first_name text DEFAULT '',
+  last_name text DEFAULT '',
+  posted_by text DEFAULT '',
+  body_type text DEFAULT '',
+  skin_tone text DEFAULT '',
+  disability text DEFAULT '',
+  blood_group text DEFAULT '',
+  eating_habits text DEFAULT '',
+  drinking_habits text DEFAULT '',
+  smoking_habits text DEFAULT '',
+  birth_time text DEFAULT '',
+  birth_place text DEFAULT '',
+  gana text DEFAULT '',
+  dosham text DEFAULT '',
+  education_field text DEFAULT '',
+  college text DEFAULT '',
+  working_with text DEFAULT '',
+  working_as text DEFAULT '',
+  organization text DEFAULT '',
+  work_location text DEFAULT '',
+  family_value text DEFAULT '',
+  family_type text DEFAULT '',
+  family_status text DEFAULT '',
+  father_status text DEFAULT '',
+  mother_status text DEFAULT '',
+  brothers text DEFAULT '',
+  brothers_married text DEFAULT '',
+  sisters text DEFAULT '',
+  sisters_married text DEFAULT '',
+  family_location text DEFAULT '',
+  guardian_phone text DEFAULT '',
+  family_origin text DEFAULT '',
+
   -- Family Details
   father_name text DEFAULT '',
   father_occupation text DEFAULT '',
@@ -80,6 +115,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   -- Admin Flags
   admin_reviewed boolean DEFAULT false,
   is_verified boolean DEFAULT false,
+
+  -- Payments flow custom fields
+  payment_status text DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'pending_verification', 'verified', 'failed')),
+  payment_utr text DEFAULT '',
+  payment_screenshot text DEFAULT '',
+  payment_amount numeric DEFAULT 1000,
+  payment_date timestamp with time zone,
 
   -- Timestamps
   created_at timestamp with time zone DEFAULT now(),

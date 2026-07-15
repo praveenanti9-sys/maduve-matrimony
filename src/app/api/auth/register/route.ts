@@ -5,7 +5,8 @@ import { getRegistrationWelcomeHtml } from '@/lib/email-templates';
 
 export async function POST(request: Request) {
   try {
-    const { email, password, profileData = {} } = await request.json();
+    const body = await request.json();
+    const { email, password, profileData = {} } = body;
 
     if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
       return NextResponse.json({ error: 'Valid email and password are required' }, { status: 400 });
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Password must be between 6 and 128 characters' }, { status: 400 });
     }
 
-    // Sanitize string helpers to prevent buffer overflow or DoS payload injection
+    // Sanitize string helpers
     const sanitizeStr = (val: any, maxLen = 150): string => {
       if (typeof val !== 'string') return '';
       return val.trim().slice(0, maxLen);
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email,
       password,
-      email_confirm: true, // Auto-confirm email to bypass validation during testing/production
+      email_confirm: true,
     });
 
     if (authError || !authData.user) {
@@ -49,51 +50,86 @@ export async function POST(request: Request) {
     const autoApprove = settings?.auto_approve_profiles ?? false;
     const initialStatus = autoApprove ? 'active' : 'pending';
 
-    // 3. Insert or update profile in profiles table via admin client (bypasses RLS & handles automatic triggers)
+    // Map ARMember field names to profiles columns
+    const firstName = sanitizeStr(profileData.text_6lo7p, 100);
+    const lastName = sanitizeStr(profileData.text_uuxfr, 100);
+    const fullName = `${firstName} ${lastName}`.trim() || 'User';
+
+    // 3. Insert or update profile in profiles table via admin client
     const { data: profile, error: profileError } = await adminClient
       .from('profiles')
       .upsert({
         auth_id: authData.user.id,
         email: sanitizeStr(email, 254),
-        full_name: sanitizeStr(profileData.fullName, 100),
-        phone: sanitizeStr(profileData.phone, 20),
+        full_name: fullName,
+        username: sanitizeStr(profileData.user_login, 50),
+        first_name: firstName,
+        last_name: lastName,
+        posted_by: sanitizeStr(profileData.select_y9qog, 50),
+        phone: sanitizeStr(profileData.text_vlenr, 20), // Mobile Number
         gender: sanitizeStr(profileData.gender, 20),
-        dob: sanitizeStr(profileData.dob, 20),
-        education: sanitizeStr(profileData.education, 100),
-        occupation: sanitizeStr(profileData.occupation, 100),
-        city: sanitizeStr(profileData.city, 100),
-        district: sanitizeStr(profileData.district, 100),
-        gothra: sanitizeStr(profileData.gothra, 50),
-        bio: sanitizeStr(profileData.bio, 1000),
-        height: sanitizeStr(profileData.height, 20),
-        weight: sanitizeStr(profileData.weight, 20),
-        complexion: sanitizeStr(profileData.complexion, 50),
-        marital_status: sanitizeStr(profileData.maritalStatus, 50),
-        annual_income: sanitizeStr(profileData.annualIncome, 50),
-        nakshatra: sanitizeStr(profileData.nakshatra, 50),
-        rashi: sanitizeStr(profileData.rashi, 50),
-        native_place: sanitizeStr(profileData.nativePlace, 100),
-        state: sanitizeStr(profileData.state || 'Karnataka', 100),
-        father_name: sanitizeStr(profileData.fatherName, 100),
-        father_occupation: sanitizeStr(profileData.fatherOccupation, 100),
-        mother_name: sanitizeStr(profileData.motherName, 100),
-        mother_occupation: sanitizeStr(profileData.motherOccupation, 100),
-        siblings: sanitizeStr(profileData.siblings, 200),
-        pref_age_min: sanitizeStr(profileData.prefAgeMin, 10),
-        pref_age_max: sanitizeStr(profileData.prefAgeMax, 10),
-        pref_height_min: sanitizeStr(profileData.prefHeightMin, 20),
-        pref_district: sanitizeStr(profileData.prefDistrict, 100),
-        pref_education: sanitizeStr(profileData.prefEducation, 100),
-        profile_photo: '',
+        dob: sanitizeStr(profileData.date_ucelp, 20), // DOB
+        marital_status: sanitizeStr(profileData.radio_6yahf, 50), // Marital Status
+        height: sanitizeStr(profileData.select_vbkvr, 20), // Height
+        weight: sanitizeStr(profileData.text_ckkxj, 20), // Weight
+        body_type: sanitizeStr(profileData.radio_cm5s8, 50),
+        skin_tone: sanitizeStr(profileData.radio_5pnjy, 50),
+        disability: sanitizeStr(profileData.radio_w3rke, 50),
+        blood_group: sanitizeStr(profileData.select_lehdo, 20),
+        eating_habits: sanitizeStr(
+          Array.isArray(profileData.checkbox_rjekv)
+            ? profileData.checkbox_rjekv.join(', ')
+            : profileData.checkbox_rjekv,
+          150
+        ),
+        drinking_habits: sanitizeStr(profileData.select_rv5zv, 50),
+        smoking_habits: sanitizeStr(profileData.select_z7uro, 50),
+        birth_time: sanitizeStr(profileData.birth_time, 20),
+        birth_place: sanitizeStr(profileData.text_pivyw, 100),
+        rashi: sanitizeStr(profileData.select_jeakk, 50), // Raashi
+        nakshatra: sanitizeStr(profileData.select_vjmu2, 50), // Nakshathra
+        gana: sanitizeStr(profileData.select_qeo3m, 50),
+        dosham: sanitizeStr(profileData.radio_so79q, 20),
+        education: sanitizeStr(profileData.select_3fxzr, 100), // Highest Education
+        education_field: sanitizeStr(profileData.select_xtyxy, 100),
+        college: sanitizeStr(profileData.text_b1gvp, 100),
+        working_with: sanitizeStr(profileData.select_giore, 100),
+        occupation: sanitizeStr(profileData.select_yr1hd, 100), // Working As / Occupation
+        organization: sanitizeStr(profileData.text_w7iyw, 100),
+        city: sanitizeStr(profileData.text_3a4em, 100), // Work Location mapped to city
+        work_location: sanitizeStr(profileData.text_3a4em, 100),
+        annual_income: sanitizeStr(profileData.select_3iunu, 50),
+        family_value: sanitizeStr(profileData.radio_xdzu9, 50),
+        family_type: sanitizeStr(profileData.radio_tyzfs, 50),
+        family_status: sanitizeStr(profileData.radio_4pzno, 50),
+        father_name: sanitizeStr(profileData.text_4obie, 100),
+        father_status: sanitizeStr(profileData.select_tmkwh, 100),
+        mother_name: sanitizeStr(profileData.text_fxamj, 100),
+        mother_status: sanitizeStr(profileData.select_3dm9u, 100),
+        brothers: sanitizeStr(profileData.text_yaxmk, 20),
+        brothers_married: sanitizeStr(profileData.text_qswpw, 20),
+        sisters: sanitizeStr(profileData.text_pqeee, 20),
+        sisters_married: sanitizeStr(profileData.text_3qceb, 20),
+        family_location: sanitizeStr(profileData.text_wjnit, 100),
+        guardian_phone: sanitizeStr(profileData.text_t6hil, 50),
+        family_origin: sanitizeStr(profileData.text_fqhn4, 100),
+        bio: sanitizeStr(profileData.textarea_d8efs, 1000), // About Me
+        profile_photo: sanitizeStr(profileData.profile_photo || '', 300),
         status: initialStatus,
-        role: 'user', // Hardcoded user role prevents privilege escalation
+        role: 'user',
         admin_reviewed: autoApprove,
+
+        // Payment fields mapping
+        payment_status: sanitizeStr(profileData.payment_status || 'pending_verification', 30),
+        payment_utr: sanitizeStr(profileData.payment_utr, 12),
+        payment_screenshot: sanitizeStr(profileData.payment_screenshot || '', 300),
+        payment_amount: Number(profileData.payment_amount) || 1000,
+        payment_date: new Date().toISOString(),
       }, { onConflict: 'auth_id' })
       .select()
       .single();
 
     if (profileError) {
-      // Clean up the created auth user if profile creation fails
       await adminClient.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json({ error: profileError.message }, { status: 400 });
     }

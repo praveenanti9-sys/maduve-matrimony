@@ -70,12 +70,55 @@ export interface UserProfile {
   profileViews: number;
   adminReviewed?: boolean;
   shortlistedIds?: string[];
+  
+  // ARMember custom fields
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  postedBy?: string;
+  bodyType?: string;
+  skinTone?: string;
+  disability?: string;
+  bloodGroup?: string;
+  eatingHabits?: string;
+  drinkingHabits?: string;
+  smokingHabits?: string;
+  birthTime?: string;
+  birthPlace?: string;
+  gana?: string;
+  dosham?: string;
+  educationField?: string;
+  college?: string;
+  workingWith?: string;
+  workingAs?: string;
+  organization?: string;
+  workLocation?: string;
+  familyValue?: string;
+  familyType?: string;
+  familyStatus?: string;
+  fatherStatus?: string;
+  motherStatus?: string;
+  brothers?: string;
+  brothersMarried?: string;
+  sisters?: string;
+  sistersMarried?: string;
+  familyLocation?: string;
+  guardianPhone?: string;
+  familyOrigin?: string;
+
+  // Payments flow custom fields
+  paymentStatus?: 'unpaid' | 'pending_verification' | 'verified' | 'failed';
+  paymentUtr?: string;
+  paymentScreenshot?: string;
+  paymentAmount?: number;
+  paymentDate?: string;
 }
 
 export interface MatchProfile {
   id: string;
   name: string;
   age: number;
+  dob?: string;
   height: string;
   location: string;
   education: string;
@@ -112,6 +155,48 @@ export interface MatchProfile {
   isVerified?: boolean;
   photoPrivacy?: boolean;
   role?: 'user' | 'admin';
+
+  // ARMember custom fields
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  postedBy?: string;
+  bodyType?: string;
+  skinTone?: string;
+  disability?: string;
+  bloodGroup?: string;
+  eatingHabits?: string;
+  drinkingHabits?: string;
+  smokingHabits?: string;
+  birthTime?: string;
+  birthPlace?: string;
+  gana?: string;
+  dosham?: string;
+  educationField?: string;
+  college?: string;
+  workingWith?: string;
+  workingAs?: string;
+  organization?: string;
+  workLocation?: string;
+  familyValue?: string;
+  familyType?: string;
+  familyStatus?: string;
+  fatherStatus?: string;
+  motherStatus?: string;
+  brothers?: string;
+  brothersMarried?: string;
+  sisters?: string;
+  sistersMarried?: string;
+  familyLocation?: string;
+  guardianPhone?: string;
+  familyOrigin?: string;
+
+  // Payments flow custom fields
+  paymentStatus?: 'unpaid' | 'pending_verification' | 'verified' | 'failed';
+  paymentUtr?: string;
+  paymentScreenshot?: string;
+  paymentAmount?: number;
+  paymentDate?: string;
 }
 
 export interface Message {
@@ -206,6 +291,48 @@ function dbProfileToUserProfile(db: DbProfile): UserProfile {
     profileViews: db.profile_views,
     adminReviewed: db.admin_reviewed,
     shortlistedIds: db.shortlisted_ids || [],
+
+    // ARMember custom fields
+    username: db.username,
+    firstName: db.first_name,
+    lastName: db.last_name,
+    postedBy: db.posted_by,
+    bodyType: db.body_type,
+    skinTone: db.skin_tone,
+    disability: db.disability,
+    bloodGroup: db.blood_group,
+    eatingHabits: db.eating_habits,
+    drinkingHabits: db.drinking_habits,
+    smokingHabits: db.smoking_habits,
+    birthTime: db.birth_time,
+    birthPlace: db.birth_place,
+    gana: db.gana,
+    dosham: db.dosham,
+    educationField: db.education_field,
+    college: db.college,
+    workingWith: db.working_with,
+    workingAs: db.working_as,
+    organization: db.organization,
+    workLocation: db.work_location,
+    familyValue: db.family_value,
+    familyType: db.family_type,
+    familyStatus: db.family_status,
+    fatherStatus: db.father_status,
+    motherStatus: db.mother_status,
+    brothers: db.brothers,
+    brothersMarried: db.brothers_married,
+    sisters: db.sisters,
+    sistersMarried: db.sisters_married,
+    familyLocation: db.family_location,
+    guardianPhone: db.guardian_phone,
+    familyOrigin: db.family_origin,
+
+    // Payments flow custom fields
+    paymentStatus: db.payment_status,
+    paymentUtr: db.payment_utr,
+    paymentScreenshot: db.payment_screenshot,
+    paymentAmount: db.payment_amount,
+    paymentDate: db.payment_date,
   };
 }
 
@@ -217,6 +344,7 @@ function dbProfileToMatchProfile(db: DbProfile): MatchProfile {
     id: db.id,
     name: db.full_name,
     age,
+    dob: db.dob,
     height: db.height,
     location: [db.city, db.state].filter(Boolean).join(', ') || db.district,
     education: db.education,
@@ -253,6 +381,48 @@ function dbProfileToMatchProfile(db: DbProfile): MatchProfile {
     isVerified: db.is_verified,
     photoPrivacy: db.photo_privacy,
     role: db.role as 'user' | 'admin',
+
+    // ARMember custom fields
+    username: db.username,
+    firstName: db.first_name,
+    lastName: db.last_name,
+    postedBy: db.posted_by,
+    bodyType: db.body_type,
+    skinTone: db.skin_tone,
+    disability: db.disability,
+    bloodGroup: db.blood_group,
+    eatingHabits: db.eating_habits,
+    drinkingHabits: db.drinking_habits,
+    smokingHabits: db.smoking_habits,
+    birthTime: db.birth_time,
+    birthPlace: db.birth_place,
+    gana: db.gana,
+    dosham: db.dosham,
+    educationField: db.education_field,
+    college: db.college,
+    workingWith: db.working_with,
+    workingAs: db.working_as,
+    organization: db.organization,
+    workLocation: db.work_location,
+    familyValue: db.family_value,
+    familyType: db.family_type,
+    familyStatus: db.family_status,
+    fatherStatus: db.father_status,
+    motherStatus: db.mother_status,
+    brothers: db.brothers,
+    brothersMarried: db.brothers_married,
+    sisters: db.sisters,
+    sistersMarried: db.sisters_married,
+    familyLocation: db.family_location,
+    guardianPhone: db.guardian_phone,
+    familyOrigin: db.family_origin,
+
+    // Payments flow custom fields
+    paymentStatus: db.payment_status,
+    paymentUtr: db.payment_utr,
+    paymentScreenshot: db.payment_screenshot,
+    paymentAmount: db.payment_amount,
+    paymentDate: db.payment_date,
   };
 }
 
@@ -302,6 +472,48 @@ function userProfileToDbUpdate(data: Partial<UserProfile>): Partial<DbProfile> {
     notifMatches: 'notif_matches', notifPromo: 'notif_promo',
     statusReason: 'status_reason',
     shortlistedIds: 'shortlisted_ids',
+
+    // ARMember custom fields
+    username: 'username',
+    firstName: 'first_name',
+    lastName: 'last_name',
+    postedBy: 'posted_by',
+    bodyType: 'body_type',
+    skinTone: 'skin_tone',
+    disability: 'disability',
+    bloodGroup: 'blood_group',
+    eatingHabits: 'eating_habits',
+    drinkingHabits: 'drinking_habits',
+    smokingHabits: 'smoking_habits',
+    birthTime: 'birth_time',
+    birthPlace: 'birth_place',
+    gana: 'gana',
+    dosham: 'dosham',
+    educationField: 'education_field',
+    college: 'college',
+    workingWith: 'working_with',
+    workingAs: 'working_as',
+    organization: 'organization',
+    workLocation: 'work_location',
+    familyValue: 'family_value',
+    familyType: 'family_type',
+    familyStatus: 'family_status',
+    fatherStatus: 'father_status',
+    motherStatus: 'mother_status',
+    brothers: 'brothers',
+    brothersMarried: 'brothers_married',
+    sisters: 'sisters',
+    sistersMarried: 'sisters_married',
+    familyLocation: 'family_location',
+    guardianPhone: 'guardian_phone',
+    familyOrigin: 'family_origin',
+
+    // Payments flow custom fields
+    paymentStatus: 'payment_status',
+    paymentUtr: 'payment_utr',
+    paymentScreenshot: 'payment_screenshot',
+    paymentAmount: 'payment_amount',
+    paymentDate: 'payment_date',
   };
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
@@ -326,6 +538,22 @@ const defaultUser: UserProfile = {
   notifAccepted: true, notifMatches: true, notifPromo: false, profileViews: 0,
   adminReviewed: false, isVerified: false,
   shortlistedIds: [],
+
+  // ARMember custom fields defaults
+  username: '', firstName: '', lastName: '', postedBy: '', bodyType: '',
+  skinTone: '', disability: '', bloodGroup: '', eatingHabits: '', drinkingHabits: '',
+  smokingHabits: '', birthTime: '', birthPlace: '', gana: '', dosham: '',
+  educationField: '', college: '', workingWith: '', workingAs: '', organization: '',
+  workLocation: '', familyValue: '', familyType: '', familyStatus: '', fatherStatus: '',
+  motherStatus: '', brothers: '', brothersMarried: '', sisters: '', sistersMarried: '',
+  familyLocation: '', guardianPhone: '', familyOrigin: '',
+
+  // Payments flow custom fields defaults
+  paymentStatus: 'unpaid',
+  paymentUtr: '',
+  paymentScreenshot: '',
+  paymentAmount: 1000,
+  paymentDate: '',
 };
 
 // ── Store Interface ──
@@ -375,6 +603,7 @@ interface AppState {
   approveUser: (userId: string) => Promise<void>;
   rejectUser: (userId: string) => Promise<void>;
   verifyUser: (userId: string, verified: boolean) => Promise<void>;
+  verifyPayment: (userId: string, status: 'verified' | 'failed') => Promise<void>;
   resetPassword: (email: string) => Promise<boolean>;
   updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
 
@@ -397,7 +626,7 @@ interface AppState {
 
   // Views
   incrementProfileViews: () => void;
-  uploadPhoto: (file: File) => Promise<string | null>;
+  uploadPhoto: (file: File, customId?: string) => Promise<string | null>;
 }
 
 // ── Module-level subscription variables ──
@@ -982,6 +1211,46 @@ export const useStore = create<AppState>((set, get) => ({
     });
   },
 
+  verifyPayment: async (userId, status) => {
+    const state = get();
+    await svc.verifyPayment(userId, status, state.currentUser.id);
+    set({
+      profiles: state.profiles.map(p =>
+        p.id === userId
+          ? {
+              ...p,
+              paymentStatus: status,
+              status: status === 'verified' ? ('active' as const) : ('suspended' as const),
+              statusReason: status === 'verified' ? '' : 'Payment verification failed',
+              adminReviewed: status === 'verified' ? true : p.adminReviewed,
+            }
+          : p
+      ),
+    });
+
+    if (status === 'verified') {
+      const profile = state.profiles.find(p => p.id === userId);
+      if (profile && profile.email) {
+        try {
+          const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://maduvedibbana.com';
+          const headers = await svc.getAuthHeader();
+          const html = getAccountActivatedHtml(profile.name || 'Member', originUrl);
+          await fetch('/api/send-email', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              to: profile.email,
+              subject: 'Profile Approved & Payment Verified — Maduvedibbana Matrimony 🎉',
+              html
+            })
+          });
+        } catch (err) {
+          console.error('Failed to send approval email:', err);
+        }
+      }
+    }
+  },
+
   resetPassword: async (email) => {
     const { error } = await svc.resetPassword(email);
     return !error;
@@ -1071,10 +1340,9 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
 
-  uploadPhoto: async (file) => {
+  uploadPhoto: async (file, customId) => {
     const state = get();
-    const profileId = state.currentUser.id;
-    if (!profileId) return null;
+    const profileId = state.currentUser.id || customId || ('temp_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now());
 
     set({ isLoading: true, error: null });
 

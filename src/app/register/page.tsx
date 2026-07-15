@@ -8,21 +8,27 @@ import {
   Mail, Lock, Eye, EyeOff, User, Phone, Calendar,
   ArrowRight, ArrowLeft, CheckCircle2, UserPlus,
   GraduationCap, Briefcase, MapPin, Heart,
-  Users, Ruler, Camera, AlertCircle,
+  Users, Ruler, Camera, AlertCircle, Info, FileText,
+  Copy, Check, Smartphone, QrCode
 } from "lucide-react";
 
 type Gender = "MALE" | "FEMALE" | "";
 
-const educationOptions = [
-  "10th Pass", "12th / PUC", "Diploma", "ITI",
-  "Graduate (BA/BSc/BCom)", "Engineering (BE/BTech)",
-  "Medical (MBBS/BDS)", "Law (LLB/LLM)",
-  "Post Graduate (MA/MSc/MBA)", "PhD / Doctorate", "Other",
+// Option lists to match ARMember field configurations
+const postedByOptions = ["Self", "Sibling", "Parents", "Friend", "Relative"];
+const maritalStatusOptions = ["Never Married", "Divorced", "Widowed"];
+const bodyTypeOptions = ["Average", "Slim", "Athletic", "Heavy"];
+const skinToneOptions = ["Very Fair", "Fair", "Wheatish", "Dark"];
+const disabilityOptions = ["None", "Physical Disability"];
+const bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+const drinkingOptions = ["Never", "Socially", "Regularly", "Don't Know"];
+const smokingOptions = ["Never", "Socially", "Regularly"];
+
+const rashiOptions = [
+  "Mesha (Aries)", "Vrishabha (Taurus)", "Mithuna (Gemini)", "Karkataka (Cancer)",
+  "Simha (Leo)", "Kanya (Virgo)", "Tula (Libra)", "Vrischika (Scorpio)",
+  "Dhanu (Sagittarius)", "Makara (Capricorn)", "Kumbha (Aquarius)", "Meena (Pisces)",
 ];
-
-const maritalStatusOptions = ["Never Married", "Divorced", "Widowed", "Awaiting Divorce"];
-
-const complexionOptions = ["Very Fair", "Fair", "Wheatish", "Wheatish Medium", "Dark"];
 
 const nakshatraOptions = [
   "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra",
@@ -32,16 +38,45 @@ const nakshatraOptions = [
   "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati",
 ];
 
-const rashiOptions = [
-  "Mesha (Aries)", "Vrishabha (Taurus)", "Mithuna (Gemini)", "Karkataka (Cancer)",
-  "Simha (Leo)", "Kanya (Virgo)", "Tula (Libra)", "Vrischika (Scorpio)",
-  "Dhanu (Sagittarius)", "Makara (Capricorn)", "Kumbha (Aquarius)", "Meena (Pisces)",
+const ganaOptions = ["Deva", "Manushya", "Rakshasa"];
+
+const educationOptions = [
+  "10th Pass", "12th / PUC", "Diploma", "ITI",
+  "Graduate (BA/BSc/BCom)", "Engineering (BE/BTech)",
+  "Medical (MBBS/BDS)", "Law (LLB/LLM)",
+  "Post Graduate (MA/MSc/MBA)", "PhD / Doctorate", "Other",
+];
+
+const educationFieldOptions = [
+  "Arts", "Science", "Commerce", "Engineering/Technology",
+  "Medicine/Healthcare", "Law", "Management/Business",
+  "Information Technology", "Agriculture", "Other"
+];
+
+const workingWithOptions = [
+  "Government / Public Sector", "Private Sector",
+  "Business / Self-Employed", "Defense", "Not Working"
 ];
 
 const incomeOptions = [
   "Below ₹3 Lakhs", "₹3-5 Lakhs", "₹5-8 Lakhs", "₹8-10 Lakhs",
   "₹10-15 Lakhs", "₹15-20 Lakhs", "₹20-30 Lakhs", "₹30-50 Lakhs",
   "₹50 Lakhs+", "Not Disclosed",
+];
+
+const familyValueOptions = ["Orthodox", "Traditional", "Moderate", "Liberal"];
+const familyTypeOptions = ["Joint Family", "Nuclear Family", "Others"];
+const familyStatusOptions = ["Middle", "Upper Middle", "Rich", "Affluent"];
+const parentStatusOptions = ["Employed", "Business / Self-Employed", "Retired", "Passed Away"];
+const motherStatusOptions = ["Homemaker", "Employed", "Business / Self-Employed", "Retired", "Passed Away"];
+
+const heightOptions = [
+  "137cm (4'6\")", "140cm (4'7\")", "142cm (4'8\")", "145cm (4'9\")",
+  "147cm (4'10\")", "150cm (4'11\")", "152cm (5'0\")", "155cm (5'1\")",
+  "157cm (5'2\")", "160cm (5'3\")", "162cm (5'4\")", "165cm (5'5\")",
+  "167cm (5'6\")", "170cm (5'7\")", "172cm (5'8\")", "175cm (5'9\")",
+  "177cm (5'10\")", "180cm (5'11\")", "182cm (6'0\")", "185cm (6'1\")",
+  "187cm (6'2\")", "191cm (6'3\")"
 ];
 
 const districtOptions = [
@@ -53,95 +88,107 @@ const districtOptions = [
   "Kodagu", "Chikkamagaluru",
 ];
 
-const heightOptions = ["4'6\"","4'7\"","4'8\"","4'9\"","4'10\"","4'11\"","5'0\"","5'1\"","5'2\"","5'3\"","5'4\"","5'5\"","5'6\"","5'7\"","5'8\"","5'9\"","5'10\"","5'11\"","6'0\"","6'1\"","6'2\"","6'3\"","6'4\"","6'5\""];
-
-// ── Validation helpers ──
-const validateName = (name: string): string => {
-  if (!name.trim()) return "Full name is required";
-  if (name.trim().length < 3) return "Name must be at least 3 characters";
-  if (!/^[a-zA-Z\s.]+$/.test(name.trim())) return "Name can only contain letters, spaces, and dots";
-  return "";
-};
-
-const validateEmail = (email: string): string => {
-  if (!email.trim()) return "Email is required";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Enter a valid email address";
-  if (email.trim().toLowerCase() === "admin@maduvedibbana.com") return "This email address is reserved and cannot be used.";
-  return "";
-};
-
-const validatePhone = (phone: string): string => {
-  if (!phone.trim()) return "Phone number is required";
-  // Remove all non-digit characters
-  const cleaned = phone.replace(/\D/g, '');
-  
-  // Only strip country code '91' if the number has 12 digits total
-  // Only strip leading '0' if the number has 11 digits total
-  let digits = cleaned;
-  if (cleaned.length === 12 && cleaned.startsWith('91')) {
-    digits = cleaned.substring(2);
-  } else if (cleaned.length === 11 && cleaned.startsWith('0')) {
-    digits = cleaned.substring(1);
-  }
-
-  if (!/^[6-9]\d{9}$/.test(digits)) return "Enter a valid 10-digit Indian mobile number";
-  return "";
-};
-
-const validatePassword = (password: string): string => {
-  if (!password) return "Password is required";
-  if (password.length < 8) return "Password must be at least 8 characters";
-  if (!/[A-Z]/.test(password)) return "Include at least 1 uppercase letter";
-  if (!/[0-9]/.test(password)) return "Include at least 1 number";
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return "Include at least 1 special character";
-  return "";
-};
-
-const validateDob = (dob: string, gender: string): string => {
-  if (!dob) return "Date of birth is required";
-  const birth = new Date(dob);
-  const now = new Date();
-  const age = Math.floor((now.getTime() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
-  
-  if (gender === 'MALE' && age < 21) return "Legal marriage age for men is 21+";
-  if (gender === 'FEMALE' && age < 18) return "Legal marriage age for women is 18+";
-  if (!gender && age < 18) return "You must be at least 18 years old";
-  
-  if (age > 60) return "Age must be below 60 years";
-  return "";
-};
-
-const validatePrefAge = (min: string, max: string): string => {
-  if (min && max) {
-    const minVal = parseInt(min);
-    const maxVal = parseInt(max);
-    if (minVal > maxVal) return "Min age cannot be greater than max age";
-    if (minVal < 18 || maxVal > 60) return "Age range must be between 18-60";
-  }
-  return "";
-};
-
 interface FieldError { [key: string]: string }
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useStore();
+  const { register, uploadPhoto, error: storeError } = useStore();
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<FieldError>({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Step 1 — Basic Info
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  // ── Step 1 Form States ──
+  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [postedBy, setPostedBy] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [gender, setGender] = useState<Gender>("");
+
+  // ── Step 2 Form States ──
   const [dob, setDob] = useState("");
+  const [maritalStatus, setMaritalStatus] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [bodyType, setBodyType] = useState("");
+  const [skinTone, setSkinTone] = useState("");
+  const [disability, setDisability] = useState("None");
+  const [bloodGroup, setBloodGroup] = useState("");
+  const [eatingHabits, setEatingHabits] = useState<string[]>([]);
+  const [drinkingHabits, setDrinkingHabits] = useState("");
+  const [smokingHabits, setSmokingHabits] = useState("");
+  const [birthTime, setBirthTime] = useState("");
+  const [birthPlace, setBirthPlace] = useState("");
+  const [rashi, setRashi] = useState("");
+  const [nakshatra, setNakshatra] = useState("");
+  const [gana, setGana] = useState("");
+  const [dosham, setDosham] = useState("");
+
+  // ── Step 3 Form States ──
+  const [education, setEducation] = useState("");
+  const [educationField, setEducationField] = useState("");
+  const [college, setCollege] = useState("");
+  const [workingWith, setWorkingWith] = useState("");
+  const [occupation, setOccupation] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [workLocation, setWorkLocation] = useState("");
+  const [annualIncome, setAnnualIncome] = useState("");
+  const [familyValue, setFamilyValue] = useState("");
+  const [familyType, setFamilyType] = useState("");
+  const [familyStatus, setFamilyStatus] = useState("");
+  const [fatherName, setFatherName] = useState("");
+  const [fatherStatus, setFatherStatus] = useState("");
+  const [motherName, setMotherName] = useState("");
+  const [motherStatus, setMotherStatus] = useState("");
+  const [brothers, setBrothers] = useState("0");
+  const [brothersMarried, setBrothersMarried] = useState("0");
+  const [sisters, setSisters] = useState("0");
+  const [sistersMarried, setSistersMarried] = useState("0");
+  const [familyLocation, setFamilyLocation] = useState("");
+  const [guardianPhone, setGuardianPhone] = useState("");
+  const [familyOrigin, setFamilyOrigin] = useState("");
+
+  // ── Step 4 Payment States ──
+  const [paymentUtr, setPaymentUtr] = useState("");
+  const [paymentScreenshot, setPaymentScreenshot] = useState("");
+  const [paymentScreenshotFile, setPaymentScreenshotFile] = useState<File | null>(null);
+  const [copiedNotification, setCopiedNotification] = useState(false);
+  const paymentFileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Step 5 Photo & Consent States ──
   const [profilePhoto, setProfilePhoto] = useState("");
   const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
+  const [bio, setBio] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
+  const totalSteps = 5;
+  const stepLabels = [
+    "Account Details",
+    "Lifestyle & Astrology",
+    "Career & Family",
+    "Activation Payment",
+    "Photo & Consent"
+  ];
+
+  const upiId = "EZE0436387@CUB";
+  const paymentAmount = 1000;
+  const upiUri = `upi://pay?pa=${upiId}&pn=Maduvedibbana&am=${paymentAmount}&cu=INR&tn=Reg_${username || 'User'}`;
+
+  // ── Handle Clipboard Copy ──
+  const copyUpiId = () => {
+    navigator.clipboard.writeText(upiId);
+    setCopiedNotification(true);
+    setTimeout(() => setCopiedNotification(false), 2000);
+  };
+
+  // ── Handle Photo uploads preview ──
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -154,48 +201,36 @@ export default function RegisterPage() {
         return;
       }
       setProfilePhotoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePhoto(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setProfilePhoto(URL.createObjectURL(file));
+      const ne = { ...errors };
+      delete ne.profilePhoto;
+      setErrors(ne);
     }
   };
 
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  // ── Handle Payment Screenshot upload preview ──
+  const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert("Please upload a valid image file (JPG, PNG)");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Screenshot must be smaller than 5MB");
+        return;
+      }
+      setPaymentScreenshotFile(file);
+      setPaymentScreenshot(URL.createObjectURL(file));
+      const ne = { ...errors };
+      delete ne.paymentScreenshot;
+      setErrors(ne);
+    }
+  };
 
-  // Step 2 — Personal Details
-  const [height, setHeight] = useState("");
-  const [weight, setWeight] = useState("");
-  const [complexion, setComplexion] = useState("");
-  const [maritalStatus, setMaritalStatus] = useState("");
-  const [education, setEducation] = useState("");
-  const [occupation, setOccupation] = useState("");
-  const [annualIncome, setAnnualIncome] = useState("");
-  const [city, setCity] = useState("");
-  const [district, setDistrict] = useState("");
-  const [nativePlace, setNativePlace] = useState("");
-
-  // Step 3 — Religion, Family, Bio
-  const [gothra, setGothra] = useState("");
-  const [nakshatra, setNakshatra] = useState("");
-  const [rashi, setRashi] = useState("");
-  const [fatherName, setFatherName] = useState("");
-  const [fatherOccupation, setFatherOccupation] = useState("");
-  const [motherName, setMotherName] = useState("");
-  const [motherOccupation, setMotherOccupation] = useState("");
-  const [siblings, setSiblings] = useState("");
-  const [bio, setBio] = useState("");
-
-  // Partner Preferences
-  const [prefAgeMin, setPrefAgeMin] = useState("");
-  const [prefAgeMax, setPrefAgeMax] = useState("");
-  const [prefHeightMin, setPrefHeightMin] = useState("");
-  const [prefDistrict, setPrefDistrict] = useState("");
-  const [prefEducation, setPrefEducation] = useState("");
-
-  // Password strength
-  const getPasswordStrength = () => {
+  // Password strength meter logic
+  const getPasswordStrength = (): number => {
+    if (!password) return 0;
     let score = 0;
     if (password.length >= 8) score++;
     if (/[A-Z]/.test(password)) score++;
@@ -203,111 +238,318 @@ export default function RegisterPage() {
     if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
     return score;
   };
-  const strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
-  const strengthColors = ["", "#dc2626", "#d97706", "#3b82f6", "#16a34a"];
 
+  const strengthColors = ["#e3e8f0", "#dc2626", "#d97706", "#3b82f6", "#16a34a"];
+  const strengthLabels = ["Empty", "Weak", "Fair", "Good", "Strong"];
+
+  // ── Step 1 Validation ──
   const handleStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: FieldError = {};
-    const nameErr = validateName(fullName);
-    if (nameErr) newErrors.fullName = nameErr;
-    const emailErr = validateEmail(email);
-    if (emailErr) newErrors.email = emailErr;
-    const phoneErr = validatePhone(phone);
-    if (phoneErr) newErrors.phone = phoneErr;
-    const pwErr = validatePassword(password);
-    if (pwErr) newErrors.password = pwErr;
-    const dobErr = validateDob(dob, gender);
-    if (dobErr) newErrors.dob = dobErr;
-    if (!gender) newErrors.gender = "Please select your gender";
-    if (!acceptTerms) newErrors.terms = "You must accept the terms";
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) setStep(2);
+
+    // Username: exactly 6 characters: 4 letters + 2 numbers
+    if (!username) {
+      newErrors.username = "Username is required";
+    } else if (!/^[A-Za-z]{4}\d{2}$/.test(username)) {
+      newErrors.username = "Username must be exactly 6 characters (4 letters followed by 2 numbers, e.g. Kira86)";
+    }
+
+    if (!firstName.trim()) newErrors.firstName = "First name is required";
+    if (!lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!postedBy) newErrors.postedBy = "Specify who is creating this profile";
+
+    // Indian 10-digit WhatsApp number validation
+    if (!phone) {
+      newErrors.phone = "Mobile number is required";
+    } else {
+      const clean = phone.replace(/\D/g, '');
+      if (!/^[6-9]\d{9}$/.test(clean.slice(-10))) {
+        newErrors.phone = "Enter a valid 10-digit WhatsApp number";
+      }
+    }
+
+    if (!email) {
+      newErrors.email = "Email address is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Enter a valid email address";
+    }
+
+    if (email !== confirmEmail) {
+      newErrors.confirmEmail = "Email addresses do not match";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    } else if (getPasswordStrength() < 3) {
+      newErrors.password = "Password is too weak. Ensure uppercase, number, and special character are included.";
+    }
+
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (!gender) newErrors.gender = "Please select gender";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setStep(2);
   };
 
+  // ── Step 2 Validation ──
   const handleStep2 = (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: FieldError = {};
+
+    if (!dob) {
+      newErrors.dob = "Date of birth is required";
+    } else {
+      const birth = new Date(dob);
+      const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+      if (gender === 'MALE' && age < 21) newErrors.dob = "Legal marriage age for grooms is 21+";
+      if (gender === 'FEMALE' && age < 18) newErrors.dob = "Legal marriage age for brides is 18+";
+    }
+
     if (!maritalStatus) newErrors.maritalStatus = "Marital status is required";
-    if (!education) newErrors.education = "Education is required";
-    if (!occupation.trim()) newErrors.occupation = "Occupation is required";
-    if (occupation.trim().length > 0 && occupation.trim().length < 2) newErrors.occupation = "Occupation must be at least 2 characters";
-    if (!city.trim()) newErrors.city = "City is required";
-    if (city.trim().length > 0 && city.trim().length < 2) newErrors.city = "City must be at least 2 characters";
-    if (weight && (parseInt(weight) < 30 || parseInt(weight) > 200)) newErrors.weight = "Weight must be between 30-200 kg";
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) setStep(3);
+    if (!height) newErrors.height = "Height is required";
+    
+    if (!weight) {
+      newErrors.weight = "Weight is required";
+    } else if (isNaN(Number(weight)) || Number(weight) < 30 || Number(weight) > 200) {
+      newErrors.weight = "Enter a valid weight in kg (30-200)";
+    }
+
+    if (!bloodGroup) newErrors.bloodGroup = "Blood group is required";
+    if (eatingHabits.length === 0) newErrors.eatingHabits = "Select at least one eating habit";
+    if (!rashi) newErrors.rashi = "Raashi is required";
+    if (!nakshatra) newErrors.nakshatra = "Nakshathra is required";
+    if (!gana) newErrors.gana = "Gana is required";
+    if (!dosham) newErrors.dosham = "Specify dosham status";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setStep(3);
   };
 
+  // ── Step 3 Validation ──
+  const handleStep3 = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: FieldError = {};
+
+    if (!education) newErrors.education = "Highest education is required";
+    if (!educationField) newErrors.educationField = "Education field is required";
+    if (!workingWith) newErrors.workingWith = "Employment sector is required";
+    if (!workLocation.trim()) newErrors.workLocation = "Work location/city is required";
+    if (!annualIncome) newErrors.annualIncome = "Annual income range is required";
+
+    if (!familyValue) newErrors.familyValue = "Family value type is required";
+    if (!familyType) newErrors.familyType = "Family type is required";
+    if (!familyStatus) newErrors.familyStatus = "Family status is required";
+    if (!fatherName.trim()) newErrors.fatherName = "Father's name is required";
+    if (!fatherStatus) newErrors.fatherStatus = "Father's status is required";
+    if (!motherStatus) newErrors.motherStatus = "Mother's status is required";
+
+    if (!brothers || isNaN(Number(brothers))) newErrors.brothers = "Required (use 0 if none)";
+    if (!brothersMarried || isNaN(Number(brothersMarried))) newErrors.brothersMarried = "Required (use 0 if none)";
+    if (!sisters || isNaN(Number(sisters))) newErrors.sisters = "Required (use 0 if none)";
+    if (!sistersMarried || isNaN(Number(sistersMarried))) newErrors.sistersMarried = "Required (use 0 if none)";
+
+    if (!familyLocation.trim()) newErrors.familyLocation = "Family location is required";
+    if (!familyOrigin.trim()) newErrors.familyOrigin = "Ancestral origin is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setStep(4);
+  };
+
+  // ── Step 4 Validation (Payment) ──
+  const handleStep4 = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: FieldError = {};
+
+    if (!paymentUtr) {
+      newErrors.paymentUtr = "UTR / Transaction Reference Number is required";
+    } else if (!/^\d{12}$/.test(paymentUtr)) {
+      newErrors.paymentUtr = "UTR must be exactly 12 digits";
+    }
+
+    if (!paymentScreenshotFile && !paymentScreenshot) {
+      newErrors.paymentScreenshot = "Payment screenshot receipt is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
+    setStep(5);
+  };
+
+  // ── Step 5 Submission ──
   const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: FieldError = {};
-    const ageErr = validatePrefAge(prefAgeMin, prefAgeMax);
-    if (ageErr) newErrors.prefAge = ageErr;
-    if (bio.length > 500) newErrors.bio = "Bio must be under 500 characters";
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
 
-    const success = await register({
-      fullName, email, phone, password, gender, dob, profilePhoto: "", // Reset to empty initially, we will upload to Storage next
-      height, weight, complexion, maritalStatus,
-      education, occupation, annualIncome,
-      city, district, nativePlace, state: "Karnataka",
-      gothra, nakshatra, rashi,
-      fatherName, fatherOccupation, motherName, motherOccupation, siblings,
-      bio,
-      prefAgeMin, prefAgeMax, prefHeightMin, prefDistrict, prefEducation
-    });
-    if (success) {
+    // Profile photo is strictly mandatory (avatar field)
+    if (!profilePhotoFile && !profilePhoto) {
+      newErrors.profilePhoto = "Profile picture is mandatory to login";
+    }
+
+    if (!acceptTerms) {
+      newErrors.acceptTerms = "You must accept the Terms & Conditions and Privacy Policy";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      let finalPhotoUrl = "";
       if (profilePhotoFile) {
-        // Upload photo file to storage bucket and update db profile
-        await useStore.getState().uploadPhoto(profilePhotoFile);
+        const url = await uploadPhoto(profilePhotoFile);
+        if (!url) {
+          throw new Error("Failed to upload profile photo. Please try again.");
+        }
+        finalPhotoUrl = url;
       }
-      setShowSuccessModal(true);
-    } else {
-      const storeError = useStore.getState().error;
-      setErrors({ submit: storeError || 'Registration failed. Please try again.' });
+
+      let finalScreenshotUrl = "";
+      if (paymentScreenshotFile) {
+        const tempFolder = 'pay_' + (username || Math.random().toString(36).substring(2, 8));
+        const url = await uploadPhoto(paymentScreenshotFile, tempFolder);
+        if (!url) {
+          throw new Error("Failed to upload payment screenshot. Please try again.");
+        }
+        finalScreenshotUrl = url;
+      }
+
+      // Prepare payload to register endpoint mapped to ARMember field names
+      const payload = {
+        email: email,
+        password: password,
+        user_login: username,
+        text_6lo7p: firstName,
+        text_uuxfr: lastName,
+        select_y9qog: postedBy,
+        text_vlenr: phone,
+        gender: gender,
+        date_ucelp: dob,
+        radio_6yahf: maritalStatus,
+        select_vbkvr: height,
+        text_ckkxj: weight,
+        radio_cm5s8: bodyType,
+        radio_5pnjy: skinTone,
+        radio_w3rke: disability,
+        select_lehdo: bloodGroup,
+        checkbox_rjekv: eatingHabits,
+        select_rv5zv: drinkingHabits,
+        select_z7uro: smokingHabits,
+        birth_time: birthTime,
+        text_pivyw: birthPlace,
+        select_jeakk: rashi,
+        select_vjmu2: nakshatra,
+        select_qeo3m: gana,
+        radio_so79q: dosham,
+        select_3fxzr: education,
+        select_xtyxy: educationField,
+        text_b1gvp: college,
+        select_giore: workingWith,
+        select_yr1hd: occupation,
+        text_w7iyw: organization,
+        text_3a4em: workLocation,
+        select_3iunu: annualIncome,
+        radio_xdzu9: familyValue,
+        radio_tyzfs: familyType,
+        radio_4pzno: familyStatus,
+        text_4obie: fatherName,
+        select_tmkwh: fatherStatus,
+        text_fxamj: motherName,
+        select_3dm9u: motherStatus,
+        text_yaxmk: brothers,
+        text_qswpw: brothersMarried,
+        text_pqeee: sisters,
+        text_3qceb: sistersMarried,
+        text_wjnit: familyLocation,
+        text_t6hil: guardianPhone,
+        text_fqhn4: familyOrigin,
+        textarea_d8efs: bio,
+        profile_photo: finalPhotoUrl,
+        
+        // Payment info payload mapping
+        payment_status: 'pending_verification',
+        payment_utr: paymentUtr,
+        payment_screenshot: finalScreenshotUrl,
+        payment_amount: paymentAmount,
+      };
+
+      const success = await register(payload);
+      if (success) {
+        setShowSuccessModal(true);
+      } else {
+        setErrors({ submit: storeError || "Registration failed. Try a different username/email." });
+      }
+    } catch (err) {
+      setErrors({ submit: (err as Error).message });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const totalSteps = 3;
-  const stepLabels = ["Basic Info", "Profile Details", "Family & Bio"];
-
   const selectStyle: React.CSSProperties = {
-    width: "100%", padding: "12px 16px", background: "#fafcff",
+    width: "100%", padding: "10px 14px", background: "#fafcff",
     border: "1px solid #e3e8f0", borderRadius: "12px",
-    fontFamily: "'Inter', sans-serif", fontSize: "15px",
-    color: "#1e2a44", outline: "none", height: "48px",
-    transition: "all 0.25s ease", appearance: "none" as const,
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-    backgroundRepeat: "no-repeat",
-    backgroundPosition: "right 16px center",
+    fontSize: "14px", color: "#1e2a44", outline: "none", height: "46px",
+    cursor: "pointer", appearance: "none" as const,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+    backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center",
   };
 
   const ErrorMsg = ({ field }: { field: string }) => {
     if (!errors[field]) return null;
     return (
-      <span className="error-text">
+      <span style={{ fontSize: "11px", color: "#dc2626", display: "flex", alignItems: "center", gap: "4px", marginTop: "4px", fontWeight: 500 }}>
         <AlertCircle style={{ width: "12px", height: "12px" }} /> {errors[field]}
       </span>
     );
   };
 
   return (
-    <section style={{ minHeight: "calc(100vh - 80px)", display: "flex", alignItems: "center", justifyContent: "center", background: "#EFEBE3", padding: "40px 20px" }}>
-      <div style={{ width: "100%", maxWidth: "560px" }}>
-        <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "linear-gradient(135deg, #1e2a44, #2a3673)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-            <UserPlus style={{ width: "28px", height: "28px", color: "#fff" }} />
+    <section style={{ maxWidth: "680px", margin: "40px auto 80px", padding: "0 20px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        
+        {/* Header */}
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "linear-gradient(135deg, #1e2a44, #c6a55c)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <UserPlus style={{ width: "26px", height: "26px", color: "#fff" }} />
           </div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "28px", fontWeight: 700, color: "#1e2a44", marginBottom: "6px" }}>Create Your Profile</h1>
-          <p style={{ fontSize: "14px", color: "#5f6368" }}>Join Maduvedibbana and find your perfect match</p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "28px", fontWeight: 700, color: "#1e2a44", marginBottom: "6px" }}>
+            Register Profile
+          </h1>
+          <p style={{ fontSize: "13px", color: "#5f6368" }}>Join the Okkaliga Community Matrimony platform</p>
         </div>
 
         {/* Step Indicator */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0", marginBottom: "28px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0", marginBottom: "8px", overflowX: "auto", paddingBottom: "10px" }}>
           {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s) => (
-            <div key={s} style={{ display: "flex", alignItems: "center" }}>
+            <div key={s} style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
                 <div style={{
                   width: "36px", height: "36px", borderRadius: "50%",
@@ -319,35 +561,109 @@ export default function RegisterPage() {
                 }}>
                   {step > s ? <CheckCircle2 style={{ width: "18px", height: "18px" }} /> : s}
                 </div>
-                <span style={{ fontSize: "11px", fontWeight: 500, color: step >= s ? "#1e2a44" : "#a0aec0", whiteSpace: "nowrap" }}>{stepLabels[s - 1]}</span>
+                <span style={{ fontSize: "10px", fontWeight: 600, color: step >= s ? "#1e2a44" : "#a0aec0", whiteSpace: "nowrap" }}>{stepLabels[s - 1]}</span>
               </div>
               {s < totalSteps && (
-                <div style={{ width: "48px", height: "2px", borderRadius: "1px", background: step > s ? "#16a34a" : "#e3e8f0", transition: "all 0.3s", marginBottom: "18px", marginLeft: "8px", marginRight: "8px" }} />
+                <div style={{ width: "32px", height: "2px", background: step > s ? "#16a34a" : "#e3e8f0", transition: "all 0.3s", marginBottom: "18px", marginLeft: "6px", marginRight: "6px" }} />
               )}
             </div>
           ))}
         </div>
 
-        <div className="card" style={{ padding: "28px 36px" }}>
-          {/* STEP 1 */}
+        <div className="card" style={{ padding: "32px" }}>
+          
+          {/* STEP 1: ACCOUNT & CONTACT INFO */}
           {step === 1 && (
-            <form onSubmit={handleStep1} noValidate style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Full Name *</label>
-                <div style={{ position: "relative" }}>
-                  <User style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", color: "#a0aec0" }} />
-                  <input type="text" value={fullName} onChange={(e) => { setFullName(e.target.value); if (errors.fullName) { const ne = { ...errors }; delete ne.fullName; setErrors(ne); } }} className={`input ${errors.fullName ? 'input-error' : ''}`} style={{ paddingLeft: "44px" }} placeholder="Enter your full name" />
-                </div>
-                <ErrorMsg field="fullName" />
+            <form onSubmit={handleStep1} noValidate style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f0ece4", paddingBottom: "8px", marginBottom: "4px" }}>
+                <Info style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
+                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>Account Credentials</h3>
               </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Username *</label>
+                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="input" placeholder="e.g. Kira86 (4 letters + 2 digits)" />
+                <ErrorMsg field="username" />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>First Name (Confidential) *</label>
+                  <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input" placeholder="First Name" />
+                  <ErrorMsg field="firstName" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Last Name (Confidential) *</label>
+                  <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="input" placeholder="Last Name" />
+                  <ErrorMsg field="lastName" />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Posted By *</label>
+                  <select value={postedBy} onChange={(e) => setPostedBy(e.target.value)} style={selectStyle}>
+                    <option value="">Select Option</option>
+                    {postedByOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="postedBy" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>WhatsApp Mobile No (Confidential) *</label>
+                  <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input" placeholder="WhatsApp mobile number" />
+                  <ErrorMsg field="phone" />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Email Address (Confidential) *</label>
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="you@example.com" />
+                  <ErrorMsg field="email" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Confirm Email Address *</label>
+                  <input type="email" value={confirmEmail} onChange={(e) => setConfirmEmail(e.target.value)} className="input" placeholder="Re-type email address" />
+                  <ErrorMsg field="confirmEmail" />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Password *</label>
+                  <div style={{ position: "relative" }}>
+                    <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="input" style={{ paddingRight: "44px" }} placeholder="Strength: uppercase + digit + special" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#a0aec0" }}>
+                      {showPassword ? <EyeOff style={{ width: "16px", height: "16px" }} /> : <Eye style={{ width: "16px", height: "16px" }} />}
+                    </button>
+                  </div>
+                  <ErrorMsg field="password" />
+                  {password && (
+                    <div style={{ marginTop: "6px" }}>
+                      <div style={{ display: "flex", gap: "4px", marginBottom: "2px" }}>
+                        {[1, 2, 3, 4].map(i => (
+                          <div key={i} style={{ flex: 1, height: "4px", borderRadius: "2px", background: getPasswordStrength() >= i ? strengthColors[getPasswordStrength()] : "#e3e8f0" }} />
+                        ))}
+                      </div>
+                      <span style={{ fontSize: "10px", fontWeight: 600, color: strengthColors[getPasswordStrength()] }}>{strengthLabels[getPasswordStrength()]} password</span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Confirm Password *</label>
+                  <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input" placeholder="Confirm password" />
+                  <ErrorMsg field="confirmPassword" />
+                </div>
+              </div>
+
               <div>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Gender *</label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                   {(["MALE", "FEMALE"] as const).map((g) => (
-                    <button key={g} type="button" onClick={() => { setGender(g); if (errors.gender) { const ne = { ...errors }; delete ne.gender; setErrors(ne); } }} style={{
+                    <button key={g} type="button" onClick={() => setGender(g)} style={{
                       padding: "12px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer",
-                      border: gender === g ? "2px solid #1e2a44" : errors.gender ? "2px solid #dc2626" : "2px solid #e3e8f0",
-                      background: gender === g ? "rgba(30,42,68,0.05)" : "#fff",
+                      border: gender === g ? "2px solid #1e2a44" : "1px solid #e3e8f0",
+                      background: gender === g ? "rgba(30,42,68,0.04)" : "#fff",
                       color: gender === g ? "#1e2a44" : "#5f6368",
                       transition: "all 0.2s ease",
                     }}>
@@ -357,387 +673,626 @@ export default function RegisterPage() {
                 </div>
                 <ErrorMsg field="gender" />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Date of Birth *</label>
-                  <div style={{ position: "relative" }}>
-                    <Calendar style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", color: "#a0aec0" }} />
-                    <input type="date" value={dob} onChange={(e) => { setDob(e.target.value); if (errors.dob) { const ne = { ...errors }; delete ne.dob; setErrors(ne); } }} className={`input ${errors.dob ? 'input-error' : ''}`} style={{ paddingLeft: "44px" }} />
-                  </div>
-                  <ErrorMsg field="dob" />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Mobile Number *</label>
-                  <div style={{ position: "relative" }}>
-                    <Phone style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", color: "#a0aec0" }} />
-                    <input type="tel" value={phone} onChange={(e) => { setPhone(e.target.value); if (errors.phone) { const ne = { ...errors }; delete ne.phone; setErrors(ne); } }} className={`input ${errors.phone ? 'input-error' : ''}`} style={{ paddingLeft: "44px" }} placeholder="+91 98765 43210" />
-                  </div>
-                  <ErrorMsg field="phone" />
-                </div>
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Email Address *</label>
-                <div style={{ position: "relative" }}>
-                  <Mail style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", color: "#a0aec0" }} />
-                  <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (errors.email) { const ne = { ...errors }; delete ne.email; setErrors(ne); } }} className={`input ${errors.email ? 'input-error' : ''}`} style={{ paddingLeft: "44px" }} placeholder="you@example.com" />
-                </div>
-                <ErrorMsg field="email" />
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Create Password *</label>
-                <div style={{ position: "relative" }}>
-                  <Lock style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", color: "#a0aec0" }} />
-                  <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => { setPassword(e.target.value); if (errors.password) { const ne = { ...errors }; delete ne.password; setErrors(ne); } }} className={`input ${errors.password ? 'input-error' : ''}`} style={{ paddingLeft: "44px", paddingRight: "44px" }} placeholder="Min. 8 characters" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#a0aec0" }}>
-                    {showPassword ? <EyeOff style={{ width: "16px", height: "16px" }} /> : <Eye style={{ width: "16px", height: "16px" }} />}
-                  </button>
-                </div>
-                <ErrorMsg field="password" />
-                {/* Password strength bar */}
-                {password && (
-                  <div style={{ marginTop: "8px" }}>
-                    <div style={{ display: "flex", gap: "4px", marginBottom: "4px" }}>
-                      {[1, 2, 3, 4].map(i => (
-                        <div key={i} style={{
-                          flex: 1, height: "4px", borderRadius: "2px",
-                          background: getPasswordStrength() >= i ? strengthColors[getPasswordStrength()] : "#e3e8f0",
-                          transition: "all 0.3s",
-                        }} />
-                      ))}
-                    </div>
-                    <span style={{ fontSize: "11px", fontWeight: 600, color: strengthColors[getPasswordStrength()] }}>
-                      {strengthLabels[getPasswordStrength()]}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                <input type="checkbox" id="terms" checked={acceptTerms} onChange={(e) => { setAcceptTerms(e.target.checked); if (errors.terms) { const ne = { ...errors }; delete ne.terms; setErrors(ne); } }} style={{ width: "16px", height: "16px", marginTop: "2px", accentColor: "#1e2a44" }} />
-                <label htmlFor="terms" style={{ fontSize: "12px", color: errors.terms ? "#dc2626" : "#5f6368", lineHeight: 1.5, cursor: "pointer" }}>
-                  I agree to the <Link href="/terms" style={{ color: "#005AEE", fontWeight: 500, textDecoration: "none" }}>Terms & Conditions</Link> and <Link href="/privacy-policy" style={{ color: "#005AEE", fontWeight: 500, textDecoration: "none" }}>Privacy Policy</Link>
-                </label>
-              </div>
-              <ErrorMsg field="terms" />
-              <button type="submit" className="btn-primary" style={{ width: "100%", height: "50px", marginTop: "4px" }}>
-                <span>Continue</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
+
+              <button type="submit" className="btn-primary" style={{ width: "100%", height: "48px", marginTop: "10px" }}>
+                <span>Continue to Step 2</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
               </button>
             </form>
           )}
 
-          {/* STEP 2 */}
+          {/* STEP 2: BASICS, LIFESTYLE & ASTROLOGY */}
           {step === 2 && (
-            <form onSubmit={handleStep2} noValidate style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                <Ruler style={{ width: "18px", height: "18px", color: "#c6a55c" }} />
-                <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44" }}>Personal Details</h3>
+            <form onSubmit={handleStep2} noValidate style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f0ece4", paddingBottom: "8px", marginBottom: "4px" }}>
+                <Ruler style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
+                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>Basics & Lifestyle</h3>
               </div>
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Profile Photo (Optional)</label>
-                <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div style={{ position: "relative", flex: 1 }}>
-                    <Camera style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", color: "#a0aec0" }} />
-                    <input type="file" accept="image/png, image/jpeg, image/jpg" onChange={handlePhotoUpload} className="input" style={{ paddingLeft: "44px", paddingTop: "12px", paddingBottom: "12px" }} />
-                  </div>
-                  {profilePhoto && (
-                    <div style={{ width: "48px", height: "48px", borderRadius: "12px", flexShrink: 0, overflow: "hidden", border: "1px solid #e3e8f0" }}>
-                      <img src={profilePhoto} alt="Profile preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Height</label>
-                  <select value={height} onChange={(e) => setHeight(e.target.value)} style={selectStyle}>
-                    <option value="">Select</option>
-                    {heightOptions.map(h => (
-                      <option key={h} value={h}>{h}</option>
-                    ))}
-                  </select>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Date of Birth *</label>
+                  <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="input" />
+                  <ErrorMsg field="dob" />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Weight (kg)</label>
-                  <input type="number" value={weight} onChange={(e) => { setWeight(e.target.value); if (errors.weight) { const ne = { ...errors }; delete ne.weight; setErrors(ne); } }} className={`input ${errors.weight ? 'input-error' : ''}`} placeholder="65" min={30} max={200} />
-                  <ErrorMsg field="weight" />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Complexion</label>
-                  <select value={complexion} onChange={(e) => setComplexion(e.target.value)} style={selectStyle}>
-                    <option value="">Select</option>
-                    {complexionOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Marital Status *</label>
-                  <select value={maritalStatus} onChange={(e) => { setMaritalStatus(e.target.value); if (errors.maritalStatus) { const ne = { ...errors }; delete ne.maritalStatus; setErrors(ne); } }} style={{ ...selectStyle, borderColor: errors.maritalStatus ? "#dc2626" : "#e3e8f0" }}>
-                    <option value="">Select status</option>
-                    {maritalStatusOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Marital Status *</label>
+                  <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} style={selectStyle}>
+                    <option value="">Select Status</option>
+                    {maritalStatusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                   <ErrorMsg field="maritalStatus" />
                 </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Annual Income</label>
-                  <select value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} style={selectStyle}>
-                    <option value="">Select</option>
-                    {incomeOptions.map(i => <option key={i} value={i}>{i}</option>)}
-                  </select>
-                </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
-                <GraduationCap style={{ width: "18px", height: "18px", color: "#c6a55c" }} />
-                <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44" }}>Education & Career</h3>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Education *</label>
-                  <select value={education} onChange={(e) => { setEducation(e.target.value); if (errors.education) { const ne = { ...errors }; delete ne.education; setErrors(ne); } }} style={{ ...selectStyle, borderColor: errors.education ? "#dc2626" : "#e3e8f0" }}>
-                    <option value="">Select education</option>
-                    {educationOptions.map(e => <option key={e} value={e}>{e}</option>)}
-                  </select>
-                  <ErrorMsg field="education" />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Occupation *</label>
-                  <input type="text" value={occupation} onChange={(e) => { setOccupation(e.target.value); if (errors.occupation) { const ne = { ...errors }; delete ne.occupation; setErrors(ne); } }} className={`input ${errors.occupation ? 'input-error' : ''}`} placeholder="e.g. Software Engineer" />
-                  <ErrorMsg field="occupation" />
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
-                <MapPin style={{ width: "18px", height: "18px", color: "#c6a55c" }} />
-                <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44" }}>Location</h3>
-              </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>City *</label>
-                  <input type="text" value={city} onChange={(e) => { setCity(e.target.value); if (errors.city) { const ne = { ...errors }; delete ne.city; setErrors(ne); } }} className={`input ${errors.city ? 'input-error' : ''}`} placeholder="e.g. Bengaluru" />
-                  <ErrorMsg field="city" />
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Height *</label>
+                  <select value={height} onChange={(e) => setHeight(e.target.value)} style={selectStyle}>
+                    <option value="">Select</option>
+                    {heightOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="height" />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>District</label>
-                  <select value={district} onChange={(e) => setDistrict(e.target.value)} style={selectStyle}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Body Weight (KG) *</label>
+                  <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} className="input" placeholder="e.g. 60" />
+                  <ErrorMsg field="weight" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Blood Group *</label>
+                  <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)} style={selectStyle}>
                     <option value="">Select</option>
-                    {districtOptions.map(d => <option key={d} value={d}>{d}</option>)}
+                    {bloodGroupOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="bloodGroup" />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Body Type</label>
+                  <select value={bodyType} onChange={(e) => setBodyType(e.target.value)} style={selectStyle}>
+                    <option value="">Select</option>
+                    {bodyTypeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Native Place</label>
-                  <input type="text" value={nativePlace} onChange={(e) => setNativePlace(e.target.value)} className="input" placeholder="e.g. Sirsi" />
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Skin Tone</label>
+                  <select value={skinTone} onChange={(e) => setSkinTone(e.target.value)} style={selectStyle}>
+                    <option value="">Select</option>
+                    {skinToneOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Disability *</label>
+                  <select value={disability} onChange={(e) => setDisability(e.target.value)} style={selectStyle}>
+                    {disabilityOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="disability" />
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
-                <Camera style={{ width: "18px", height: "18px", color: "#c6a55c" }} />
-                <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44" }}>Profile Photos (Recommended)</h3>
-              </div>
-              {/* Hidden file input */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handlePhotoUpload}
-                accept="image/*"
-                style={{ display: "none" }}
-              />
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
-                {["Main Photo", "Side Photo (Opt)", "Side Photo (Opt)"].map((label, i) => {
-                  const isMain = i === 0;
-                  const hasPreview = isMain && profilePhoto;
-
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => {
-                        if (isMain) {
-                          fileInputRef.current?.click();
-                        } else {
-                          alert("Optional side photos can be uploaded from profile settings later.");
-                        }
-                      }}
-                      style={{
-                        height: "100px",
-                        borderRadius: "12px",
-                        border: hasPreview ? "2px solid #16a34a" : "2px dashed #d4d8e0",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: isMain ? "pointer" : "not-allowed",
-                        backgroundImage: hasPreview ? `url('${profilePhoto}')` : "none",
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                        position: "relative",
-                        background: hasPreview ? undefined : "rgba(30,42,68,0.02)",
-                        transition: "all 0.2s",
-                      }}
-                    >
-                      {!hasPreview && (
-                        <>
-                          <Camera style={{ width: "20px", height: "20px", color: isMain ? "#c6a55c" : "#a0aec0", marginBottom: "4px" }} />
-                          <span style={{ fontSize: "10px", color: "#5f6368", fontWeight: 500 }}>{label}</span>
-                        </>
-                      )}
-                      {hasPreview && (
-                        <div style={{
-                          position: "absolute", bottom: 0, left: 0, right: 0,
-                          background: "rgba(0,0,0,0.6)", padding: "4px",
-                          borderBottomLeftRadius: "10px", borderBottomRightRadius: "10px",
-                          textAlign: "center", fontSize: "9px", color: "#fff", fontWeight: 600
-                        }}>
-                          Change Photo
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+              <div style={{ background: "#fafcff", padding: "16px", borderRadius: "12px", border: "1px solid #e3e8f0" }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "8px" }}>Eating Habits *</label>
+                <div style={{ display: "flex", gap: "20px" }}>
+                  {["Non Vegetarian", "Vegetarian", "Eggetarian"].map((habit) => (
+                    <label key={habit} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#5f6368", cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={eatingHabits.includes(habit)}
+                        onChange={(e) => {
+                          const updated = e.target.checked
+                            ? [...eatingHabits, habit]
+                            : eatingHabits.filter(h => h !== habit);
+                          setEatingHabits(updated);
+                          if (errors.eatingHabits && updated.length > 0) {
+                            const ne = { ...errors };
+                            delete ne.eatingHabits;
+                            setErrors(ne);
+                          }
+                        }}
+                        style={{ width: "16px", height: "16px", accentColor: "#1e2a44" }}
+                      />
+                      {habit}
+                    </label>
+                  ))}
+                </div>
+                <ErrorMsg field="eatingHabits" />
               </div>
 
-              <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Drinking Habits</label>
+                  <select value={drinkingHabits} onChange={(e) => setDrinkingHabits(e.target.value)} style={selectStyle}>
+                    <option value="">Select Option</option>
+                    {drinkingOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Smoking Habits</label>
+                  <select value={smokingHabits} onChange={(e) => setSmokingHabits(e.target.value)} style={selectStyle}>
+                    <option value="">Select Option</option>
+                    {smokingOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f0ece4", paddingBottom: "8px", marginTop: "10px", marginBottom: "4px" }}>
+                <Heart style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
+                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>Astrology & Birth Details</h3>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Birth Time (AM/PM)</label>
+                  <input type="text" value={birthTime} onChange={(e) => setBirthTime(e.target.value)} className="input" placeholder="e.g. 10:45 AM" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Place of Birth</label>
+                  <input type="text" value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} className="input" placeholder="e.g. Bengaluru" />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Raashi (Zodiac) *</label>
+                  <select value={rashi} onChange={(e) => setRashi(e.target.value)} style={selectStyle}>
+                    <option value="">Select</option>
+                    {rashiOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="rashi" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Nakshathra (Star) *</label>
+                  <select value={nakshatra} onChange={(e) => setNakshatra(e.target.value)} style={selectStyle}>
+                    <option value="">Select</option>
+                    {nakshatraOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="nakshatra" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Gana *</label>
+                  <select value={gana} onChange={(e) => setGana(e.target.value)} style={selectStyle}>
+                    <option value="">Select</option>
+                    {ganaOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="gana" />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Dosham *</label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                  {["No", "Yes"].map((val) => (
+                    <button key={val} type="button" onClick={() => setDosham(val)} style={{
+                      padding: "10px", borderRadius: "10px", fontSize: "13px", fontWeight: 600, cursor: "pointer",
+                      border: dosham === val ? "2px solid #1e2a44" : "1px solid #e3e8f0",
+                      background: dosham === val ? "rgba(30,42,68,0.04)" : "#fff",
+                      color: dosham === val ? "#1e2a44" : "#5f6368",
+                      transition: "all 0.2s ease",
+                    }}>
+                      {val}
+                    </button>
+                  ))}
+                </div>
+                <ErrorMsg field="dosham" />
+              </div>
+
+              <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
                 <button type="button" onClick={() => setStep(1)} className="btn-outline" style={{ flex: 1, height: "48px" }}>
                   <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
                 </button>
                 <button type="submit" className="btn-primary" style={{ flex: 2, height: "48px" }}>
-                  <span>Continue</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
+                  <span>Continue to Step 3</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
                 </button>
               </div>
             </form>
           )}
 
-          {/* STEP 3 */}
+          {/* STEP 3: EDUCATION, CAREER & FAMILY */}
           {step === 3 && (
-            <form onSubmit={handleFinalSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                <Heart style={{ width: "18px", height: "18px", color: "#c6a55c" }} />
-                <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44" }}>Religion Details</h3>
+            <form onSubmit={handleStep3} noValidate style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f0ece4", paddingBottom: "8px", marginBottom: "4px" }}>
+                <GraduationCap style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
+                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>Education & Career</h3>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Gothra</label>
-                  <input type="text" value={gothra} onChange={(e) => setGothra(e.target.value)} className="input" placeholder="e.g. Kashyapa" />
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Highest Education *</label>
+                  <select value={education} onChange={(e) => setEducation(e.target.value)} style={selectStyle}>
+                    <option value="">Select Education</option>
+                    {educationOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="education" />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Nakshatra</label>
-                  <select value={nakshatra} onChange={(e) => setNakshatra(e.target.value)} style={selectStyle}>
-                    <option value="">Select</option>
-                    {nakshatraOptions.map(n => <option key={n} value={n}>{n}</option>)}
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Education in (field) *</label>
+                  <select value={educationField} onChange={(e) => setEducationField(e.target.value)} style={selectStyle}>
+                    <option value="">Select Field</option>
+                    {educationFieldOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Rashi</label>
-                  <select value={rashi} onChange={(e) => setRashi(e.target.value)} style={selectStyle}>
-                    <option value="">Select</option>
-                    {rashiOptions.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
+                  <ErrorMsg field="educationField" />
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
-                <Users style={{ width: "18px", height: "18px", color: "#c6a55c" }} />
-                <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44" }}>Family Details</h3>
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>College / University Attended</label>
+                <input type="text" value={college} onChange={(e) => setCollege(e.target.value)} className="input" placeholder="e.g. Bangalore University" />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Father&apos;s Name</label>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Working With *</label>
+                  <select value={workingWith} onChange={(e) => setWorkingWith(e.target.value)} style={selectStyle}>
+                    <option value="">Select Employment</option>
+                    {workingWithOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="workingWith" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Working As (Designation)</label>
+                  <input type="text" value={occupation} onChange={(e) => setOccupation(e.target.value)} className="input" placeholder="e.g. Project Manager" />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Organization</label>
+                  <input type="text" value={organization} onChange={(e) => setOrganization(e.target.value)} className="input" placeholder="e.g. Infosys" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Work Location *</label>
+                  <input type="text" value={workLocation} onChange={(e) => setWorkLocation(e.target.value)} className="input" placeholder="e.g. Bengaluru" />
+                  <ErrorMsg field="workLocation" />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Annual Income *</label>
+                <select value={annualIncome} onChange={(e) => setAnnualIncome(e.target.value)} style={selectStyle}>
+                  <option value="">Select Income Range</option>
+                  {incomeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+                <ErrorMsg field="annualIncome" />
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f0ece4", paddingBottom: "8px", marginTop: "10px", marginBottom: "4px" }}>
+                <Users style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
+                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>Family Specifications</h3>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Family Value *</label>
+                  <select value={familyValue} onChange={(e) => setFamilyValue(e.target.value)} style={selectStyle}>
+                    <option value="">Select</option>
+                    {familyValueOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="familyValue" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Family Type *</label>
+                  <select value={familyType} onChange={(e) => setFamilyType(e.target.value)} style={selectStyle}>
+                    <option value="">Select</option>
+                    {familyTypeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="familyType" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Family Status *</label>
+                  <select value={familyStatus} onChange={(e) => setFamilyStatus(e.target.value)} style={selectStyle}>
+                    <option value="">Select</option>
+                    {familyStatusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="familyStatus" />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Father&apos;s Name *</label>
                   <input type="text" value={fatherName} onChange={(e) => setFatherName(e.target.value)} className="input" placeholder="Father's full name" />
+                  <ErrorMsg field="fatherName" />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Father&apos;s Occupation</label>
-                  <input type="text" value={fatherOccupation} onChange={(e) => setFatherOccupation(e.target.value)} className="input" placeholder="e.g. Retired Teacher" />
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Father&apos;s Status *</label>
+                  <select value={fatherStatus} onChange={(e) => setFatherStatus(e.target.value)} style={selectStyle}>
+                    <option value="">Select Status</option>
+                    {parentStatusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="fatherStatus" />
                 </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Mother&apos;s Name</label>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Mother&apos;s Name</label>
                   <input type="text" value={motherName} onChange={(e) => setMotherName(e.target.value)} className="input" placeholder="Mother's full name" />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Mother&apos;s Occupation</label>
-                  <input type="text" value={motherOccupation} onChange={(e) => setMotherOccupation(e.target.value)} className="input" placeholder="e.g. Homemaker" />
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Mother&apos;s Status *</label>
+                  <select value={motherStatus} onChange={(e) => setMotherStatus(e.target.value)} style={selectStyle}>
+                    <option value="">Select Status</option>
+                    {motherStatusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  <ErrorMsg field="motherStatus" />
                 </div>
               </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Brothers *</label>
+                  <input type="number" value={brothers} onChange={(e) => setBrothers(e.target.value)} className="input" min={0} />
+                  <ErrorMsg field="brothers" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Brothers Married *</label>
+                  <input type="number" value={brothersMarried} onChange={(e) => setBrothersMarried(e.target.value)} className="input" min={0} />
+                  <ErrorMsg field="brothersMarried" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Sisters *</label>
+                  <input type="number" value={sisters} onChange={(e) => setSisters(e.target.value)} className="input" min={0} />
+                  <ErrorMsg field="sisters" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#5f6368", marginBottom: "6px" }}>Sisters Married *</label>
+                  <input type="number" value={sistersMarried} onChange={(e) => setSistersMarried(e.target.value)} className="input" min={0} />
+                  <ErrorMsg field="sistersMarried" />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Family Location *</label>
+                  <input type="text" value={familyLocation} onChange={(e) => setFamilyLocation(e.target.value)} className="input" placeholder="e.g. Mandya" />
+                  <ErrorMsg field="familyLocation" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Ancestral/Family Origin *</label>
+                  <input type="text" value={familyOrigin} onChange={(e) => setFamilyOrigin(e.target.value)} className="input" placeholder="e.g. Hassan" />
+                  <ErrorMsg field="familyOrigin" />
+                </div>
+              </div>
+
               <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Siblings</label>
-                <input type="text" value={siblings} onChange={(e) => setSiblings(e.target.value)} className="input" placeholder="e.g. 1 brother (married), 1 sister (unmarried)" />
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Parents/Guardian Contact No.</label>
+                <input type="tel" value={guardianPhone} onChange={(e) => setGuardianPhone(e.target.value)} className="input" placeholder="Publicly visible (Leave empty to keep hidden)" />
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
-                <Heart style={{ width: "18px", height: "18px", color: "#c6a55c" }} />
-                <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44" }}>Partner Preferences</h3>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Min Age</label>
-                  <input type="number" value={prefAgeMin} onChange={(e) => { setPrefAgeMin(e.target.value); if (errors.prefAge) { const ne = { ...errors }; delete ne.prefAge; setErrors(ne); } }} className={`input ${errors.prefAge ? 'input-error' : ''}`} placeholder="e.g. 21" min={18} max={60} />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Max Age</label>
-                  <input type="number" value={prefAgeMax} onChange={(e) => { setPrefAgeMax(e.target.value); if (errors.prefAge) { const ne = { ...errors }; delete ne.prefAge; setErrors(ne); } }} className={`input ${errors.prefAge ? 'input-error' : ''}`} placeholder="e.g. 30" min={18} max={60} />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Min Height</label>
-                  <select value={prefHeightMin} onChange={(e) => setPrefHeightMin(e.target.value)} style={selectStyle}>
-                    <option value="">Select</option>
-                    {heightOptions.map(h => (
-                      <option key={h} value={h}>{h}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <ErrorMsg field="prefAge" />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Preferred District</label>
-                  <select value={prefDistrict} onChange={(e) => setPrefDistrict(e.target.value)} style={selectStyle}>
-                    <option value="">All Districts</option>
-                    {districtOptions.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#5f6368", marginBottom: "4px" }}>Preferred Education</label>
-                  <select value={prefEducation} onChange={(e) => setPrefEducation(e.target.value)} style={selectStyle}>
-                    <option value="">All Educations</option>
-                    {educationOptions.map(e => <option key={e} value={e}>{e}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
-                <Camera style={{ width: "18px", height: "18px", color: "#c6a55c" }} />
-                <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44" }}>About Yourself</h3>
-              </div>
-              <div>
-                <textarea value={bio} onChange={(e) => { setBio(e.target.value); if (errors.bio) { const ne = { ...errors }; delete ne.bio; setErrors(ne); } }} className={`input ${errors.bio ? 'input-error' : ''}`} style={{ minHeight: "90px", resize: "none", height: "auto" }} placeholder="Tell about yourself, your interests, hobbies, and what you're looking for in a partner..." rows={4} />
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
-                  <ErrorMsg field="bio" />
-                  <span style={{ fontSize: "11px", color: bio.length > 500 ? "#dc2626" : "#a0aec0", fontWeight: 500, marginLeft: "auto" }}>
-                    {bio.length}/500
-                  </span>
-                </div>
-              </div>
-
-              {errors.submit && (
-                <div style={{ padding: "12px 16px", borderRadius: "10px", background: "rgba(220,38,38,0.08)", color: "#dc2626", fontSize: "13px", fontWeight: 500, marginTop: "8px" }}>
-                  ⚠️ {errors.submit}
-                </div>
-              )}
-
-              <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+              <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
                 <button type="button" onClick={() => setStep(2)} className="btn-outline" style={{ flex: 1, height: "48px" }}>
                   <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
                 </button>
                 <button type="submit" className="btn-primary" style={{ flex: 2, height: "48px" }}>
-                  <span>Create Profile</span> <CheckCircle2 style={{ width: "16px", height: "16px" }} />
+                  <span>Continue to Step 4</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
                 </button>
               </div>
             </form>
           )}
 
-          <div style={{ textAlign: "center", marginTop: "20px", paddingTop: "20px", borderTop: "1px solid #e3e8f0" }}>
-            <p style={{ fontSize: "14px", color: "#5f6368" }}>
+          {/* STEP 4: ACTIVATION PAYMENT (₹1,000) */}
+          {step === 4 && (
+            <form onSubmit={handleStep4} noValidate style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f0ece4", paddingBottom: "8px", marginBottom: "4px" }}>
+                <QrCode style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
+                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>Okkaliga Community Activation Payment</h3>
+              </div>
+
+              {/* Gold Glassmorphic QR Box */}
+              <div style={{
+                background: "linear-gradient(135deg, rgba(30,42,68,0.95), rgba(42,54,115,0.9))",
+                padding: "24px 16px", borderRadius: "16px", color: "#fff", textAlign: "center",
+                boxShadow: "0 8px 32px rgba(30, 42, 68, 0.15)", border: "1px solid rgba(198,165,92,0.3)"
+              }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "#c6a55c", textTransform: "uppercase", letterSpacing: "1px" }}>Profile Activation Fee</span>
+                <h2 style={{ fontSize: "36px", fontWeight: 800, margin: "6px 0 16px", fontFamily: "Outfit, sans-serif" }}>₹1,000</h2>
+                
+                {/* QR Code Container */}
+                <div style={{
+                  width: "180px", height: "180px", background: "#fff", padding: "8px",
+                  borderRadius: "12px", margin: "0 auto 16px", display: "flex", alignItems: "center",
+                  justifyContent: "center", border: "4px solid #c6a55c"
+                }}>
+                  <img src="/payment_qr.jpg" alt="UPI Payment QR Code" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                </div>
+
+                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", margin: "0 0 12px", lineHeight: "1.4" }}>
+                  Scan the QR code with any UPI app (GPay, PhonePe, Paytm, BHIM) to pay the one-time verification fee.
+                </p>
+
+                {/* UPI copy layout */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", background: "rgba(255,255,255,0.06)", padding: "8px 12px", borderRadius: "8px", maxWidth: "260px", margin: "0 auto" }}>
+                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", letterSpacing: "0.5px" }}>UPI ID: <strong>{upiId}</strong></span>
+                  <button type="button" onClick={copyUpiId} style={{ background: "none", border: "none", cursor: "pointer", color: copiedNotification ? "#16a34a" : "#c6a55c", display: "flex", alignItems: "center" }}>
+                    {copiedNotification ? <Check style={{ width: "14px", height: "14px" }} /> : <Copy style={{ width: "14px", height: "14px" }} />}
+                  </button>
+                </div>
+                {copiedNotification && <span style={{ fontSize: "10px", color: "#16a34a", fontWeight: 600, display: "block", marginTop: "4px" }}>Copied UPI ID!</span>}
+              </div>
+
+              {/* Mobile Deep Linking Brand Buttons */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: "#5f6368", textAlign: "center" }}>Paying from mobile? Tap to open payment app:</span>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <a href={upiUri} style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    background: "linear-gradient(135deg, #1a73e8, #1557b0)", color: "#fff",
+                    textDecoration: "none", height: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
+                  }}>
+                    <Smartphone style={{ width: "16px", height: "16px" }} /> Google Pay / UPI
+                  </a>
+                  <a href={upiUri} style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    background: "linear-gradient(135deg, #5f259f, #4d1c82)", color: "#fff",
+                    textDecoration: "none", height: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
+                  }}>
+                    <Smartphone style={{ width: "16px", height: "16px" }} /> PhonePe / BHIM
+                  </a>
+                </div>
+              </div>
+
+              {/* UTR Input Form */}
+              <div style={{ background: "#fafcff", padding: "16px", borderRadius: "12px", border: "1px solid #e3e8f0", marginTop: "4px" }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>12-Digit Transaction Reference (UTR) *</label>
+                <input
+                  type="text"
+                  value={paymentUtr}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                    setPaymentUtr(val);
+                    if (errors.paymentUtr) {
+                      const ne = { ...errors };
+                      delete ne.paymentUtr;
+                      setErrors(ne);
+                    }
+                  }}
+                  className="input"
+                  placeholder="Enter 12-digit transaction number"
+                />
+                <ErrorMsg field="paymentUtr" />
+                <span style={{ fontSize: "10px", color: "#a0aec0", display: "block", marginTop: "4px" }}>
+                  Found under transaction details in your payment app receipt (e.g. UPI Ref No, UTR).
+                </span>
+              </div>
+
+              {/* Drag & Drop Screenshot proof */}
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Upload Payment Screenshot Proof *</label>
+                <input
+                  type="file"
+                  ref={paymentFileInputRef}
+                  onChange={handleScreenshotUpload}
+                  accept="image/png, image/jpeg, image/jpg"
+                  style={{ display: "none" }}
+                />
+                <div
+                  onClick={() => paymentFileInputRef.current?.click()}
+                  style={{
+                    height: "140px", borderRadius: "12px", border: paymentScreenshot ? "2px solid #16a34a" : "2px dashed #d4d8e0",
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer", backgroundImage: paymentScreenshot ? `url('${paymentScreenshot}')` : "none",
+                    backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat",
+                    background: paymentScreenshot ? undefined : "rgba(30,42,68,0.01)", position: "relative",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  {!paymentScreenshot ? (
+                    <>
+                      <Camera style={{ width: "20px", height: "20px", color: "#c6a55c", marginBottom: "6px" }} />
+                      <span style={{ fontSize: "12px", color: "#5f6368", fontWeight: 500 }}>Upload Receipt Screenshot</span>
+                      <span style={{ fontSize: "10px", color: "#a0aec0", marginTop: "2px" }}>PNG, JPG (Max 5MB)</span>
+                    </>
+                  ) : (
+                    <div style={{
+                      position: "absolute", bottom: 0, left: 0, right: 0,
+                      background: "rgba(0,0,0,0.6)", padding: "6px",
+                      borderBottomLeftRadius: "10px", borderBottomRightRadius: "10px",
+                      textAlign: "center", fontSize: "10px", color: "#fff", fontWeight: 600
+                    }}>
+                      Change Payment Proof Image
+                    </div>
+                  )}
+                </div>
+                <ErrorMsg field="paymentScreenshot" />
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
+                <button type="button" onClick={() => setStep(3)} className="btn-outline" style={{ flex: 1, height: "48px" }}>
+                  <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
+                </button>
+                <button type="submit" className="btn-primary" style={{ flex: 2, height: "48px" }}>
+                  <span>Continue to Step 5</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* STEP 5: PHOTO & CONSENT */}
+          {step === 5 && (
+            <form onSubmit={handleFinalSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f0ece4", paddingBottom: "8px", marginBottom: "4px" }}>
+                <Camera style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
+                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>Profile Verification Picture</h3>
+              </div>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handlePhotoUpload}
+                accept="image/png, image/jpeg, image/jpg"
+                style={{ display: "none" }}
+              />
+
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  height: "220px", borderRadius: "16px", border: profilePhoto ? "2px solid #16a34a" : "2px dashed #d4d8e0",
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", backgroundImage: profilePhoto ? `url('${profilePhoto}')` : "none",
+                  backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat",
+                  background: profilePhoto ? undefined : "rgba(30,42,68,0.02)", position: "relative",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                {!profilePhoto ? (
+                  <>
+                    <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(198,165,92,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
+                      <Camera style={{ width: "24px", height: "24px", color: "#c6a55c" }} />
+                    </div>
+                    <span style={{ fontSize: "14px", color: "#1e2a44", fontWeight: 600 }}>Upload Profile Picture *</span>
+                    <span style={{ fontSize: "11px", color: "#a0aec0", marginTop: "4px" }}>Mandatory to create and log in to your account (Max 5MB)</span>
+                  </>
+                ) : (
+                  <div style={{
+                    position: "absolute", bottom: 0, left: 0, right: 0,
+                    background: "rgba(0,0,0,0.6)", padding: "10px",
+                    borderBottomLeftRadius: "14px", borderBottomRightRadius: "14px",
+                    textAlign: "center", fontSize: "12px", color: "#fff", fontWeight: 600
+                  }}>
+                    Change Profile Photo
+                  </div>
+                )}
+              </div>
+              <ErrorMsg field="profilePhoto" />
+
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f0ece4", paddingBottom: "8px", marginTop: "10px", marginBottom: "4px" }}>
+                <FileText style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
+                <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>About & Consent</h3>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>About Me & My Family</label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value.slice(0, 500))}
+                  className="input"
+                  style={{ minHeight: "100px", resize: "none", height: "auto", padding: "12px" }}
+                  placeholder="Share a brief overview of yourself, your hobbies, family background, and partner preferences..."
+                />
+                <span style={{ display: "block", fontSize: "10px", color: "#a0aec0", textAlign: "right", marginTop: "4px" }}>
+                  {bio.length}/500 characters
+                </span>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "12px", background: "#fafcff", border: "1px solid #e3e8f0", borderRadius: "12px" }}>
+                <input
+                  type="checkbox"
+                  id="consent_check"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  style={{ width: "18px", height: "18px", marginTop: "2px", accentColor: "#1e2a44", cursor: "pointer" }}
+                />
+                <label htmlFor="consent_check" style={{ fontSize: "12px", color: "#5f6368", lineHeight: 1.5, cursor: "pointer" }}>
+                  I confirm that all information provided is accurate. I accept the <Link href="/terms" target="_blank" style={{ color: "#c6a55c", fontWeight: 600, textDecoration: "none" }}>Terms and Conditions</Link> and <Link href="/privacy-policy" target="_blank" style={{ color: "#c6a55c", fontWeight: 600, textDecoration: "none" }}>Privacy Policy</Link> of Maduvedibbana Matrimony. *
+                </label>
+              </div>
+              <ErrorMsg field="acceptTerms" />
+
+              {errors.submit && (
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px", background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.15)", borderRadius: "10px", color: "#dc2626", fontSize: "12px", fontWeight: 500 }}>
+                  <AlertCircle style={{ width: "16px", height: "16px", flexShrink: 0 }} />
+                  {errors.submit}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
+                <button type="button" onClick={() => setStep(4)} className="btn-outline" style={{ flex: 1, height: "48px" }}>
+                  <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
+                </button>
+                <button type="submit" disabled={isSubmitting} className="btn-primary-gold" style={{ flex: 2, height: "48px", opacity: isSubmitting ? 0.7 : 1 }}>
+                  <span>{isSubmitting ? "Submitting..." : "Submit Registration"}</span> <CheckCircle2 style={{ width: "16px", height: "16px" }} />
+                </button>
+              </div>
+            </form>
+          )}
+
+          <div style={{ textAlign: "center", marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #f0ece4" }}>
+            <p style={{ fontSize: "13px", color: "#5f6368", margin: 0 }}>
               Already have an account?{" "}
-              <Link href="/login" style={{ color: "#005AEE", fontWeight: 600, textDecoration: "none" }}>Login here</Link>
+              <Link href="/login" style={{ color: "#c6a55c", fontWeight: 700, textDecoration: "none" }}>Log In</Link>
             </p>
           </div>
         </div>
@@ -751,14 +1306,15 @@ export default function RegisterPage() {
               <CheckCircle2 style={{ width: "32px", height: "32px", color: "#16a34a" }} />
             </div>
             <h3 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: "24px", color: "#1e2a44", marginBottom: "12px" }}>
-              Registration Successful!
+              Registered Successfully!
             </h3>
-            <p style={{ fontSize: "15px", color: "#5f6368", lineHeight: 1.6, marginBottom: "24px" }}>
-              Your account is created. We will verify it within 2-4 days. You will receive an update over mail once verified.
+            <p style={{ fontSize: "14px", color: "#5f6368", lineHeight: 1.6, marginBottom: "24px" }}>
+              Your profile registration and payment details have been submitted. Maduvedibbana admin will verify your payment UTR and activate your profile within 2-4 days. You will receive an email confirmation once verified and activated.
             </p>
             <button 
               onClick={() => router.push("/login")}
-              style={{ width: "100%", height: "48px", background: "#1e2a44", color: "#fff", borderRadius: "12px", fontSize: "15px", fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.2s ease" }}
+              className="btn-primary"
+              style={{ width: "100%", height: "48px" }}
             >
               Go to Login
             </button>

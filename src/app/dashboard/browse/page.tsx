@@ -618,13 +618,23 @@ export default function BrowseMatchesPage() {
                       { label: "Location", value: detailProfile.location, icon: MapPin },
                       { label: "District", value: detailProfile.district, icon: MapPin },
                       { label: "Education", value: detailProfile.education, icon: GraduationCap },
+                      { label: "Education Field", value: detailProfile.educationField, icon: GraduationCap },
+                      { label: "College/University", value: detailProfile.college, icon: GraduationCap },
+                      { label: "Working With", value: detailProfile.workingWith, icon: Briefcase },
                       { label: "Occupation", value: detailProfile.occupation, icon: Briefcase },
                       { label: "Annual Income", value: detailProfile.annualIncome, icon: Briefcase },
                       { label: "Gothra", value: detailProfile.gothra, icon: Heart },
                       { label: "Nakshatra", value: detailProfile.nakshatra, icon: Sparkles },
                       { label: "Rashi", value: detailProfile.rashi, icon: Sparkles },
+                      { label: "Gana", value: detailProfile.gana, icon: Sparkles },
+                      { label: "Dosham", value: detailProfile.dosham, icon: AlertCircle },
                       { label: "Weight", value: detailProfile.weight ? `${detailProfile.weight} kg` : "", icon: User },
-                      { label: "Complexion", value: detailProfile.complexion, icon: User },
+                      { label: "Body Type", value: detailProfile.bodyType, icon: User },
+                      { label: "Complexion", value: detailProfile.complexion || detailProfile.skinTone, icon: User },
+                      { label: "Blood Group", value: detailProfile.bloodGroup, icon: Heart },
+                      { label: "Eating Habits", value: detailProfile.eatingHabits, icon: Heart },
+                      { label: "Drinking Habits", value: detailProfile.drinkingHabits, icon: Heart },
+                      { label: "Smoking Habits", value: detailProfile.smokingHabits, icon: Heart },
                     ].map((item, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
                         <item.icon style={{ width: "16px", height: "16px", color: "#a0aec0", marginTop: "2px", flexShrink: 0 }} />
@@ -640,23 +650,39 @@ export default function BrowseMatchesPage() {
                 {/* Family */}
                 <div>
                   <h4 style={{ fontSize: "13px", fontWeight: 700, color: "#c6a55c", textTransform: "uppercase" as const, letterSpacing: "1px", borderBottom: "1px solid #e3e8f0", paddingBottom: "6px", marginBottom: "12px" }}>Family Background</h4>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 24px" }}>
-                    {[
-                      { label: "Father", value: detailProfile.fatherName, icon: User },
-                      { label: "Father's Occupation", value: detailProfile.fatherOccupation, icon: Briefcase },
-                      { label: "Mother", value: detailProfile.motherName, icon: User },
-                      { label: "Mother's Occupation", value: detailProfile.motherOccupation, icon: Briefcase },
-                      { label: "Siblings", value: detailProfile.siblings, icon: Users },
-                    ].map((item, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", gridColumn: item.label === "Siblings" ? "span 2" : undefined }}>
-                        <item.icon style={{ width: "16px", height: "16px", color: "#a0aec0", marginTop: "2px", flexShrink: 0 }} />
-                        <div>
-                          <div style={{ fontSize: "10px", color: "#a0aec0", fontWeight: 500, textTransform: "uppercase" as const, letterSpacing: "0.5px" }}>{item.label}</div>
-                          <div style={{ fontSize: "13px", fontWeight: 500, color: "#1e2a44", marginTop: "1px" }}>{item.value || "—"}</div>
+                  {isAdmin || isMutualMatch(detailProfile.id) ? (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 24px" }}>
+                      {[
+                        { label: "Father", value: detailProfile.fatherName, icon: User },
+                        { label: "Father's Status", value: detailProfile.fatherStatus, icon: Briefcase },
+                        { label: "Mother", value: detailProfile.motherName, icon: User },
+                        { label: "Mother's Status", value: detailProfile.motherStatus, icon: Briefcase },
+                        { label: "Brothers", value: detailProfile.brothers ? `${detailProfile.brothers} (Married: ${detailProfile.brothersMarried || 0})` : "0", icon: Users },
+                        { label: "Sisters", value: detailProfile.sisters ? `${detailProfile.sisters} (Married: ${detailProfile.sistersMarried || 0})` : "0", icon: Users },
+                        { label: "Family Value", value: detailProfile.familyValue, icon: Heart },
+                        { label: "Family Type", value: detailProfile.familyType, icon: Users },
+                        { label: "Family Status", value: detailProfile.familyStatus, icon: Heart },
+                        { label: "Family Location", value: detailProfile.familyLocation, icon: MapPin },
+                        { label: "Ancestral Origin", value: detailProfile.familyOrigin, icon: MapPin },
+                        { label: "Parents/Guardian Contact", value: detailProfile.guardianPhone, icon: Phone },
+                      ].map((item, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                          <item.icon style={{ width: "16px", height: "16px", color: "#a0aec0", marginTop: "2px", flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontSize: "10px", color: "#a0aec0", fontWeight: 500, textTransform: "uppercase" as const, letterSpacing: "0.5px" }}>{item.label}</div>
+                            <div style={{ fontSize: "13px", fontWeight: 500, color: "#1e2a44", marginTop: "1px" }}>{item.value || "—"}</div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ background: "rgba(30,42,68,0.03)", padding: "18px", borderRadius: "12px", border: "1px solid #e3e8f0", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", textAlign: "center" }}>
+                      <span style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44" }}>🔒 Family Background Hidden</span>
+                      <span style={{ fontSize: "12px", color: "#5f6368", maxWidth: "400px" }}>
+                        Family names, status, siblings, and locations will be visible once you both accept each other&apos;s interest.
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Contact Details — DIFFERENT for admin vs user */}

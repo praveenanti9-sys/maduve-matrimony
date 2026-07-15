@@ -1,22 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useStore } from "@/store/useStore";
+import { useStore, type MatchProfile } from "@/store/useStore";
 import {
   Shield, Users, Search, Ban, AlertTriangle, CheckCircle2,
   Eye, UserX, UserCheck, X, BarChart3,
   Activity, Mail, Calendar, MapPin, Filter,
   MessageCircle, Heart, ArrowLeft, User, Briefcase,
   GraduationCap, Sparkles, Clock, Check, Trash2,
-  Phone, ChevronRight, Send, Settings,
+  Phone, ChevronRight, Send, Settings, Ruler, AlertCircle, CreditCard
 } from "lucide-react";
 
-type AdminView = 'overview' | 'users' | 'approvals' | 'user-detail' | 'messages' | 'settings' | 'inquiries';
+type AdminView = 'overview' | 'users' | 'approvals' | 'user-detail' | 'messages' | 'settings' | 'inquiries' | 'payments';
 
 export default function AdminPage() {
   const { 
     currentUser, profiles, messages, interests, blockUser, suspendUser, 
-    activateUser, deleteUser, approveUser, rejectUser, verifyUser, 
+    activateUser, deleteUser, approveUser, rejectUser, verifyUser, verifyPayment,
     registeredUser, systemSettings, fetchSystemSettings, updateSystemSettings,
     markMessagesRead, contactInquiries, markInquiryRead,
   } = useStore();
@@ -33,6 +33,7 @@ export default function AdminPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedConvoPartners, setSelectedConvoPartners] = useState<[string, string] | null>(null);
   const [expandedInquiryId, setExpandedInquiryId] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   // Settings tab local state
   const [interestLimit, setInterestLimit] = useState(10);
@@ -119,7 +120,7 @@ export default function AdminPage() {
     }
 
     // Convert the registered user to a MatchProfile-like object (only if not admin)
-    const regProfile = {
+    const regProfile: MatchProfile = {
       id: registeredUser.id || currentUser.id,
       name: registeredUser.fullName || 'Registered User',
       age: registeredUser.dob ? Math.floor((Date.now() - new Date(registeredUser.dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : 0,
@@ -159,6 +160,48 @@ export default function AdminPage() {
       isVerified: registeredUser.isVerified,
       photoPrivacy: registeredUser.photoPrivacy,
       role: registeredUser.role as 'user' | 'admin',
+
+      // ARMember custom fields
+      username: registeredUser.username || '',
+      firstName: registeredUser.firstName || '',
+      lastName: registeredUser.lastName || '',
+      postedBy: registeredUser.postedBy || '',
+      bodyType: registeredUser.bodyType || '',
+      skinTone: registeredUser.skinTone || '',
+      disability: registeredUser.disability || '',
+      bloodGroup: registeredUser.bloodGroup || '',
+      eatingHabits: registeredUser.eatingHabits || '',
+      drinkingHabits: registeredUser.drinkingHabits || '',
+      smokingHabits: registeredUser.smokingHabits || '',
+      birthTime: registeredUser.birthTime || '',
+      birthPlace: registeredUser.birthPlace || '',
+      gana: registeredUser.gana || '',
+      dosham: registeredUser.dosham || '',
+      educationField: registeredUser.educationField || '',
+      college: registeredUser.college || '',
+      workingWith: registeredUser.workingWith || '',
+      workingAs: registeredUser.workingAs || '',
+      organization: registeredUser.organization || '',
+      workLocation: registeredUser.workLocation || '',
+      familyValue: registeredUser.familyValue || '',
+      familyType: registeredUser.familyType || '',
+      familyStatus: registeredUser.familyStatus || '',
+      fatherStatus: registeredUser.fatherStatus || '',
+      motherStatus: registeredUser.motherStatus || '',
+      brothers: registeredUser.brothers || '',
+      brothersMarried: registeredUser.brothersMarried || '',
+      sisters: registeredUser.sisters || '',
+      sistersMarried: registeredUser.sistersMarried || '',
+      familyLocation: registeredUser.familyLocation || '',
+      guardianPhone: registeredUser.guardianPhone || '',
+      familyOrigin: registeredUser.familyOrigin || '',
+
+      // Payments flow custom fields
+      paymentStatus: registeredUser.paymentStatus || 'unpaid',
+      paymentUtr: registeredUser.paymentUtr || '',
+      paymentScreenshot: registeredUser.paymentScreenshot || '',
+      paymentAmount: registeredUser.paymentAmount || 1000,
+      paymentDate: registeredUser.paymentDate || '',
     };
     return [regProfile, ...clientProfiles];
   })();
@@ -254,11 +297,14 @@ export default function AdminPage() {
     backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center",
   };
 
+  const pendingPaymentsCount = allProfiles.filter(p => p.paymentStatus === 'pending_verification').length;
+
   // ── Navigation Tabs ──
   const navTabs = [
     { id: 'overview' as const, label: 'Overview', icon: BarChart3, count: 0 },
     { id: 'users' as const, label: 'User Management', icon: Users, count: totalUsers },
     { id: 'approvals' as const, label: 'Pending Approvals', icon: Clock, count: pendingApprovalsCount },
+    { id: 'payments' as const, label: 'Payment Approvals', icon: CreditCard, count: pendingPaymentsCount },
     { id: 'messages' as const, label: 'All Messages', icon: MessageCircle, count: totalMessages },
     { id: 'inquiries' as const, label: 'Contact Inquiries', icon: Mail, count: contactInquiries.filter(i => !i.isRead).length },
     { id: 'settings' as const, label: 'System Settings', icon: Settings, count: 0 },
@@ -645,6 +691,88 @@ export default function AdminPage() {
       )}
 
       {/* ═══════════════════════════════════════════
+          PAYMENT APPROVALS TAB
+         ═══════════════════════════════════════════ */}
+      {activeView === 'payments' && (
+        <>
+          <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>WhatsApp No</th>
+                    <th>UTR Reference Number</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th style={{ textAlign: "center" }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allProfiles.filter(p => p.paymentStatus === 'pending_verification').map((profile) => (
+                    <tr key={profile.id}>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => viewUserDetail(profile.id)}>
+                          <div style={{
+                            width: "40px", height: "40px", borderRadius: "50%", flexShrink: 0,
+                            backgroundImage: profile.profilePhoto ? `url('${profile.profilePhoto}')` : "linear-gradient(135deg, #1e2a44, #c6a55c)",
+                            backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            color: "#fff", fontSize: "14px", fontWeight: 700,
+                          }}>
+                            {!profile.profilePhoto && profile.name[0]}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: "14px", color: "#1e2a44", display: "flex", alignItems: "center", gap: "6px" }}>
+                              {profile.name}
+                              <Eye style={{ width: "12px", height: "12px", color: "#a0aec0" }} />
+                            </div>
+                            <div style={{ fontSize: "11px", color: "#a0aec0" }}>ID: {profile.id.toUpperCase()}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td><div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#5f6368" }}><Mail style={{ width: "12px", height: "12px", color: "#a0aec0" }} />{profile.email}</div></td>
+                      <td><div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#5f6368" }}><Phone style={{ width: "12px", height: "12px", color: "#a0aec0" }} />{profile.phone}</div></td>
+                      <td>
+                        <span style={{ fontSize: "13px", fontWeight: 700, fontFamily: "monospace", color: "#1e2a44", background: "rgba(198,165,92,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid rgba(198,165,92,0.15)" }}>
+                          {profile.paymentUtr || "—"}
+                        </span>
+                      </td>
+                      <td><span style={{ fontSize: "13px", fontWeight: 700, color: "#16a34a" }}>₹{profile.paymentAmount || 1000}</span></td>
+                      <td><span style={{ fontSize: "12px", color: "#a0aec0" }}>{profile.paymentDate ? formatTime(profile.paymentDate) : "—"}</span></td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                          {profile.paymentScreenshot && (
+                            <button onClick={() => setLightboxImage(profile.paymentScreenshot || null)} className="btn-outline" style={{ padding: "6px 10px", fontSize: "11px", borderRadius: "8px" }}>
+                              🖼️ Proof
+                            </button>
+                          )}
+                          <button onClick={() => { verifyPayment(profile.id, 'verified'); showToast("Payment verified, account activated!", "success"); }} className="btn-success" style={{ padding: "6px 12px", fontSize: "12px", borderRadius: "8px" }}>
+                            <CheckCircle2 style={{ width: "14px", height: "14px" }} /> Approve
+                          </button>
+                          <button onClick={() => { verifyPayment(profile.id, 'failed'); showToast("Payment verification failed.", "error"); }} className="btn-danger" style={{ padding: "6px 12px", fontSize: "12px", borderRadius: "8px" }}>
+                            <Ban style={{ width: "14px", height: "14px" }} /> Reject
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {allProfiles.filter(p => p.paymentStatus === 'pending_verification').length === 0 && (
+              <div style={{ padding: "48px", textAlign: "center" }}>
+                <CheckCircle2 style={{ width: "40px", height: "40px", color: "#16a34a", margin: "0 auto 12px" }} />
+                <h3 style={{ fontWeight: 600, fontSize: "16px", color: "#1e2a44" }}>No pending payment approvals</h3>
+                <p style={{ fontSize: "13px", color: "#5f6368", marginTop: "4px" }}>All payments have been verified.</p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ═══════════════════════════════════════════
           USER DETAIL VIEW
          ═══════════════════════════════════════════ */}
       {activeView === 'user-detail' && selectedUser && (
@@ -755,21 +883,46 @@ export default function AdminPage() {
               <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#1e2a44", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <User style={{ width: "16px", height: "16px", color: "#c6a55c" }} /> Profile Details
               </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "450px", overflowY: "auto", paddingRight: "8px" }}>
                 {[
+                  { label: "Username", value: selectedUser.username, icon: User },
+                  { label: "First Name", value: selectedUser.firstName, icon: User },
+                  { label: "Last Name", value: selectedUser.lastName, icon: User },
+                  { label: "Posted By", value: selectedUser.postedBy, icon: User },
                   { label: "Email", value: selectedUser.email, icon: Mail },
                   { label: "Phone", value: selectedUser.phone, icon: Phone },
-                  { label: "Education", value: selectedUser.education, icon: GraduationCap },
-                  { label: "Occupation", value: selectedUser.occupation, icon: Briefcase },
-                  { label: "District", value: selectedUser.district, icon: MapPin },
-                  { label: "Income", value: selectedUser.annualIncome, icon: Briefcase },
+                  { label: "Gender", value: selectedUser.gender, icon: User },
+                  { label: "DOB", value: selectedUser.dob, icon: Calendar },
+                  { label: "Marital Status", value: selectedUser.maritalStatus, icon: Heart },
+                  { label: "Height", value: selectedUser.height, icon: Ruler },
+                  { label: "Weight", value: selectedUser.weight ? `${selectedUser.weight} kg` : "", icon: Ruler },
                   { label: "Gothra", value: selectedUser.gothra, icon: Sparkles },
                   { label: "Nakshatra", value: selectedUser.nakshatra, icon: Sparkles },
+                  { label: "Rashi", value: selectedUser.rashi, icon: Sparkles },
+                  { label: "Gana", value: selectedUser.gana, icon: Sparkles },
+                  { label: "Dosham", value: selectedUser.dosham, icon: AlertCircle },
+                  { label: "Education", value: selectedUser.education, icon: GraduationCap },
+                  { label: "Education Field", value: selectedUser.educationField, icon: GraduationCap },
+                  { label: "College", value: selectedUser.college, icon: GraduationCap },
+                  { label: "Working With", value: selectedUser.workingWith, icon: Briefcase },
+                  { label: "Occupation", value: selectedUser.occupation, icon: Briefcase },
+                  { label: "Annual Income", value: selectedUser.annualIncome, icon: Briefcase },
+                  { label: "District", value: selectedUser.district, icon: MapPin },
+                  { label: "Work City", value: selectedUser.workLocation, icon: MapPin },
+                  { label: "Father Name", value: selectedUser.fatherName, icon: User },
+                  { label: "Father Status", value: selectedUser.fatherStatus, icon: Briefcase },
+                  { label: "Mother Name", value: selectedUser.motherName, icon: User },
+                  { label: "Mother Status", value: selectedUser.motherStatus, icon: Briefcase },
+                  { label: "Brothers", value: selectedUser.brothers, icon: Users },
+                  { label: "Sisters", value: selectedUser.sisters, icon: Users },
+                  { label: "Family Location", value: selectedUser.familyLocation, icon: MapPin },
+                  { label: "Ancestral Origin", value: selectedUser.familyOrigin, icon: MapPin },
+                  { label: "Guardian Contact", value: selectedUser.guardianPhone, icon: Phone },
                   { label: "Joined", value: selectedUser.joinDate ? new Date(selectedUser.joinDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : '—', icon: Calendar },
                 ].map((item, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "6px 0", borderBottom: "1px solid #f0ece4" }}>
                     <item.icon style={{ width: "14px", height: "14px", color: "#a0aec0", flexShrink: 0 }} />
-                    <span style={{ fontSize: "12px", color: "#a0aec0", fontWeight: 500, minWidth: "80px" }}>{item.label}</span>
+                    <span style={{ fontSize: "12px", color: "#a0aec0", fontWeight: 500, minWidth: "120px" }}>{item.label}</span>
                     <span style={{ fontSize: "13px", fontWeight: 500, color: "#1e2a44" }}>{item.value || "—"}</span>
                   </div>
                 ))}
@@ -778,6 +931,79 @@ export default function AdminPage() {
                 <div style={{ marginTop: "16px", padding: "12px", borderRadius: "8px", background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.15)" }}>
                   <div style={{ fontSize: "11px", fontWeight: 600, color: "#d97706", marginBottom: "4px" }}>SUSPENSION REASON</div>
                   <div style={{ fontSize: "13px", color: "#5f6368" }}>{selectedUser.statusReason}</div>
+                </div>
+              )}
+
+              {/* Payment Status Card (if UTR or paymentStatus exists) */}
+              {(selectedUser.paymentUtr || selectedUser.paymentStatus) && (
+                <div style={{ marginTop: "20px", padding: "16px", borderRadius: "12px", background: "rgba(198,165,92,0.05)", border: "1px solid rgba(198,165,92,0.2)" }}>
+                  <h4 style={{ fontSize: "12px", fontWeight: 700, color: "#c6a55c", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    💳 Registration Payment Info
+                  </h4>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                      <span style={{ color: "#a0aec0" }}>UTR Reference:</span>
+                      <strong style={{ fontFamily: "monospace", color: "#1e2a44" }}>{selectedUser.paymentUtr || "—"}</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                      <span style={{ color: "#a0aec0" }}>Amount Paid:</span>
+                      <strong style={{ color: "#16a34a" }}>₹{selectedUser.paymentAmount || 1000}</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                      <span style={{ color: "#a0aec0" }}>Payment Date:</span>
+                      <span style={{ color: "#1e2a44", fontWeight: 500 }}>{selectedUser.paymentDate ? formatTime(selectedUser.paymentDate) : "—"}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", alignItems: "center" }}>
+                      <span style={{ color: "#a0aec0" }}>Verification Status:</span>
+                      <span style={{
+                        padding: "3px 8px", borderRadius: "999px", fontSize: "10px", fontWeight: 700,
+                        background: selectedUser.paymentStatus === 'verified' ? "rgba(22,163,106,0.15)" : selectedUser.paymentStatus === 'failed' ? "rgba(220,38,38,0.15)" : "rgba(245,158,11,0.15)",
+                        color: selectedUser.paymentStatus === 'verified' ? "#16a34a" : selectedUser.paymentStatus === 'failed' ? "#dc2626" : "#d97706",
+                      }}>
+                        {selectedUser.paymentStatus === 'pending_verification' ? 'Pending Review' : selectedUser.paymentStatus?.toUpperCase() || 'UNPAID'}
+                      </span>
+                    </div>
+
+                    {selectedUser.paymentScreenshot && (
+                      <div style={{ marginTop: "8px" }}>
+                        <span style={{ display: "block", fontSize: "11px", color: "#a0aec0", marginBottom: "4px" }}>Receipt Screenshot:</span>
+                        <div
+                          onClick={() => setLightboxImage(selectedUser.paymentScreenshot || null)}
+                          style={{
+                            height: "100px", borderRadius: "8px", border: "1px solid #e3e8f0", overflow: "hidden",
+                            backgroundImage: `url('${selectedUser.paymentScreenshot}')`, backgroundSize: "cover",
+                            backgroundPosition: "center", cursor: "pointer", position: "relative"
+                          }}
+                        >
+                          <div style={{
+                            position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.6)",
+                            padding: "4px", textAlign: "center", fontSize: "9px", color: "#fff", fontWeight: 600
+                          }}>
+                            Click to expand
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedUser.paymentStatus === 'pending_verification' && (
+                      <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+                        <button
+                          onClick={() => { verifyPayment(selectedUser.id, 'verified'); showToast("Payment approved, user activated!", "success"); }}
+                          className="btn-success"
+                          style={{ flex: 1, padding: "8px", fontSize: "12px", borderRadius: "8px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                        >
+                          <CheckCircle2 style={{ width: "14px", height: "14px" }} /> Approve Payment
+                        </button>
+                        <button
+                          onClick={() => { verifyPayment(selectedUser.id, 'failed'); showToast("Payment rejected, user suspended.", "error"); }}
+                          className="btn-danger"
+                          style={{ flex: 1, padding: "8px", fontSize: "12px", borderRadius: "8px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}
+                        >
+                          <Ban style={{ width: "14px", height: "14px" }} /> Reject Payment
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1315,6 +1541,48 @@ export default function AdminPage() {
               <button onClick={() => setShowConfirmDelete(null)} className="btn-outline" style={{ flex: 1, height: "44px" }}>Cancel</button>
               <button onClick={() => handleDelete(showConfirmDelete)} className="btn-danger" style={{ flex: 1, height: "44px" }}><Trash2 style={{ width: "14px", height: "14px" }} /> Delete Permanently</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Modal */}
+      {lightboxImage && (
+        <div 
+          onClick={() => setLightboxImage(null)}
+          style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)",
+            zIndex: 120, display: "flex", alignItems: "center",
+            justifyContent: "center", padding: "20px", cursor: "zoom-out"
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "relative", maxWidth: "90%", maxHeight: "90%",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.5)", borderRadius: "12px",
+              overflow: "hidden", background: "#000"
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src={lightboxImage} 
+              alt="Payment Screenshot Receipt Proof" 
+              style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain", display: "block" }} 
+            />
+            <button 
+              onClick={() => setLightboxImage(null)}
+              style={{
+                position: "absolute", top: "16px", right: "16px",
+                width: "36px", height: "36px", borderRadius: "50%",
+                background: "rgba(255,255,255,0.2)", border: "none",
+                color: "#fff", fontSize: "18px", fontWeight: 700,
+                cursor: "pointer", display: "flex", alignItems: "center",
+                justifyContent: "center", transition: "background 0.2s"
+              }}
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}

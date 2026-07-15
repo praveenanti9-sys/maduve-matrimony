@@ -63,6 +63,48 @@ export interface DbProfile {
   shortlisted_ids?: string[];
   created_at: string;
   updated_at: string;
+
+  // ARMember custom fields
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  posted_by?: string;
+  body_type?: string;
+  skin_tone?: string;
+  disability?: string;
+  blood_group?: string;
+  eating_habits?: string;
+  drinking_habits?: string;
+  smoking_habits?: string;
+  birth_time?: string;
+  birth_place?: string;
+  gana?: string;
+  dosham?: string;
+  education_field?: string;
+  college?: string;
+  working_with?: string;
+  working_as?: string;
+  organization?: string;
+  work_location?: string;
+  family_value?: string;
+  family_type?: string;
+  family_status?: string;
+  father_status?: string;
+  mother_status?: string;
+  brothers?: string;
+  brothers_married?: string;
+  sisters?: string;
+  sisters_married?: string;
+  family_location?: string;
+  guardian_phone?: string;
+  family_origin?: string;
+
+  // Payments flow custom fields
+  payment_status?: 'unpaid' | 'pending_verification' | 'verified' | 'failed';
+  payment_utr?: string;
+  payment_screenshot?: string;
+  payment_amount?: number;
+  payment_date?: string;
 }
 
 export interface DbMessage {
@@ -630,6 +672,44 @@ export async function verifyUser(
         : '⚠️ Your profile verification has been revoked by the admin team.'
     );
     await logAdminAction(adminId, 'verify', profileId, `verified=${verified}`);
+  }
+
+  return { error: error?.message || null };
+}
+
+/** Verify payment status for a user */
+export async function verifyPayment(
+  profileId: string,
+  status: 'verified' | 'failed',
+  adminId: string
+): Promise<{ error: string | null }> {
+  const supabase = getSupabase();
+  
+  const updateData = {
+    payment_status: status,
+    status: status === 'verified' ? 'active' : 'suspended',
+    status_reason: status === 'verified' ? '' : 'Payment verification failed',
+    admin_reviewed: status === 'verified' ? true : false,
+  };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(updateData)
+    .eq('id', profileId);
+
+  if (!error) {
+    if (status === 'verified') {
+      await sendAdminMessage(
+        profileId,
+        '✅ Your registration payment of ₹1,000 has been verified! Your account is now fully active and approved. Happy matchmaking!'
+      );
+    } else {
+      await sendAdminMessage(
+        profileId,
+        '⚠️ Your registration payment verification failed. Please contact the administrator to resolve payment verification.'
+      );
+    }
+    await logAdminAction(adminId, 'verify_payment', profileId, `status=${status}`);
   }
 
   return { error: error?.message || null };
