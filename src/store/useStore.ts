@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as svc from '@/lib/supabase-service';
 import { ADMIN_UUID, SYSTEM_UUID } from '@/lib/supabase-service';
 import type { DbProfile, DbMessage, DbInterest, DbSystemSettings } from '@/lib/supabase-service';
+import { getAccountActivatedHtml } from '@/lib/email-service';
 
 // Read NEXT_PUBLIC_ env vars with fallback to server-injected runtime values
 function getClientEnv(key: string): string {
@@ -846,33 +847,7 @@ export const useStore = create<AppState>((set, get) => ({
         p.id === userId ? { ...p, status: 'suspended' as const, statusReason: reason } : p
       ),
     });
-
-    const profile = state.profiles.find(p => p.id === userId);
-    if (profile && profile.email) {
-      try {
-        const headers = await svc.getAuthHeader();
-        await fetch('/api/send-email', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            to: profile.email,
-            subject: 'Account Suspension Update — Maduvedibbana Matrimony ⚠️',
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f0ece4; border-radius: 12px;">
-                <h2 style="color: #dc2626;">Account Suspended</h2>
-                <p>Hello ${profile.name},</p>
-                <p>Please be advised that your account on <strong>Maduvedibbana Matrimony</strong> has been temporarily suspended by our administrator team.</p>
-                <p><strong>Reason for suspension:</strong> ${reason}</p>
-                <p>Please contact our support helpdesk at info@maduvedibbana.com if you would like to appeal this suspension.</p>
-                <p style="color: #5f6368; font-size: 13px;">Best regards,<br>The Maduvedibbana Matrimony Support Team</p>
-              </div>
-            `
-          })
-        });
-      } catch (err) {
-        console.error('Failed to send suspension email:', err);
-      }
-    }
+    // Email skipped to strictly preserve 300 free tier monthly quota
   },
 
   activateUser: async (userId) => {
@@ -883,6 +858,26 @@ export const useStore = create<AppState>((set, get) => ({
         p.id === userId ? { ...p, status: 'active' as const, statusReason: '' } : p
       ),
     });
+
+    const profile = state.profiles.find(p => p.id === userId);
+    if (profile && profile.email) {
+      try {
+        const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://maduvedibbana.com';
+        const headers = await svc.getAuthHeader();
+        const html = getAccountActivatedHtml(profile.name || 'Member', originUrl);
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            to: profile.email,
+            subject: 'Account Activated — Maduvedibbana Matrimony 🎉',
+            html
+          })
+        });
+      } catch (err) {
+        console.error('Failed to send activation email:', err);
+      }
+    }
   },
 
   deleteUser: async (userId) => {
@@ -909,28 +904,14 @@ export const useStore = create<AppState>((set, get) => ({
       try {
         const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://maduvedibbana.com';
         const headers = await svc.getAuthHeader();
+        const html = getAccountActivatedHtml(profile.name || 'Member', originUrl);
         await fetch('/api/send-email', {
           method: 'POST',
           headers,
           body: JSON.stringify({
             to: profile.email,
-            subject: 'Profile Approved — Maduvedibbana Matrimony 🎉',
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f0ece4; border-radius: 12px;">
-                <h2 style="color: #1e2a44;">Namaste ${profile.name},</h2>
-                <p>We are pleased to inform you that your registration on <strong>Maduvedibbana Matrimony</strong> has been reviewed and approved by our administrator team!</p>
-                <p>Your profile is now live, and you can access all features on our platform:</p>
-                <ul>
-                  <li>Browse verified bride and groom profiles.</li>
-                  <li>Send connection interests.</li>
-                  <li>Chat in real-time with mutual matches.</li>
-                </ul>
-                <div style="margin: 24px 0;">
-                  <a href="${originUrl}/login" style="background-color: #1e2a44; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Log In to Your Dashboard</a>
-                </div>
-                <p style="color: #5f6368; font-size: 13px;">Best regards,<br>The Maduvedibbana Matrimony Team</p>
-              </div>
-            `
+            subject: 'Profile Approved & Activated — Maduvedibbana Matrimony 🎉',
+            html
           })
         });
       } catch (err) {
@@ -947,32 +928,7 @@ export const useStore = create<AppState>((set, get) => ({
         p.id === userId ? { ...p, status: 'blocked' as const, statusReason: 'Rejected by admin' } : p
       ),
     });
-
-    const profile = state.profiles.find(p => p.id === userId);
-    if (profile && profile.email) {
-      try {
-        const headers = await svc.getAuthHeader();
-        await fetch('/api/send-email', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            to: profile.email,
-            subject: 'Profile Registration Update — Maduvedibbana Matrimony',
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #f0ece4; border-radius: 12px;">
-                <h2 style="color: #1e2a44;">Namaste ${profile.name},</h2>
-                <p>Thank you for your interest in registering on <strong>Maduvedibbana Matrimony</strong>.</p>
-                <p>After reviewing your submitted details, unfortunately, we could not approve your profile at this time because it does not meet our verification criteria.</p>
-                <p>If you believe this is a mistake, or if you need to submit additional documents, please reach out to our support team.</p>
-                <p style="color: #5f6368; font-size: 13px;">Best regards,<br>The Maduvedibbana Matrimony Team</p>
-              </div>
-            `
-          })
-        });
-      } catch (err) {
-        console.error('Failed to send rejection email:', err);
-      }
-    }
+    // Email skipped to strictly preserve 300 free tier monthly quota
   },
 
   verifyUser: async (userId, verified) => {

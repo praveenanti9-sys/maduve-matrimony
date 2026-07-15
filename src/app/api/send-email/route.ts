@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import { verifyServerAuth } from '@/lib/server-auth';
+import { sendResendEmail } from '@/lib/email-service';
 
 export async function POST(request: Request) {
   try {
@@ -13,21 +13,12 @@ export async function POST(request: Request) {
     const auth = await verifyServerAuth(request, { requireAdmin: true });
     if (!auth.authorized) return auth.errorResponse!;
 
-    if (!process.env.RESEND_API_KEY) {
-      console.warn('RESEND_API_KEY is not set. Email dispatch aborted.');
-      return NextResponse.json({ error: 'Email service is not configured.' }, { status: 503 });
+    const result = await sendResendEmail(to, subject, html);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 503 });
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
-    const data = await resend.emails.send({
-      from: 'Maduvedibbana <noreply@maduvedibbana.com>',
-      to: [to],
-      subject: subject,
-      html: html,
-    });
-
-    return NextResponse.json(data);
+    return NextResponse.json(result.data);
   } catch (error) {
     console.error('Failed to send email:', error);
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });

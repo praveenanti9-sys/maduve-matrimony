@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-service';
+import { sendResendEmail, getRegistrationWelcomeHtml } from '@/lib/email-service';
 
 export async function POST(request: Request) {
   try {
@@ -94,6 +95,15 @@ export async function POST(request: Request) {
       // Clean up the created auth user if profile creation fails
       await adminClient.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json({ error: profileError.message }, { status: 400 });
+    }
+
+    // Dispatch welcome email (non-blocking)
+    try {
+      const originUrl = request.headers.get('origin') || 'https://maduvedibbana.com';
+      const welcomeHtml = getRegistrationWelcomeHtml(profile.full_name || 'User', originUrl);
+      await sendResendEmail(profile.email, 'Welcome to Maduvedibbana Matrimony! Account Registered 💍', welcomeHtml);
+    } catch (emailErr) {
+      console.error('Failed to dispatch registration welcome email:', emailErr);
     }
 
     return NextResponse.json({ profile, user: authData.user });
