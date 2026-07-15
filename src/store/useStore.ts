@@ -1252,8 +1252,22 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   resetPassword: async (email) => {
-    const { error } = await svc.resetPassword(email);
-    return !error;
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        set({ error: data.error || 'Failed to send reset email' });
+        return false;
+      }
+      return true;
+    } catch (err) {
+      set({ error: (err as Error).message });
+      return false;
+    }
   },
 
   updatePassword: async (newPassword) => {
