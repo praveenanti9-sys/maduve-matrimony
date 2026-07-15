@@ -111,7 +111,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick links */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }} className="home-section-grid">
           {[
             { title: "User Management", desc: "Approve, block, or suspend users", icon: Users, href: "/dashboard/admin", color: "#3b82f6" },
             { title: "All Messages", desc: "Monitor conversations between users", icon: MessageCircle, href: "/dashboard/admin", color: "#8b5cf6" },
@@ -130,6 +130,67 @@ export default function DashboardPage() {
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* Recent Users — Clickable to Admin User Detail */}
+        <div className="card" style={{ padding: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+            <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#1e2a44", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Users style={{ width: "18px", height: "18px", color: "#c6a55c" }} /> All Registered Users
+            </h3>
+            <Link href="/dashboard/admin" style={{ fontSize: "12px", fontWeight: 500, color: "#1e2a44", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
+              Manage All <ArrowRight style={{ width: "12px", height: "12px" }} />
+            </Link>
+          </div>
+          {profiles.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "32px", color: "#a0aec0" }}>
+              <Users style={{ width: "28px", height: "28px", margin: "0 auto 8px" }} />
+              <p style={{ fontSize: "13px" }}>No users registered yet</p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+              {profiles.slice(0, 10).map((p) => {
+                const pMessages = messages.filter(m => m.senderId === p.id || m.receiverId === p.id).length;
+                const pInterests = interests.filter(i => i.fromId === p.id || i.toId === p.id).length;
+                return (
+                  <Link key={p.id} href="/dashboard/admin" style={{
+                    display: "flex", alignItems: "center", gap: "12px", padding: "12px 8px",
+                    borderBottom: "1px solid #f0ece4", cursor: "pointer", textDecoration: "none", color: "inherit",
+                    transition: "background 0.15s",
+                  }}>
+                    <div style={{
+                      width: "40px", height: "40px", borderRadius: "50%", flexShrink: 0,
+                      backgroundImage: p.profilePhoto ? `url('${p.profilePhoto}')` : "linear-gradient(135deg, #1e2a44, #c6a55c)",
+                      backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: "#fff", fontSize: "14px", fontWeight: 700,
+                    }}>
+                      {!p.profilePhoto && p.name[0]}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44" }}>{p.name}</div>
+                      <div style={{ fontSize: "11px", color: "#a0aec0" }}>{p.email}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: "12px", alignItems: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: "11px", color: "#5f6368", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <MessageCircle style={{ width: "12px", height: "12px" }} /> {pMessages}
+                      </span>
+                      <span style={{ fontSize: "11px", color: "#5f6368", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <Heart style={{ width: "12px", height: "12px" }} /> {pInterests}
+                      </span>
+                      <span style={{
+                        padding: "3px 10px", borderRadius: "999px", fontSize: "10px", fontWeight: 600,
+                        background: p.status === 'active' ? "rgba(22,163,106,0.1)" : p.status === 'pending' ? "rgba(245,158,11,0.1)" : "rgba(220,38,38,0.1)",
+                        color: p.status === 'active' ? "#16a34a" : p.status === 'pending' ? "#d97706" : "#dc2626",
+                      }}>
+                        {p.status}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     );

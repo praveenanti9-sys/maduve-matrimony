@@ -111,7 +111,7 @@ export default function AdminPage() {
 
     // Convert the registered user to a MatchProfile-like object (only if not admin)
     const regProfile = {
-      id: 'me',
+      id: registeredUser.id || currentUser.id,
       name: registeredUser.fullName || 'Registered User',
       age: registeredUser.dob ? Math.floor((Date.now() - new Date(registeredUser.dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : 0,
       height: registeredUser.height || '',
