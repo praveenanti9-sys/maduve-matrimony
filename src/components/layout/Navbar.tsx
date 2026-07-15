@@ -101,14 +101,13 @@ export function Navbar() {
       }}>
         {/* Logo */}
         <Link href={isLoggedIn ? "/dashboard" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{
-            width: "38px", height: "38px", borderRadius: "10px",
-            background: "linear-gradient(135deg, #1e2a44, #2b3c61)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 4px 10px rgba(30,42,68,0.2)",
-          }}>
-            <Heart style={{ width: "20px", height: "20px", color: "#c6a55c" }} fill="#c6a55c" />
-          </div>
+          <Image
+            src="https://maduvedibbana.com/wp-content/uploads/2026/04/cropped-Untitled-design-22.png"
+            alt="Maduvedibbana Logo"
+            width={44}
+            height={44}
+            style={{ borderRadius: "8px", objectFit: "contain" }}
+          />
           <div>
             <span style={{
               fontFamily: "'Playfair Display', serif",
@@ -131,7 +130,6 @@ export function Navbar() {
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }} className="hidden md:flex">
             {[
               { label: "Home", href: "/" },
-              { label: "Browse Profiles", href: "/dashboard/browse" },
               { label: "About Sangama", href: "/about" },
               { label: "Contact Us", href: "/contact" },
             ].map((link) => (

@@ -31,9 +31,9 @@ export default function ContactPage() {
   };
 
   const contactInfo = [
-    { icon: Phone, label: "Phone / WhatsApp", value: "+91 98765 43210", href: "tel:+919876543210" },
-    { icon: Mail, label: "Email", value: "info@maduvedibbana.com", href: "mailto:info@maduvedibbana.com" },
-    { icon: MapPin, label: "Address", value: "Utthana Uttara Kannada Okkalu Sangama, Bengaluru, Karnataka", href: "#" },
+    { icon: Phone, label: "Phone / WhatsApp", value: "+91 8951872744", href: "tel:+918951872744" },
+    { icon: Mail, label: "Email", value: "maduvedibbana@gmail.com", href: "mailto:maduvedibbana@gmail.com" },
+    { icon: MapPin, label: "Association", value: "In association with UTTHANA UTTARA KANNADA OKKALU SANGAMA(Reg.), Bengaluru", href: "#" },
     { icon: Clock, label: "Working Hours", value: "Mon – Sat, 10 AM – 6 PM", href: "#" },
   ];
 

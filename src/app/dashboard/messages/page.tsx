@@ -98,26 +98,27 @@ export default function MessagesPage() {
 
   return (
     <div style={{
-      height: "calc(100vh - 180px)", display: "flex",
+      height: "calc(100vh - 180px)", minHeight: "450px", display: "flex",
       background: "#fff", borderRadius: "16px",
       boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
       overflow: "hidden", border: "1px solid #e3e8f0",
-    }}>
+      width: "100%", minWidth: 0, maxWidth: "100%",
+    }} className="messages-container">
       {/* Left: Chat List */}
       <div style={{
-        borderRight: "1px solid #e3e8f0", background: "#fff", flexShrink: 0,
-      }} className={activeChat ? "hidden md:flex md:flex-col md:w-[340px]" : "flex flex-col w-full md:w-[340px]"}>
+        borderRight: "1px solid #e3e8f0", background: "#fff", minWidth: 0,
+      }} className={activeChat ? "hidden md:flex md:flex-col md:w-[340px] md:flex-shrink-0" : "flex flex-col w-full md:w-[340px] md:flex-shrink-0"}>
         <div style={{ padding: "20px", borderBottom: "1px solid #e3e8f0" }}>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "20px", fontWeight: 700, color: "#1e2a44", marginBottom: "16px" }}>
             Messages
           </h2>
           <div style={{ position: "relative" }}>
             <Search style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", width: "14px", height: "14px", color: "#a0aec0" }} />
-            <input type="text" placeholder="Search messages..." className="input" style={{ paddingLeft: "36px", height: "40px", fontSize: "13px", background: "#f0ece4" }} />
+            <input type="text" placeholder="Search messages..." className="input" style={{ paddingLeft: "36px", height: "40px", fontSize: "13px", background: "#f0ece4", width: "100%" }} />
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: "auto" }}>
+        <div style={{ flex: 1, overflowY: "auto", minWidth: 0 }}>
           {chatPartnerIds.length === 0 ? (
             <div style={{ padding: "32px", textAlign: "center", color: "#5f6368", fontSize: "14px" }}>
               No conversations yet
@@ -145,38 +146,39 @@ export default function MessagesPage() {
                   key={partnerId}
                   onClick={() => setActiveChat(partnerId)}
                   style={{
-                    width: "100%", padding: "14px 20px", display: "flex", alignItems: "center",
+                    width: "100%", padding: "14px 16px", display: "flex", alignItems: "center",
                     gap: "12px", border: "none", cursor: "pointer", textAlign: "left",
                     borderBottom: "1px solid rgba(227,232,240,0.5)",
                     background: isActive ? "rgba(30,42,68,0.05)" : "#fff",
                     transition: "0.2s",
+                    minWidth: 0,
                   }}
                 >
                   <div style={{ position: "relative", flexShrink: 0 }}>
                     <div style={{
-                      width: "48px", height: "48px", borderRadius: "50%",
+                      width: "44px", height: "44px", borderRadius: "50%",
                       background: profile.profilePhoto ? `url('${profile.profilePhoto}') center/cover no-repeat` : "linear-gradient(135deg, #1e2a44, #c6a55c)",
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      color: "#fff", fontSize: "18px", fontWeight: 700,
+                      color: "#fff", fontSize: "16px", fontWeight: 700,
                     }}>
                       {!profile.profilePhoto && profile.name[0]}
                     </div>
                     {/* Online indicator */}
                     <div style={{
                       position: "absolute", bottom: "2px", right: "2px",
-                      width: "12px", height: "12px", borderRadius: "50%",
+                      width: "10px", height: "10px", borderRadius: "50%",
                       background: "#16a34a", border: "2px solid #fff",
                     }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                      <h4 style={{ fontWeight: 600, fontSize: "14px", color: "#1e2a44" }}>{profile.name}</h4>
-                      <span style={{ fontSize: "10px", color: "#a0aec0", whiteSpace: "nowrap" }}>
+                      <h4 style={{ fontWeight: 600, fontSize: "14px", color: "#1e2a44", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: "6px" }}>{profile.name}</h4>
+                      <span style={{ fontSize: "10px", color: "#a0aec0", whiteSpace: "nowrap", flexShrink: 0 }}>
                         {lastMessage ? formatDate(lastMessage.timestamp) : ""}
                       </span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <p style={{ fontSize: "12px", color: unreadCount > 0 ? "#1e2a44" : "#5f6368", fontWeight: unreadCount > 0 ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                      <p style={{ fontSize: "12px", color: unreadCount > 0 ? "#1e2a44" : "#5f6368", fontWeight: unreadCount > 0 ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
                         {lastMessage
                           ? isMyId(lastMessage.senderId)
                             ? `You: ${lastMessage.text}`
@@ -185,10 +187,10 @@ export default function MessagesPage() {
                       </p>
                       {unreadCount > 0 && (
                         <span style={{
-                          minWidth: "20px", height: "20px", borderRadius: "50%",
+                          minWidth: "18px", height: "18px", borderRadius: "50%",
                           background: "#1e2a44", color: "#fff", fontSize: "10px", fontWeight: 700,
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          marginLeft: "8px", flexShrink: 0,
+                          marginLeft: "6px", flexShrink: 0, padding: "0 4px",
                         }}>
                           {unreadCount}
                         </span>
@@ -203,60 +205,60 @@ export default function MessagesPage() {
       </div>
 
       {/* Right: Chat Window */}
-      <div style={{ background: "#fafcff" }} className={!activeChat ? "hidden md:flex md:flex-col md:flex-1" : "flex flex-col flex-1 w-full"}>
+      <div style={{ background: "#fafcff", minWidth: 0, width: "100%", maxWidth: "100%" }} className={!activeChat ? "hidden md:flex md:flex-col md:flex-1" : "flex flex-col flex-1 w-full min-w-0"}>
         {activeProfile ? (
           <>
             {/* Chat Header */}
             <div style={{
-              height: "72px", padding: "0 24px", borderBottom: "1px solid #e3e8f0",
+              minHeight: "68px", padding: "10px 16px", borderBottom: "1px solid #e3e8f0",
               background: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between",
-              flexShrink: 0,
+              flexShrink: 0, minWidth: 0, width: "100%", gap: "8px",
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
                 <button
                   onClick={() => setActiveChat(null)}
                   style={{
                     padding: "6px", background: "rgba(30,42,68,0.06)", borderRadius: "8px",
                     border: "none", cursor: "pointer", color: "#1e2a44", display: "flex",
-                    alignItems: "center", justifyContent: "center",
+                    alignItems: "center", justifyContent: "center", flexShrink: 0,
                   }}
                   className="md:hidden"
                   title="Back to conversations"
                 >
                   <ArrowLeft style={{ width: "18px", height: "18px" }} />
                 </button>
-                <div style={{ position: "relative" }}>
+                <div style={{ position: "relative", flexShrink: 0 }}>
                   <div style={{
-                    width: "40px", height: "40px", borderRadius: "50%",
+                    width: "38px", height: "38px", borderRadius: "50%",
                     background: activeProfile.profilePhoto ? `url('${activeProfile.profilePhoto}') center/cover no-repeat` : "linear-gradient(135deg, #1e2a44, #c6a55c)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "#fff", fontSize: "16px", fontWeight: 700,
+                    color: "#fff", fontSize: "15px", fontWeight: 700,
                   }}>
                     {!activeProfile.profilePhoto && activeProfile.name[0]}
                   </div>
                   <div style={{
                     position: "absolute", bottom: "0px", right: "0px",
-                    width: "10px", height: "10px", borderRadius: "50%",
+                    width: "9px", height: "9px", borderRadius: "50%",
                     background: "#16a34a", border: "2px solid #fff",
                   }} />
                 </div>
-                <div>
-                  <h3 style={{ fontWeight: 600, fontSize: "14px", color: "#1e2a44" }}>{activeProfile.name}</h3>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <h3 style={{ fontWeight: 600, fontSize: "14px", color: "#1e2a44", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activeProfile.name}</h3>
                   <p style={{ fontSize: "11px", fontWeight: 500, color: "#16a34a" }}>Online</p>
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                <button style={{ width: "36px", height: "36px", borderRadius: "50%", border: "none", background: "rgba(30,42,68,0.04)", cursor: "pointer", color: "#5f6368", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
-                  <Phone style={{ width: "16px", height: "16px" }} />
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+                <button style={{ width: "34px", height: "34px", borderRadius: "50%", border: "none", background: "rgba(30,42,68,0.04)", cursor: "pointer", color: "#5f6368", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                  <Phone style={{ width: "15px", height: "15px" }} />
                 </button>
-                <button style={{ width: "36px", height: "36px", borderRadius: "50%", border: "none", background: "rgba(30,42,68,0.04)", cursor: "pointer", color: "#5f6368", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
-                  <Video style={{ width: "16px", height: "16px" }} />
+                <button style={{ width: "34px", height: "34px", borderRadius: "50%", border: "none", background: "rgba(30,42,68,0.04)", cursor: "pointer", color: "#5f6368", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                  <Video style={{ width: "15px", height: "15px" }} />
                 </button>
               </div>
             </div>
 
             {/* Messages */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "12px", minWidth: 0, width: "100%" }}>
               {activeChatMessages.map((msg, idx) => {
                 const isMe = msg.senderId === myId;
                 // Show date divider
@@ -264,7 +266,7 @@ export default function MessagesPage() {
                 const showDateDivider = !prevMsg || formatDate(msg.timestamp) !== formatDate(prevMsg.timestamp);
 
                 return (
-                  <div key={msg.id}>
+                  <div key={msg.id} style={{ minWidth: 0, width: "100%" }}>
                     {showDateDivider && (
                       <div style={{ textAlign: "center", margin: "8px 0" }}>
                         <span style={{ fontSize: "11px", fontWeight: 500, color: "#a0aec0", background: "#fafcff", padding: "0 12px" }}>
@@ -272,16 +274,17 @@ export default function MessagesPage() {
                         </span>
                       </div>
                     )}
-                    <div style={{ display: "flex", justifyContent: isMe ? "flex-end" : "flex-start" }}>
-                      <div style={{ maxWidth: "70%" }}>
+                    <div style={{ display: "flex", justifyContent: isMe ? "flex-end" : "flex-start", minWidth: 0, width: "100%" }}>
+                      <div style={{ maxWidth: "85%", minWidth: 0 }}>
                         <div style={{
-                          padding: "12px 16px", borderRadius: "16px", fontSize: "14px", lineHeight: 1.5,
+                          padding: "10px 14px", borderRadius: "16px", fontSize: "14px", lineHeight: 1.5,
                           background: isMe ? "#1e2a44" : "#fff",
                           color: isMe ? "#fff" : "#1e2a44",
                           borderBottomRightRadius: isMe ? "4px" : "16px",
                           borderBottomLeftRadius: isMe ? "16px" : "4px",
                           border: isMe ? "none" : "1px solid #e3e8f0",
                           boxShadow: isMe ? "0 2px 8px rgba(30,42,68,0.15)" : "0 1px 3px rgba(0,0,0,0.04)",
+                          overflowWrap: "break-word", wordBreak: "break-word",
                         }}>
                           {msg.text}
                         </div>
@@ -307,21 +310,21 @@ export default function MessagesPage() {
             </div>
 
             {/* Input */}
-            <div style={{ padding: "16px", background: "#fff", borderTop: "1px solid #e3e8f0", flexShrink: 0 }}>
-              <form onSubmit={handleSend} style={{ display: "flex", gap: "8px" }}>
+            <div style={{ padding: "12px 16px", background: "#fff", borderTop: "1px solid #e3e8f0", flexShrink: 0, minWidth: 0, width: "100%" }}>
+              <form onSubmit={handleSend} style={{ display: "flex", gap: "8px", minWidth: 0, width: "100%" }}>
                 <input
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   placeholder="Type a message..."
                   className="input"
-                  style={{ flex: 1, background: "#f0ece4" }}
+                  style={{ flex: 1, minWidth: 0, background: "#f0ece4", height: "42px" }}
                 />
                 <button
                   type="submit"
                   disabled={!inputText.trim()}
                   style={{
-                    width: "48px", height: "48px", borderRadius: "12px",
+                    width: "42px", height: "42px", borderRadius: "12px",
                     background: inputText.trim() ? "#1e2a44" : "#e3e8f0",
                     color: "#fff", border: "none",
                     cursor: inputText.trim() ? "pointer" : "not-allowed",
@@ -329,7 +332,7 @@ export default function MessagesPage() {
                     flexShrink: 0, transition: "all 0.2s ease",
                   }}
                 >
-                  <Send style={{ width: "20px", height: "20px" }} />
+                  <Send style={{ width: "18px", height: "18px" }} />
                 </button>
               </form>
             </div>

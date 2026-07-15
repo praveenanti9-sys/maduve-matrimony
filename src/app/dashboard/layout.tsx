@@ -80,7 +80,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div style={{ minHeight: "calc(100vh - 80px)", background: "#f0ece4", display: "flex" }}>
+    <div style={{ minHeight: "calc(100vh - 80px)", background: "#f0ece4", display: "flex", width: "100%", minWidth: 0, maxWidth: "100vw", overflowX: "hidden" }}>
       {/* Desktop Sidebar */}
       <aside style={{
         display: "none",
@@ -205,8 +205,8 @@ export default function DashboardLayout({
       </nav>
 
       {/* Main Content */}
-      <main style={{ flex: 1, minHeight: "calc(100vh - 80px)", paddingBottom: "24px" }} className="dashboard-main-content">
-        <div style={{ padding: "32px", maxWidth: "1200px", margin: "0 auto" }} className="responsive-pad">
+      <main style={{ flex: 1, minHeight: "calc(100vh - 80px)", paddingBottom: "24px", minWidth: 0, width: "100%", maxWidth: "100%" }} className="dashboard-main-content">
+        <div style={{ padding: "32px", maxWidth: "1200px", margin: "0 auto", width: "100%", minWidth: 0 }} className="responsive-pad">
           {children}
         </div>
       </main>
