@@ -15,8 +15,7 @@ function getClientEnv(key: string): string {
   return '';
 }
 
-// ── Constants ──
-export const DAILY_INTEREST_LIMIT = 10;
+
 
 // ── Frontend-facing types (kept for backward compatibility with pages) ──
 export interface UserProfile {

@@ -7,7 +7,7 @@ import {
   Users, Heart, Eye, MessageCircle, TrendingUp, ArrowRight,
   Sparkles, Bell, Zap, Crown, Shield, CheckCircle2,
   AlertTriangle, Ban, Activity, BarChart3, Clock,
-  Star, MapPin, Calendar, Mail, Inbox,
+  Star, MapPin, Mail, Inbox,
 } from "lucide-react";
 
 export default function DashboardPage() {
