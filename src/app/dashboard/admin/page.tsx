@@ -34,7 +34,7 @@ export default function AdminPage() {
 
   // Settings tab local state
   const [interestLimit, setInterestLimit] = useState(10);
-  const [autoApprove, setAutoApprove] = useState(true);
+  const [autoApprove, setAutoApprove] = useState(false);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   useEffect(() => {
@@ -202,7 +202,7 @@ export default function AdminPage() {
   });
 
   const getProfileName = (id: string) => {
-    if (id === 'me') return registeredUser?.fullName || 'Registered User';
+    if (id === currentUser.id) return registeredUser?.fullName || 'Registered User';
     if (id === 'admin') return 'Super Admin';
     if (id === 'system') return '🔔 System';
     const p = allProfiles.find(pr => pr.id === id);
@@ -210,7 +210,7 @@ export default function AdminPage() {
   };
 
   const getProfilePhoto = (id: string) => {
-    if (id === 'me') return registeredUser?.profilePhoto || '';
+    if (id === currentUser.id) return registeredUser?.profilePhoto || '';
     const p = allProfiles.find(pr => pr.id === id);
     return p?.profilePhoto || '';
   };

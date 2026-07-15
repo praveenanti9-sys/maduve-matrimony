@@ -22,7 +22,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: authError?.message || 'Auth registration failed' }, { status: 400 });
     }
 
-    // 2. Insert or update profile in profiles table via admin client (bypasses RLS & handles automatic triggers)
+    // 2. Read system settings to determine if auto-approve is enabled
+    const { data: settings } = await adminClient
+      .from('system_settings')
+      .select('auto_approve_profiles')
+      .eq('id', 1)
+      .single();
+
+    const autoApprove = settings?.auto_approve_profiles ?? false;
+    const initialStatus = autoApprove ? 'active' : 'pending';
+
+    // 3. Insert or update profile in profiles table via admin client (bypasses RLS & handles automatic triggers)
     const { data: profile, error: profileError } = await adminClient
       .from('profiles')
       .upsert({
@@ -58,8 +68,9 @@ export async function POST(request: Request) {
         pref_district: profileData.prefDistrict || '',
         pref_education: profileData.prefEducation || '',
         profile_photo: '',
-        status: 'pending', // defaults to pending review
+        status: initialStatus,
         role: 'user',
+        admin_reviewed: autoApprove,
       }, { onConflict: 'auth_id' })
       .select()
       .single();

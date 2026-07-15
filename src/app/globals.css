@@ -706,3 +706,16 @@ select.input {
     grid-template-columns: 1fr !important;
   }
 }
+
+@media (max-width: 768px) {
+  .home-section-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  .contact-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .contact-form-row {
+    grid-template-columns: 1fr !important;
+  }
+}

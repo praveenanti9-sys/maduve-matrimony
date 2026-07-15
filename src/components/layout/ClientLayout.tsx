@@ -1,12 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
+import { useStore } from "@/store/useStore";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || "";
   const isDashboard = pathname.startsWith("/dashboard");
+  const initializeSession = useStore((s) => s.initializeSession);
+
+  // Initialize session once at app-level — no need to call in Navbar or dashboard/layout
+  useEffect(() => {
+    initializeSession();
+  }, [initializeSession]);
 
   if (isDashboard) {
     return (

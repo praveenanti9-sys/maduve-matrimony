@@ -52,7 +52,7 @@ export default function Home() {
           (shingara-section on the live site)
       ═══════════════════════════════════════════════════ */}
       <section style={{ padding: "100px 20px", background: "#EFEBE3" }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
+        <div className="home-section-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
           <div>
             <Image
               src="https://maduvedibbana.com/wp-content/uploads/2026/04/madhuve.webp"
@@ -87,7 +87,7 @@ export default function Home() {
           (relationship-section on live site)
       ═══════════════════════════════════════════════════ */}
       <section style={{ padding: "100px 20px", background: "#f8fafc" }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
+        <div className="home-section-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
           <div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "44px", fontWeight: 600, lineHeight: 1.25, letterSpacing: "-0.3px", color: "#1e2a44", marginBottom: "12px" }}>
               Built on Tradition & Meaningful Relationships
@@ -124,7 +124,7 @@ export default function Home() {
           SECTION 4: Maduvedibbana (Gold background)
       ═══════════════════════════════════════════════════ */}
       <section style={{ padding: "100px 20px", background: "#f7f2e8" }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
+        <div className="home-section-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
           <div>
             <Image
               src="https://maduvedibbana.com/wp-content/uploads/2026/04/matrimonny.webp"
@@ -161,7 +161,7 @@ export default function Home() {
           SECTION 5: Our Objectives (White background)
       ═══════════════════════════════════════════════════ */}
       <section style={{ padding: "100px 20px", background: "#ffffff" }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
+        <div className="home-section-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
           <div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "44px", fontWeight: 600, lineHeight: 1.25, letterSpacing: "-0.3px", color: "#1e2a44", marginBottom: "12px" }}>
               Our Objectives

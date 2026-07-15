@@ -345,7 +345,8 @@ interface AppState {
   approveUser: (userId: string) => Promise<void>;
   rejectUser: (userId: string) => Promise<void>;
   verifyUser: (userId: string, verified: boolean) => Promise<void>;
-  resetPassword: (email: string, newPassword: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>;
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>;
 
   // System Settings
   systemSettings: {
@@ -416,12 +417,21 @@ export const useStore = create<AppState>((set, get) => ({
   // ── Initialize session on app load ──
   initializeSession: async () => {
     try {
+      // Skip if already initialized and logged in
+      const state = get();
+      if (state.isLoggedIn && state.currentUser.id) return;
+
       set({ isLoading: true });
       const profile = await svc.fetchMyProfile();
       if (profile) {
         if (profile.status === 'pending' || profile.status === 'blocked' || profile.status === 'suspended') {
+          const statusMessages: Record<string, string> = {
+            pending: 'Your account is pending admin approval. You will receive an update via email once verified.',
+            blocked: 'Your account has been blocked by the administrator. Please contact support.',
+            suspended: `Your account has been suspended. Reason: ${profile.status_reason || 'Policy violation'}. Please contact support.`,
+          };
           await svc.logoutUser();
-          set({ currentUser: defaultUser, isLoggedIn: false, isLoading: false });
+          set({ currentUser: defaultUser, isLoggedIn: false, isLoading: false, error: statusMessages[profile.status] || 'Account restricted.' });
           return;
         }
         const userProfile = dbProfileToUserProfile(profile);
@@ -876,6 +886,11 @@ export const useStore = create<AppState>((set, get) => ({
   resetPassword: async (email) => {
     const { error } = await svc.resetPassword(email);
     return !error;
+  },
+
+  updatePassword: async (newPassword) => {
+    const { error } = await svc.updatePassword(newPassword);
+    return { error };
   },
 
   // ── System Settings ──

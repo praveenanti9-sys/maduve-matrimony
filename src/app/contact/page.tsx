@@ -6,14 +6,28 @@ import { submitContactInquiry } from "@/lib/supabase-service";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await submitContactInquiry(name, email, message);
-    setSubmitted(true);
+    setSubmitError("");
+    setIsSubmitting(true);
+    try {
+      const result = await submitContactInquiry(name, email, message);
+      if (result?.error) {
+        setSubmitError("Failed to send message. Please try again or email us directly.");
+      } else {
+        setSubmitted(true);
+      }
+    } catch {
+      setSubmitError("Something went wrong. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -39,7 +53,7 @@ export default function ContactPage() {
           <div className="ornament" style={{ margin: "24px auto 0" }} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 3fr", gap: "32px" }}>
+        <div className="contact-grid" style={{ display: "grid", gridTemplateColumns: "2fr 3fr", gap: "32px" }}>
           {/* Contact Info Cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {contactInfo.map((item, i) => (
@@ -81,7 +95,12 @@ export default function ContactPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                  {submitError && (
+                    <div style={{ padding: "12px 16px", borderRadius: "10px", background: "rgba(220,38,38,0.08)", color: "#dc2626", fontSize: "13px", fontWeight: 500 }}>
+                      {submitError}
+                    </div>
+                  )}
+                  <div className="contact-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                     <div>
                       <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Your Name</label>
                       <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input" placeholder="Full name" required />
@@ -95,8 +114,8 @@ export default function ContactPage() {
                     <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Message</label>
                     <textarea value={message} onChange={(e) => setMessage(e.target.value)} className="input" style={{ minHeight: "140px", resize: "none", height: "auto" }} placeholder="How can we help you?" rows={5} required />
                   </div>
-                  <button type="submit" className="btn-primary" style={{ height: "50px" }}>
-                    <Send style={{ width: "16px", height: "16px" }} /> <span>Send Message</span>
+                  <button type="submit" className="btn-primary" style={{ height: "50px", opacity: isSubmitting ? 0.7 : 1 }} disabled={isSubmitting}>
+                    <Send style={{ width: "16px", height: "16px" }} /> <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
                   </button>
                 </form>
               </>

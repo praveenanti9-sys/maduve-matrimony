@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      const success = await useStore.getState().resetPassword(email, '');
+      const success = await useStore.getState().resetPassword(email);
       if (success) {
         setStep("done");
       } else {

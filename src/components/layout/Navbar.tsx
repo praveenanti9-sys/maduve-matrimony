@@ -14,11 +14,7 @@ export function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   
-  const { isLoggedIn, currentUser, logout, initializeSession, messages, interests, profiles } = useStore();
-
-  useEffect(() => {
-    initializeSession();
-  }, [initializeSession]);
+  const { isLoggedIn, currentUser, logout, messages, interests, profiles } = useStore();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -39,7 +35,7 @@ export function Navbar() {
   }, [userMenuOpen, notifMenuOpen]);
 
   // Calculate notifications
-  const isMyId = (id: string) => id === 'me' || id === currentUser.id;
+  const isMyId = (id: string) => id === currentUser.id;
   
   const pendingInterests = interests.filter(i => isMyId(i.toId) && i.status === 'pending');
   const unreadMessages = messages.filter(m => isMyId(m.receiverId) && !m.read);

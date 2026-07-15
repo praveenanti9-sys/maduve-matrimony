@@ -37,7 +37,7 @@ export default function SettingsPage() {
 
   // Super Admin settings states
   const [interestLimit, setInterestLimit] = useState(10);
-  const [autoApprove, setAutoApprove] = useState(true);
+  const [autoApprove, setAutoApprove] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
@@ -66,7 +66,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError("");
 
@@ -93,7 +93,12 @@ export default function SettingsPage() {
         setPasswordError("Passwords do not match");
         return;
       }
-      updateData.password = newPassword;
+      // Use Supabase Auth to update the actual password
+      const { error } = await useStore.getState().updatePassword(newPassword);
+      if (error) {
+        setPasswordError(error);
+        return;
+      }
     }
 
     updateProfile(updateData);

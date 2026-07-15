@@ -70,17 +70,17 @@ export default function BrowseMatchesPage() {
       if (sortBy === "age-asc") return a.age - b.age;
       if (sortBy === "age-desc") return b.age - a.age;
       if (sortBy === "name") return a.name.localeCompare(b.name);
-      if (sortBy === "newest") return b.id.localeCompare(a.id);
+      if (sortBy === "newest") return new Date(b.joinDate || 0).getTime() - new Date(a.joinDate || 0).getTime();
       if (sortBy === "location") return a.location.localeCompare(b.location);
       return 0;
     });
 
-  const hasSentInterest = (toId: string) => interests.some((i) => i.fromId === "me" && i.toId === toId);
+  const hasSentInterest = (toId: string) => interests.some((i) => i.fromId === currentUser.id && i.toId === toId);
 
   // Check if mutual interest accepted (both parties accepted)
   const isMutualMatch = (profileId: string) => {
     return interests.some((i) =>
-      ((i.fromId === "me" && i.toId === profileId) || (i.fromId === profileId && i.toId === "me")) &&
+      ((i.fromId === currentUser.id && i.toId === profileId) || (i.fromId === profileId && i.toId === currentUser.id)) &&
       i.status === "accepted"
     );
   };
@@ -174,10 +174,14 @@ export default function BrowseMatchesPage() {
       checks++;
       if (profile.education === currentUser.prefEducation) matches++;
     }
-    // Height preference
+    // Height preference — parse to inches for proper numeric comparison
     if (currentUser.prefHeightMin) {
       checks++;
-      if (profile.height >= currentUser.prefHeightMin) matches++;
+      const parseHeightToInches = (h: string): number => {
+        const match = h.match(/(\d+)'(\d+)/);
+        return match ? parseInt(match[1]) * 12 + parseInt(match[2]) : 0;
+      };
+      if (parseHeightToInches(profile.height) >= parseHeightToInches(currentUser.prefHeightMin)) matches++;
     }
     // Same community (gothra should NOT match — exogamy rule)
     if (currentUser.gothra && profile.gothra) {

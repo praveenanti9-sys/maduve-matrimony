@@ -7,7 +7,7 @@ export function Footer() {
       {/* Main Footer */}
       <div style={{
         maxWidth: "1100px", margin: "0 auto", padding: "60px 20px",
-        display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "50px",
+        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "50px",
       }}>
         {/* Col 1 — Logo */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "10px" }}>

@@ -16,9 +16,8 @@ export default function InterestsPage() {
 
   const getProfile = (id: string) => profiles.find((p) => p.id === id);
 
-  // The store uses 'me' as the current user ID in interests
-  const myId = 'me';
-  const isMyId = (id: string) => id === myId || id === currentUser.id;
+  const myId = currentUser.id;
+  const isMyId = (id: string) => id === myId;
 
   const received = interests.filter((i) => isMyId(i.toId) && i.status === "pending");
   const sent = interests.filter((i) => isMyId(i.fromId));

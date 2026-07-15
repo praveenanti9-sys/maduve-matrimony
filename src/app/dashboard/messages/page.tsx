@@ -8,17 +8,15 @@ export default function MessagesPage() {
   const { messages, currentUser, profiles, sendMessage, markMessagesRead } = useStore();
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [inputText, setInputText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // The store uses 'me' as the current user's ID in messages
-  const myId = 'me';
+  const myId = currentUser.id;
 
   const chatPartnerIds = Array.from(
     new Set(
       messages
         .flatMap((m) => [m.senderId, m.receiverId])
-        .filter((id) => id !== myId && id !== currentUser.id)
+        .filter((id) => id !== myId)
     )
   );
 
@@ -32,8 +30,8 @@ export default function MessagesPage() {
     ? messages
         .filter(
           (m) =>
-            ((m.senderId === myId || m.senderId === currentUser.id) && m.receiverId === activeChat) ||
-            (m.senderId === activeChat && (m.receiverId === myId || m.receiverId === currentUser.id))
+            (m.senderId === myId && m.receiverId === activeChat) ||
+            (m.senderId === activeChat && m.receiverId === myId)
         )
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
     : [];
@@ -42,10 +40,9 @@ export default function MessagesPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [activeChatMessages, isTyping]);
+  }, [activeChatMessages]);
 
   useEffect(() => {
-    setIsTyping(false);
     if (activeChat) {
       markMessagesRead(activeChat);
     }
@@ -61,22 +58,6 @@ export default function MessagesPage() {
     
     sendMessage(activeChat, inputText);
     setInputText("");
-
-    // Simulate typing and reply
-    setTimeout(() => setIsTyping(true), 800);
-    setTimeout(() => {
-      setIsTyping(false);
-      const replies = [
-        "Dhanyavadagalu for reaching out! Let me check with my parents and we can talk further.",
-        "Namaste! Yes, your profile matches what we are looking for. I would love to connect.",
-        "Thanks for the message! Where are you currently working?",
-        "Sounds good. We can arrange a call this weekend, does that work for you?",
-        "I will discuss this with my father and get back to you shortly.",
-      ];
-      const randomReply = replies[Math.floor(Math.random() * replies.length)];
-      // sendMessage(receiverId, text, senderId) — the reply comes FROM the partner
-      sendMessage(myId, randomReply, activeChat);
-    }, 2500);
   };
 
   const formatTime = (isoString: string) => {
@@ -96,7 +77,7 @@ export default function MessagesPage() {
   };
 
   const getUnreadCount = (partnerId: string) => {
-    return messages.filter(m => m.senderId === partnerId && (m.receiverId === myId || m.receiverId === currentUser.id) && !m.read).length;
+    return messages.filter(m => m.senderId === partnerId && m.receiverId === myId && !m.read).length;
   };
 
   return (
@@ -134,8 +115,8 @@ export default function MessagesPage() {
               const partnerMessages = messages
                 .filter(
                   (m) =>
-                    ((m.senderId === myId || m.senderId === currentUser.id) && m.receiverId === partnerId) ||
-                    (m.senderId === partnerId && (m.receiverId === myId || m.receiverId === currentUser.id))
+                    (m.senderId === myId && m.receiverId === partnerId) ||
+                    (m.senderId === partnerId && m.receiverId === myId)
                 )
                 .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
               const lastMessage = partnerMessages[0];
@@ -180,7 +161,7 @@ export default function MessagesPage() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <p style={{ fontSize: "12px", color: unreadCount > 0 ? "#1e2a44" : "#5f6368", fontWeight: unreadCount > 0 ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
                         {lastMessage
-                          ? (lastMessage.senderId === myId || lastMessage.senderId === currentUser.id)
+                          ? (lastMessage.senderId === myId)
                             ? `You: ${lastMessage.text}`
                             : lastMessage.text
                           : "Start chatting..."}
@@ -248,7 +229,7 @@ export default function MessagesPage() {
             {/* Messages */}
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               {activeChatMessages.map((msg, idx) => {
-                const isMe = msg.senderId === myId || msg.senderId === currentUser.id;
+                const isMe = msg.senderId === myId;
                 // Show date divider
                 const prevMsg = idx > 0 ? activeChatMessages[idx - 1] : null;
                 const showDateDivider = !prevMsg || formatDate(msg.timestamp) !== formatDate(prevMsg.timestamp);
@@ -291,23 +272,8 @@ export default function MessagesPage() {
                 );
               })}
 
-              {isTyping && (
-                <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                  <div style={{ maxWidth: "70%" }}>
-                    <div style={{
-                      padding: "12px 16px", borderRadius: "16px", fontSize: "14px", lineHeight: 1.5,
-                      background: "#fff", color: "#1e2a44",
-                      borderBottomLeftRadius: "4px", border: "1px solid #e3e8f0",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                      display: "flex", alignItems: "center", gap: "4px"
-                    }}>
-                      <span style={{ width: "6px", height: "6px", background: "#a0aec0", borderRadius: "50%", display: "inline-block", animation: "bounce 1.4s infinite ease-in-out both" }} />
-                      <span style={{ width: "6px", height: "6px", background: "#a0aec0", borderRadius: "50%", display: "inline-block", animation: "bounce 1.4s infinite ease-in-out both", animationDelay: "0.2s" }} />
-                      <span style={{ width: "6px", height: "6px", background: "#a0aec0", borderRadius: "50%", display: "inline-block", animation: "bounce 1.4s infinite ease-in-out both", animationDelay: "0.4s" }} />
-                    </div>
-                  </div>
-                </div>
-              )}
+
+
               <div ref={messagesEndRef} />
             </div>
 

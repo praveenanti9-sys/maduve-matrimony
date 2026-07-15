@@ -141,89 +141,9 @@ export function getSupabaseAdmin(): SupabaseClient {
 // AUTH OPERATIONS
 // ============================================================
 
-/** Register a new user with Supabase Auth + create profile */
-export async function registerUser(
-  email: string,
-  password: string,
-  profileData: Partial<DbProfile>
-): Promise<{ profile: DbProfile | null; error: string | null }> {
-  const supabase = getSupabase();
-
-  // 1. Sign up with Supabase Auth
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-
-  if (authError) {
-    return { profile: null, error: authError.message };
-  }
-
-  if (!authData.user) {
-    return { profile: null, error: 'Registration failed. Please try again.' };
-  }
-
-  // 2. Fetch system settings to determine auto-approve
-  const settings = await fetchSystemSettings();
-  const initialStatus = settings?.auto_approve_profiles ? 'active' : 'pending';
-
-  // 3. Insert profile into profiles table
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .insert({
-      auth_id: authData.user.id,
-      email,
-      full_name: profileData.full_name || '',
-      phone: profileData.phone || '',
-      gender: profileData.gender || '',
-      dob: profileData.dob || '',
-      education: profileData.education || '',
-      occupation: profileData.occupation || '',
-      city: profileData.city || '',
-      district: profileData.district || '',
-      gothra: profileData.gothra || '',
-      bio: profileData.bio || '',
-      height: profileData.height || '',
-      weight: profileData.weight || '',
-      complexion: profileData.complexion || '',
-      marital_status: profileData.marital_status || '',
-      annual_income: profileData.annual_income || '',
-      nakshatra: profileData.nakshatra || '',
-      rashi: profileData.rashi || '',
-      native_place: profileData.native_place || '',
-      state: profileData.state || 'Karnataka',
-      father_name: profileData.father_name || '',
-      father_occupation: profileData.father_occupation || '',
-      mother_name: profileData.mother_name || '',
-      mother_occupation: profileData.mother_occupation || '',
-      siblings: profileData.siblings || '',
-      pref_age_min: profileData.pref_age_min || '',
-      pref_age_max: profileData.pref_age_max || '',
-      pref_height_min: profileData.pref_height_min || '',
-      pref_district: profileData.pref_district || '',
-      pref_education: profileData.pref_education || '',
-      profile_photo: profileData.profile_photo || '',
-      status: initialStatus,
-      role: 'user',
-      admin_reviewed: settings?.auto_approve_profiles ?? false,
-    })
-    .select()
-    .single();
-
-  if (profileError) {
-    return { profile: null, error: profileError.message };
-  }
-
-  // 4. Send system welcome message
-  if (profile) {
-    await sendSystemMessage(
-      profile.id,
-      `🎉 Welcome to Maduvedibbana, ${profile.full_name}! Your profile has been created successfully.${initialStatus === 'active' ? ' Your profile is now live and visible to other members.' : ' Your profile is pending admin approval. You will be notified once approved.'}`
-    );
-  }
-
-  return { profile: profile as DbProfile, error: null };
-}
+// NOTE: Registration is handled server-side via /api/auth/register route
+// which uses the admin client to bypass RLS. The old registerUser()
+// function has been removed to avoid confusion.
 
 /** Login with Supabase Auth + fetch profile */
 export async function loginUser(
@@ -279,26 +199,39 @@ export async function logoutUser(): Promise<void> {
 /** Reset password — sends a real email via Supabase Auth */
 export async function resetPassword(email: string): Promise<{ error: string | null }> {
   const supabase = getSupabase();
+  const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/login` : '';
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/login`,
+    redirectTo,
   });
   return { error: error?.message || null };
 }
 
-/** Delete own account */
-export async function deleteSelfAccount(profileId: string): Promise<{ error: string | null }> {
+/** Update password for the currently authenticated user */
+export async function updatePassword(newPassword: string): Promise<{ error: string | null }> {
   const supabase = getSupabase();
-
-  // Delete messages
-  await supabase.from('messages').delete().or(`sender_id.eq.${profileId},receiver_id.eq.${profileId}`);
-  // Delete interests
-  await supabase.from('interests').delete().or(`from_id.eq.${profileId},to_id.eq.${profileId}`);
-  // Delete profile (cascade will handle auth.users deletion)
-  const { error } = await supabase.from('profiles').delete().eq('id', profileId);
-  // Sign out
-  await supabase.auth.signOut();
-
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
   return { error: error?.message || null };
+}
+
+/** Delete own account — uses server API route to also clean up auth user */
+export async function deleteSelfAccount(profileId: string): Promise<{ error: string | null }> {
+  try {
+    const res = await fetch('/api/admin/delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId, selfDelete: true }),
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      return { error: result.error || 'Failed to delete account' };
+    }
+    // Sign out locally
+    const supabase = getSupabase();
+    await supabase.auth.signOut();
+    return { error: null };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 }
 
 // ============================================================
@@ -422,15 +355,17 @@ export async function sendMessage(
   return { message: data as DbMessage | null, error: error?.message || null };
 }
 
-/** Send a system message (convenience wrapper) */
+/** Send a system message — uses server API route to bypass RLS */
 export async function sendSystemMessage(receiverId: string, text: string): Promise<void> {
-  const supabase = getSupabase();
-  await supabase.from('messages').insert({
-    sender_id: receiverId, // system messages use receiver as sender for RLS
-    receiver_id: receiverId,
-    text,
-    sender_type: 'system',
-  });
+  try {
+    await fetch('/api/messages/system', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receiverId, text, senderType: 'system' }),
+    });
+  } catch (err) {
+    console.error('Failed to send system message:', err);
+  }
 }
 
 /** Fetch messages for a user (all conversations) */
@@ -665,31 +600,22 @@ export async function verifyUser(
   return { error: error?.message || null };
 }
 
-/** Delete a user (admin action) */
+/** Delete a user (admin action) — uses server API route to also clean up auth user */
 export async function deleteUserByAdmin(profileId: string, adminId: string): Promise<{ error: string | null }> {
-  const supabase = getSupabase();
-
-  // Delete related data first
-  await supabase.from('messages').delete().or(`sender_id.eq.${profileId},receiver_id.eq.${profileId}`);
-  await supabase.from('interests').delete().or(`from_id.eq.${profileId},to_id.eq.${profileId}`);
-
-  // Get auth_id before deleting profile
-  const { data: profile } = await supabase.from('profiles').select('auth_id').eq('id', profileId).single();
-
-  // Delete profile
-  const { error } = await supabase.from('profiles').delete().eq('id', profileId);
-
-  if (!error) {
-    await logAdminAction(adminId, 'delete', profileId);
-
-    // Delete from auth.users (requires service role key — server-side only)
-    if (profile?.auth_id && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      const adminClient = getSupabaseAdmin();
-      await adminClient.auth.admin.deleteUser(profile.auth_id);
+  try {
+    const res = await fetch('/api/admin/delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId, adminId }),
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      return { error: result.error || 'Failed to delete user' };
     }
+    return { error: null };
+  } catch (e) {
+    return { error: (e as Error).message };
   }
-
-  return { error: error?.message || null };
 }
 
 // ============================================================
@@ -827,15 +753,17 @@ export function subscribeToInterests(
 // HELPERS
 // ============================================================
 
-/** Send message from admin */
+/** Send message from admin — uses server API route to bypass RLS */
 async function sendAdminMessage(receiverId: string, text: string): Promise<void> {
-  const supabase = getSupabase();
-  await supabase.from('messages').insert({
-    sender_id: receiverId, // Use receiver as sender for RLS compliance
-    receiver_id: receiverId,
-    text,
-    sender_type: 'admin',
-  });
+  try {
+    await fetch('/api/messages/system', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receiverId, text, senderType: 'admin' }),
+    });
+  } catch (err) {
+    console.error('Failed to send admin message:', err);
+  }
 }
 
 /** Log admin action to audit log */

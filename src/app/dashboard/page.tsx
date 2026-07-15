@@ -136,8 +136,7 @@ export default function DashboardPage() {
   }
 
   // ── User Dashboard ──
-  // The store uses 'me' as the ID in interests/messages
-  const isMyId = (id: string) => id === 'me' || id === currentUser.id;
+  const isMyId = (id: string) => id === currentUser.id;
   
   const receivedInterests = interests.filter((i) => isMyId(i.toId));
   const unreadMessages = messages.filter((m) => isMyId(m.receiverId) && !m.read);
