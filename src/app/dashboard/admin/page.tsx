@@ -32,6 +32,7 @@ export default function AdminPage() {
   const [toast, setToast] = useState<{ message: string; type: string } | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedConvoPartners, setSelectedConvoPartners] = useState<[string, string] | null>(null);
+  const [expandedInquiryId, setExpandedInquiryId] = useState<string | null>(null);
 
   // Settings tab local state
   const [interestLimit, setInterestLimit] = useState(10);
@@ -1008,51 +1009,168 @@ export default function AdminPage() {
               <p style={{ fontSize: "13px", color: "#5f6368" }}>Contact form submissions will appear here.</p>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {contactInquiries.map((inquiry) => (
-                <div key={inquiry.id} className="card" style={{
-                  padding: "20px 24px",
-                  borderLeft: inquiry.isRead ? "3px solid transparent" : "3px solid #c6a55c",
-                  background: inquiry.isRead ? "#fff" : "rgba(198,165,92,0.02)",
-                }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px" }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                        <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "linear-gradient(135deg, #1e2a44, #c6a55c)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "14px", fontWeight: 700, flexShrink: 0 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: "#fff", borderRadius: "16px", border: "1px solid #e3e8f0", overflow: "hidden", boxShadow: "0 4px 20px rgba(30, 42, 68, 0.02)" }}>
+              {contactInquiries.map((inquiry) => {
+                const isExpanded = expandedInquiryId === inquiry.id;
+                const toggleExpand = () => {
+                  if (isExpanded) {
+                    setExpandedInquiryId(null);
+                  } else {
+                    setExpandedInquiryId(inquiry.id);
+                    if (!inquiry.isRead) {
+                      markInquiryRead(inquiry.id);
+                    }
+                  }
+                };
+
+                return (
+                  <div key={inquiry.id} style={{
+                    borderBottom: "1px solid #f0ece4",
+                    background: isExpanded ? "rgba(198,165,92,0.01)" : (inquiry.isRead ? "#fff" : "rgba(198,165,92,0.03)"),
+                    transition: "all 0.2s ease",
+                  }}>
+                    {/* Mail Row header */}
+                    <div onClick={toggleExpand} style={{
+                      padding: "16px 24px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }} className="flex-col-mobile align-left-mobile">
+                      {/* Read/Unread Indicator Dot */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+                        <div style={{
+                          width: "8px", height: "8px", borderRadius: "50%",
+                          background: inquiry.isRead ? "transparent" : "#3b82f6",
+                          border: inquiry.isRead ? "1px solid #a0aec0" : "none",
+                          flexShrink: 0,
+                        }} />
+                        <div style={{
+                          width: "32px", height: "32px", borderRadius: "50%",
+                          background: inquiry.isRead ? "#f0ece4" : "rgba(198,165,92,0.15)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: inquiry.isRead ? "#5f6368" : "#8b6914",
+                          fontWeight: 700, fontSize: "13px"
+                        }}>
                           {inquiry.name[0]?.toUpperCase()}
                         </div>
-                        <div>
-                          <span style={{ fontWeight: 600, fontSize: "14px", color: "#1e2a44" }}>{inquiry.name}</span>
-                          {!inquiry.isRead && <span style={{ marginLeft: "8px", width: "8px", height: "8px", borderRadius: "50%", background: "#dc2626", display: "inline-block" }} />}
-                          <div style={{ fontSize: "12px", color: "#5f6368", display: "flex", gap: "8px" }}>
-                            <span>{inquiry.email}</span>
+                      </div>
+
+                      {/* Sender Name */}
+                      <div style={{
+                        width: "180px",
+                        fontWeight: inquiry.isRead ? 500 : 700,
+                        fontSize: "14px",
+                        color: "#1e2a44",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap"
+                      }} className="w-full-mobile">
+                        {inquiry.name}
+                      </div>
+
+                      {/* Message Preview */}
+                      <div style={{
+                        flex: 1,
+                        fontSize: "13px",
+                        color: inquiry.isRead ? "#5f6368" : "#1e2a44",
+                        fontWeight: inquiry.isRead ? 400 : 600,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap"
+                      }} className="w-full-mobile">
+                        {inquiry.message}
+                      </div>
+
+                      {/* Date/Time */}
+                      <div style={{
+                        fontSize: "12px",
+                        color: inquiry.isRead ? "#a0aec0" : "#3b82f6",
+                        fontWeight: inquiry.isRead ? 400 : 600,
+                        flexShrink: 0,
+                        textAlign: "right"
+                      }} className="align-left-mobile mt-1-mobile">
+                        {new Date(inquiry.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+
+                    {/* Mail Body detail panel (collapsible) */}
+                    {isExpanded && (
+                      <div style={{
+                        padding: "0 24px 24px 72px",
+                        animation: "fadeIn 0.25s ease-out",
+                      }} className="responsive-pad">
+                        <div style={{
+                          background: "#f8f6f2",
+                          border: "1px solid #e3e8f0",
+                          borderRadius: "12px",
+                          padding: "20px",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "16px",
+                          boxShadow: "inset 0 2px 4px rgba(0,0,0,0.01)"
+                        }}>
+                          {/* Sender Meta Info */}
+                          <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "12px", borderBottom: "1px solid #f0ece4", paddingBottom: "12px" }}>
+                            <div>
+                              <div style={{ fontSize: "11px", color: "#5f6368", textTransform: "uppercase", letterSpacing: "0.5px" }}>From</div>
+                              <div style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>{inquiry.name}</div>
+                              <div style={{ fontSize: "13px", color: "#5f6368", marginTop: "2px" }}>
+                                ✉️ {inquiry.email} {inquiry.phone && ` · 📞 ${inquiry.phone}`}
+                              </div>
+                            </div>
+                            <div style={{ textAlign: "right" }} className="align-left-mobile">
+                              <div style={{ fontSize: "11px", color: "#5f6368", textTransform: "uppercase", letterSpacing: "0.5px" }}>Date Received</div>
+                              <div style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44" }}>
+                                {new Date(inquiry.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Message Body */}
+                          <div>
+                            <div style={{ fontSize: "11px", color: "#5f6368", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px" }}>Message Body</div>
+                            <div style={{
+                              fontSize: "14px",
+                              color: "#2a3a5a",
+                              lineHeight: "1.6",
+                              whiteSpace: "pre-wrap",
+                              background: "#fff",
+                              border: "1px solid #f0ece4",
+                              borderRadius: "8px",
+                              padding: "16px",
+                            }}>
+                              {inquiry.message}
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
+                            <a href={`mailto:${inquiry.email}?subject=Re: Inquiry on Maduvedibbana Matrimony`} style={{
+                              padding: "10px 20px", borderRadius: "8px", background: "#1e2a44", color: "#fff",
+                              fontSize: "13px", fontWeight: 600, textDecoration: "none", display: "inline-flex",
+                              alignItems: "center", gap: "8px", transition: "all 0.2s",
+                            }}>
+                              <Send style={{ width: "14px", height: "14px" }} /> Reply via Email
+                            </a>
                             {inquiry.phone && (
-                              <>
-                                <span style={{ color: "#a0aec0" }}>·</span>
-                                <span style={{ color: "#c6a55c", fontWeight: 500 }}>📞 {inquiry.phone}</span>
-                              </>
+                              <a href={`tel:${inquiry.phone}`} style={{
+                                padding: "10px 20px", borderRadius: "8px", border: "1px solid #e3e8f0",
+                                color: "#1e2a44", background: "#fff", fontSize: "13px", fontWeight: 600,
+                                textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px",
+                                transition: "all 0.2s",
+                              }}>
+                                <Phone style={{ width: "14px", height: "14px" }} /> Call Sender
+                              </a>
                             )}
                           </div>
                         </div>
                       </div>
-                      <p style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6, margin: "8px 0", padding: "12px", background: "#f8f6f3", borderRadius: "10px" }}>{inquiry.message}</p>
-                      <p style={{ fontSize: "11px", color: "#a0aec0" }}>
-                        {new Date(inquiry.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                    {!inquiry.isRead && (
-                      <button onClick={() => markInquiryRead(inquiry.id)} style={{
-                        padding: "8px 14px", borderRadius: "8px", border: "1px solid #e3e8f0",
-                        background: "#fff", color: "#1e2a44", fontSize: "12px", fontWeight: 600,
-                        cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
-                        transition: "all 0.2s", flexShrink: 0,
-                      }}>
-                        <Eye style={{ width: "14px", height: "14px" }} /> Mark Read
-                      </button>
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
