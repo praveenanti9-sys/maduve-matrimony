@@ -8,69 +8,66 @@ import { Menu, X, User, LogOut, LayoutDashboard, ChevronDown, Bell, Heart } from
 import { useStore } from "@/store/useStore";
 import { ADMIN_UUID, SYSTEM_UUID } from "@/lib/supabase-service";
 
-const translations = {
-  en: {
-    logoTitle: "Maduvedibbana",
-    logoSubtitle: "Matrimony",
-    home: "Home",
-    about: "About",
-    contact: "Contact Us",
-    dashboard: "Dashboard",
-    login: "Login",
-    register: "Register Free",
-    logout: "Logout",
-    myProfile: "My Profile",
-    adminPanel: "Admin Panel",
-    allCaughtUp: "All caught up! 🎉",
-    noNewNotifs: "No new notifications at this time.",
-    adminSubtitle: "🛡️ Administrator",
-  },
-  kn: {
-    logoTitle: "ಮದುವೆದಿಬ್ಬಣ",
-    logoSubtitle: "ಮ್ಯಾಟ್ರಿಮೋನಿ",
-    home: "ಮುಖಪುಟ",
-    about: "ನಮ್ಮ ಬಗ್ಗೆ",
-    contact: "ಸಂಪರ್ಕಿಸಿ",
-    dashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
-    login: "ಲಾಗಿನ್",
-    register: "ಉಚಿತ ನೋಂದಣಿ",
-    logout: "ಲಾಗ್ ಔಟ್",
-    myProfile: "ನನ್ನ ಪ್ರೊಫೈಲ್",
-    adminPanel: "ಅಡ್ಮಿನ್ ಪ್ಯಾನಲ್",
-    allCaughtUp: "ಎಲ್ಲವೂ ಓದಲಾಗಿದೆ! 🎉",
-    noNewNotifs: "ಯಾವುದೇ ಹೊಸ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ.",
-    adminSubtitle: "🛡️ ಆಡಳಿತಗಾರ",
-  }
-};
-
 export function Navbar() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState<"en" | "kn">("en");
   
   const { isLoggedIn, currentUser, logout, messages, interests, profiles, readNotificationIds, markNotificationAsRead, markAllNotificationsAsRead, markMessagesRead } = useStore();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem("preferred_lang");
-      if (saved === "kn" || saved === "en") {
-        setCurrentLang(saved);
-      }
+    // 1. Define global callback for Google Translate
+    (window as any).googleTranslateElementInit = () => {
+      new (window as any).google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,kn',
+        layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+        autoDisplay: false
+      }, 'google_translate_element');
+    };
+
+    // 2. Inject Google Translate Script
+    const scriptId = 'google-translate-script';
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      document.body.appendChild(script);
+    }
+
+    // 3. Inject Clean/Premium Custom Styles to hide ugly banners & style dropdown
+    const styleId = 'google-translate-custom-styles';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.innerHTML = `
+        .goog-te-banner-frame.skiptranslate, .goog-te-banner-frame { display: none !important; }
+        body { top: 0px !important; }
+        .goog-logo-link { display: none !important; }
+        .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+        .goog-te-gadget .goog-te-combo {
+          padding: 6px 10px;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+          background: #f1f5f9;
+          color: #1e2a44;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          outline: none;
+          font-family: inherit;
+          transition: all 0.2s;
+        }
+        .goog-te-gadget .goog-te-combo:hover {
+          border-color: #cbd5e1;
+          background: #e2e8f0;
+        }
+      `;
+      document.head.appendChild(style);
     }
   }, []);
-
-  const handleLanguageChange = (lang: "en" | "kn") => {
-    setCurrentLang(lang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem("preferred_lang", lang);
-      window.dispatchEvent(new Event("languageChange"));
-    }
-  };
-
-  const t = translations[currentLang];
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -154,89 +151,39 @@ export function Navbar() {
         maxWidth: "1280px", margin: "0 auto", padding: "0 20px",
         height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
-        {/* Left Side: Language Switcher + Logo Container */}
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          {/* Language Switcher */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "2px",
-            background: "#f1f5f9",
-            padding: "2px",
-            borderRadius: "6px",
-            fontSize: "10px",
-            fontWeight: 700,
-            border: "1px solid #cbd5e1",
-            flexShrink: 0,
-          }}>
-            <button
-              onClick={() => handleLanguageChange('en')}
-              style={{
-                padding: "4px 8px",
-                borderRadius: "4px",
-                border: "none",
-                background: currentLang === 'en' ? "#1e2a44" : "transparent",
-                color: currentLang === 'en' ? "#fff" : "#5f6368",
-                cursor: "pointer",
-                fontWeight: 700,
-                fontSize: "10px",
-                transition: "all 0.15s"
-              }}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => handleLanguageChange('kn')}
-              style={{
-                padding: "4px 8px",
-                borderRadius: "4px",
-                border: "none",
-                background: currentLang === 'kn' ? "#1e2a44" : "transparent",
-                color: currentLang === 'kn' ? "#fff" : "#5f6368",
-                cursor: "pointer",
-                fontWeight: 700,
-                fontSize: "10px",
-                transition: "all 0.15s"
-              }}
-            >
-              KN
-            </button>
+        {/* Logo */}
+        <Link href={isLoggedIn ? "/dashboard" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px" }}>
+          <Image
+            src="https://maduvedibbana.com/wp-content/uploads/2026/04/cropped-Untitled-design-22.png"
+            alt="Maduvedibbana Logo"
+            width={44}
+            height={44}
+            style={{ borderRadius: "8px", objectFit: "contain" }}
+          />
+          <div>
+            <span style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "20px", fontWeight: 700, color: "#1e2a44",
+              letterSpacing: "-0.3px", display: "block", lineHeight: 1.1,
+            }}>
+              Maduvedibbana
+            </span>
+            <span style={{
+              fontSize: "10px", fontWeight: 600, color: "#c6a55c",
+              letterSpacing: "1.5px", textTransform: "uppercase",
+            }}>
+              Matrimony
+            </span>
           </div>
-
-          {/* Logo */}
-          <Link href={isLoggedIn ? "/dashboard" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px" }}>
-            <Image
-              src="https://maduvedibbana.com/wp-content/uploads/2026/04/cropped-Untitled-design-22.png"
-              alt="Maduvedibbana Logo"
-              width={44}
-              height={44}
-              style={{ borderRadius: "8px", objectFit: "contain" }}
-            />
-            <div>
-              <span style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: "20px", fontWeight: 700, color: "#1e2a44",
-                letterSpacing: "-0.3px", display: "block", lineHeight: 1.1,
-              }}>
-                {t.logoTitle}
-              </span>
-              <span style={{
-                fontSize: "10px", fontWeight: 600, color: "#c6a55c",
-                letterSpacing: "1.5px", textTransform: "uppercase",
-              }}>
-                {t.logoSubtitle}
-              </span>
-            </div>
-          </Link>
-        </div>
+        </Link>
 
         {/* Desktop Navigation Links (Public) */}
         {showPublicLinks && (
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }} className="hidden md:flex">
             {[
-              { label: t.home, href: "/" },
-              { label: t.about, href: "/about" },
-              { label: t.contact, href: "/contact" },
+              { label: "Home", href: "/" },
+              { label: "About", href: "/about" },
+              { label: "Contact Us", href: "/contact" },
             ].map((link) => (
               <Link
                 key={link.href}
@@ -255,6 +202,7 @@ export function Navbar() {
 
         {/* Right Side Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div id="google_translate_element" style={{ marginRight: "4px" }} />
           {isLoggedIn ? (
             <>
               <Link
@@ -266,7 +214,7 @@ export function Navbar() {
                 }}
                 className="hidden md:block"
               >
-                {t.dashboard}
+                Dashboard
               </Link>
 
               {/* Notification Bell Dropdown */}
@@ -368,8 +316,8 @@ export function Navbar() {
                       ) : (
                         <div style={{ padding: "32px 16px", textAlign: "center" }}>
                           <Bell style={{ width: "24px", height: "24px", color: "#a0aec0", margin: "0 auto 8px" }} />
-                          <p style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44", margin: 0 }}>{t.allCaughtUp}</p>
-                          <p style={{ fontSize: "11px", color: "#5f6368", marginTop: "2px", margin: 0 }}>{t.noNewNotifs}</p>
+                          <p style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44", margin: 0 }}>All caught up! 🎉</p>
+                          <p style={{ fontSize: "11px", color: "#5f6368", marginTop: "2px", margin: 0 }}>No new notifications at this time.</p>
                         </div>
                       )}
                     </div>
@@ -401,7 +349,7 @@ export function Navbar() {
                     {currentUser.profilePhoto ? null : (currentUser.role === 'admin' ? "🛡️" : (currentUser.fullName ? currentUser.fullName[0].toUpperCase() : "U"))}
                   </div>
                   <span style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44" }} className="hidden sm:inline">
-                    {currentUser.role === 'admin' ? t.adminPanel : (currentUser.fullName ? currentUser.fullName.split(" ")[0] : "Account")}
+                    {currentUser.role === 'admin' ? "Admin Panel" : (currentUser.fullName ? currentUser.fullName.split(" ")[0] : "Account")}
                   </span>
                   <ChevronDown style={{ width: "14px", height: "14px", color: "#5f6368" }} />
                 </button>
@@ -417,7 +365,7 @@ export function Navbar() {
                       <p style={{ fontSize: "14px", fontWeight: 600, color: "#1e2a44" }}>{currentUser.fullName || "User"}</p>
                       <p style={{ fontSize: "12px", color: "#5f6368", marginTop: "2px" }}>{currentUser.email}</p>
                       {currentUser.role === 'admin' && (
-                        <span style={{ display: "inline-block", marginTop: "6px", fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", background: "rgba(198,165,92,0.12)", color: "#c6a55c" }}>{t.adminSubtitle}</span>
+                        <span style={{ display: "inline-block", marginTop: "6px", fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", background: "rgba(198,165,92,0.12)", color: "#c6a55c" }}>🛡️ Administrator</span>
                       )}
                     </div>
                     <div style={{ padding: "4px" }}>
@@ -429,7 +377,7 @@ export function Navbar() {
                           transition: "background 0.2s",
                         }}>
                           <LayoutDashboard style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
-                          {t.adminPanel}
+                          Admin Panel
                         </Link>
                       ) : (
                         <Link href="/dashboard/profile" onClick={() => setUserMenuOpen(false)} style={{
@@ -439,7 +387,7 @@ export function Navbar() {
                           transition: "background 0.2s",
                         }}>
                           <User style={{ width: "16px", height: "16px", color: "#5f6368" }} />
-                          {t.myProfile}
+                          My Profile
                         </Link>
                       )}
                       <Link href="/dashboard" onClick={() => setUserMenuOpen(false)} style={{
@@ -449,7 +397,7 @@ export function Navbar() {
                         transition: "background 0.2s",
                       }}>
                         <LayoutDashboard style={{ width: "16px", height: "16px", color: "#5f6368" }} />
-                        {t.dashboard}
+                        Dashboard
                       </Link>
                     </div>
                     <div style={{ padding: "4px", borderTop: "1px solid #e3e8f0" }}>
@@ -460,7 +408,7 @@ export function Navbar() {
                         border: "none", cursor: "pointer", transition: "background 0.2s",
                       }}>
                         <LogOut style={{ width: "16px", height: "16px" }} />
-                        {t.logout}
+                        Logout
                       </button>
                     </div>
                   </div>
@@ -478,7 +426,7 @@ export function Navbar() {
               }}
               className="hidden md:inline-flex"
               >
-                {t.login}
+                Login
               </Link>
               <Link href="/register" style={{
                 display: "inline-flex", alignItems: "center", gap: "6px",
@@ -490,7 +438,7 @@ export function Navbar() {
               }}
               className="hidden md:inline-flex"
               >
-                {t.register}
+                Register Free
               </Link>
             </>
           )}
@@ -516,9 +464,9 @@ export function Navbar() {
         }} className="md:hidden">
           <ul style={{ padding: "8px 0", margin: 0, listStyle: "none" }}>
             {showPublicLinks && [
-              { name: t.home, href: "/" },
-              { name: t.about, href: "/about" },
-              { name: t.contact, href: "/contact" },
+              { name: "Home", href: "/" },
+              { name: "About", href: "/about" },
+              { name: "Contact", href: "/contact" },
             ].map((link) => (
               <li key={link.name}>
                 <Link
@@ -545,7 +493,7 @@ export function Navbar() {
                     color: "#1e2a44", textDecoration: "none",
                   }}>
                     <LayoutDashboard style={{ width: "18px", height: "18px" }} />
-                    {t.dashboard}
+                    Dashboard
                   </Link>
                 </li>
                 <li>
@@ -556,7 +504,7 @@ export function Navbar() {
                     cursor: "pointer", textAlign: "left",
                   }}>
                     <LogOut style={{ width: "18px", height: "18px" }} />
-                    {t.logout}
+                    Logout
                   </button>
                 </li>
               </>
@@ -567,13 +515,13 @@ export function Navbar() {
                   padding: "12px", borderRadius: "10px", border: "1px solid #e3e8f0",
                   fontSize: "14px", fontWeight: 600, color: "#1e2a44",
                   textDecoration: "none",
-                }}>{t.login}</Link>
+                }}>Login</Link>
                 <Link href="/register" onClick={() => setMobileMenuOpen(false)} style={{
                   flex: 1, display: "block", textAlign: "center",
                   padding: "12px", borderRadius: "10px",
                   background: "#1e2a44", color: "#fff",
                   fontSize: "14px", fontWeight: 600, textDecoration: "none",
-                }}>{t.register}</Link>
+                }}>Register Free</Link>
               </li>
             )}
           </ul>
