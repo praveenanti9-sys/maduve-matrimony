@@ -133,6 +133,24 @@ export interface Interest {
   timestamp: string;
 }
 
+export interface ContactInquiry {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  adminId: string;
+  action: string;
+  targetUserId: string;
+  details: string;
+  createdAt: string;
+}
+
 // ── Converters: DB ↔ Frontend ──
 
 function dbProfileToUserProfile(db: DbProfile): UserProfile {
@@ -368,6 +386,15 @@ interface AppState {
   updateSystemSettings: (settings: Partial<{ dailyInterestLimit: number; autoApproveProfiles: boolean }>) => Promise<void>;
   fetchSystemSettings: () => Promise<void>;
 
+  // Contact Inquiries (Admin)
+  contactInquiries: ContactInquiry[];
+  fetchContactInquiries: () => Promise<void>;
+  markInquiryRead: (id: string) => Promise<void>;
+
+  // Audit Log (Admin)
+  auditLog: AuditLogEntry[];
+  fetchAuditLog: () => Promise<void>;
+
   // Views
   incrementProfileViews: () => void;
   uploadPhoto: (file: File) => Promise<string | null>;
@@ -466,6 +493,8 @@ export const useStore = create<AppState>((set, get) => ({
   profiles: [],
   messages: [],
   interests: [],
+  contactInquiries: [],
+  auditLog: [],
   readNotificationIds: [],
   markNotificationAsRead: (id: string) => {
     const state = get();
@@ -516,12 +545,16 @@ export const useStore = create<AppState>((set, get) => ({
 
         // Fetch all data in parallel
         const state = get();
-        await Promise.all([
+        const fetches: Promise<void>[] = [
           state.fetchProfiles(),
           state.fetchMessages(),
           state.fetchInterests(),
           state.fetchSystemSettings(),
-        ]);
+        ];
+        if (profile.role === 'admin') {
+          fetches.push(state.fetchContactInquiries(), state.fetchAuditLog());
+        }
+        await Promise.all(fetches);
       } else {
         set({ isLoading: false });
       }
@@ -612,12 +645,16 @@ export const useStore = create<AppState>((set, get) => ({
 
       // Fetch all data
       const state = get();
-      await Promise.all([
+      const fetches: Promise<void>[] = [
         state.fetchProfiles(),
         state.fetchMessages(),
         state.fetchInterests(),
         state.fetchSystemSettings(),
-      ]);
+      ];
+      if (profile.role === 'admin') {
+        fetches.push(state.fetchContactInquiries(), state.fetchAuditLog());
+      }
+      await Promise.all(fetches);
       return true;
     } catch (e) {
       set({ isLoading: false, error: (e as Error).message });
@@ -976,6 +1013,53 @@ export const useStore = create<AppState>((set, get) => ({
     set((state) => ({
       systemSettings: { ...state.systemSettings, ...data },
     }));
+  },
+
+  // ── Contact Inquiries (Admin) ──
+  fetchContactInquiries: async () => {
+    const state = get();
+    if (state.currentUser.role !== 'admin') return;
+    const data = await svc.fetchContactInquiries();
+    const inquiries = data.map((d: any) => ({
+      id: d.id,
+      name: d.name,
+      email: d.email,
+      message: d.message,
+      isRead: d.is_read,
+      createdAt: d.created_at,
+    }));
+    set({ contactInquiries: inquiries });
+  },
+
+  markInquiryRead: async (id: string) => {
+    const supabase = svc.getSupabase();
+    await supabase.from('contact_inquiries').update({ is_read: true }).eq('id', id);
+    set((state) => ({
+      contactInquiries: state.contactInquiries.map(i =>
+        i.id === id ? { ...i, isRead: true } : i
+      ),
+    }));
+  },
+
+  // ── Audit Log (Admin) ──
+  fetchAuditLog: async () => {
+    const state = get();
+    if (state.currentUser.role !== 'admin') return;
+    const supabase = svc.getSupabase();
+    const { data } = await supabase
+      .from('admin_audit_log')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    const log = (data || []).map((d: any) => ({
+      id: d.id,
+      adminId: d.admin_id,
+      action: d.action,
+      targetUserId: d.target_user_id,
+      details: d.details || '',
+      createdAt: d.created_at,
+    }));
+    set({ auditLog: log });
   },
 
   // ── Views ──

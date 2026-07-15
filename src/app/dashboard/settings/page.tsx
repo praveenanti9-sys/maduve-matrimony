@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Settings as SettingsIcon, Bell, Lock, Eye, Shield, Smartphone,
   Mail, CheckCircle2, Save, Trash2, LogOut, AlertCircle,
-  User, Key,
+  User, Key, PauseCircle, Server,
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -152,6 +152,7 @@ export default function SettingsPage() {
     { title: "Profile Visibility", desc: "Show my profile in search results to other users", icon: Eye, checked: profileVisible, onChange: setProfileVisible },
     { title: "Photo Privacy", desc: "Only allow accepted interests to see my photos", icon: Lock, checked: photoPrivacy, onChange: setPhotoPrivacy },
     { title: "Contact Details", desc: "Hide my phone number from all users until interest is accepted", icon: Smartphone, checked: contactHidden, onChange: setContactHidden },
+    { title: "Pause Profile", desc: "Temporarily hide your profile from all users. Use this instead of deleting your account.", icon: PauseCircle, checked: !profileVisible, onChange: (val: boolean) => setProfileVisible(!val) },
   ];
 
   const notifItems = [
@@ -378,6 +379,38 @@ export default function SettingsPage() {
           }}>
             <LogOut style={{ width: "16px", height: "16px" }} /> Logout
           </button>
+
+          {/* Admin: Email System Status */}
+          {isAdmin && (
+            <div className="card" style={{ padding: "24px" }}>
+              <h3 style={{ fontWeight: 600, marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px", fontSize: "16px", color: "#1e2a44" }}>
+                <Server style={{ width: "20px", height: "20px", color: "#c6a55c" }} />
+                Email System Status
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f0ece4" }}>
+                  <span style={{ fontSize: "13px", color: "#5f6368" }}>SMTP Provider</span>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44" }}>Zoho Mail</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f0ece4" }}>
+                  <span style={{ fontSize: "13px", color: "#5f6368" }}>Sender Email</span>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44" }}>contact@maduvedibbana.com</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f0ece4" }}>
+                  <span style={{ fontSize: "13px", color: "#5f6368" }}>Email Triggers</span>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#1e2a44" }}>Registration + Activation</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0" }}>
+                  <span style={{ fontSize: "13px", color: "#5f6368" }}>Free Tier Limit</span>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#f59e0b" }}>500 emails/day</span>
+                </div>
+              </div>
+              <div style={{ marginTop: "12px", padding: "10px 14px", borderRadius: "10px", background: "rgba(22,163,106,0.06)", border: "1px solid rgba(22,163,106,0.15)", display: "flex", alignItems: "center", gap: "8px" }}>
+                <CheckCircle2 style={{ width: "14px", height: "14px", color: "#16a34a" }} />
+                <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 500 }}>Email system configured via environment variables</span>
+              </div>
+            </div>
+          )}
 
           {/* Danger Zone (Only for regular users) */}
           {!isAdmin && (

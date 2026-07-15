@@ -11,14 +11,14 @@ import {
   Phone, ChevronRight, Send, Settings,
 } from "lucide-react";
 
-type AdminView = 'overview' | 'users' | 'approvals' | 'user-detail' | 'messages' | 'settings';
+type AdminView = 'overview' | 'users' | 'approvals' | 'user-detail' | 'messages' | 'settings' | 'inquiries';
 
 export default function AdminPage() {
   const { 
     currentUser, profiles, messages, interests, blockUser, suspendUser, 
     activateUser, deleteUser, approveUser, rejectUser, verifyUser, 
     registeredUser, systemSettings, fetchSystemSettings, updateSystemSettings,
-    markMessagesRead
+    markMessagesRead, contactInquiries, markInquiryRead,
   } = useStore();
   
   const [activeView, setActiveView] = useState<AdminView>('overview');
@@ -259,6 +259,7 @@ export default function AdminPage() {
     { id: 'users' as const, label: 'User Management', icon: Users, count: totalUsers },
     { id: 'approvals' as const, label: 'Pending Approvals', icon: Clock, count: pendingApprovalsCount },
     { id: 'messages' as const, label: 'All Messages', icon: MessageCircle, count: totalMessages },
+    { id: 'inquiries' as const, label: 'Contact Inquiries', icon: Mail, count: contactInquiries.filter(i => !i.isRead).length },
     { id: 'settings' as const, label: 'System Settings', icon: Settings, count: 0 },
   ];
 
@@ -980,6 +981,72 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          CONTACT INQUIRIES TAB
+         ═══════════════════════════════════════════ */}
+      {activeView === 'inquiries' && (
+        <div className="animate-fade-in">
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+            <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(198,165,92,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Mail style={{ width: "22px", height: "22px", color: "#c6a55c" }} />
+            </div>
+            <div>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "22px", fontWeight: 700, color: "#1e2a44", margin: 0 }}>Contact Inquiries</h2>
+              <p style={{ fontSize: "12px", color: "#5f6368", margin: 0 }}>Messages received from the contact form on the website</p>
+            </div>
+            <span style={{ marginLeft: "auto", padding: "4px 12px", borderRadius: "999px", background: "rgba(198,165,92,0.1)", color: "#c6a55c", fontSize: "12px", fontWeight: 600 }}>
+              {contactInquiries.length} total · {contactInquiries.filter(i => !i.isRead).length} unread
+            </span>
+          </div>
+          {contactInquiries.length === 0 ? (
+            <div className="card" style={{ padding: "48px", textAlign: "center" }}>
+              <Mail style={{ width: "40px", height: "40px", color: "#a0aec0", margin: "0 auto 12px" }} />
+              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#1e2a44", marginBottom: "4px" }}>No Inquiries Yet</h3>
+              <p style={{ fontSize: "13px", color: "#5f6368" }}>Contact form submissions will appear here.</p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {contactInquiries.map((inquiry) => (
+                <div key={inquiry.id} className="card" style={{
+                  padding: "20px 24px",
+                  borderLeft: inquiry.isRead ? "3px solid transparent" : "3px solid #c6a55c",
+                  background: inquiry.isRead ? "#fff" : "rgba(198,165,92,0.02)",
+                }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "16px" }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                        <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "linear-gradient(135deg, #1e2a44, #c6a55c)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "14px", fontWeight: 700, flexShrink: 0 }}>
+                          {inquiry.name[0]?.toUpperCase()}
+                        </div>
+                        <div>
+                          <span style={{ fontWeight: 600, fontSize: "14px", color: "#1e2a44" }}>{inquiry.name}</span>
+                          {!inquiry.isRead && <span style={{ marginLeft: "8px", width: "8px", height: "8px", borderRadius: "50%", background: "#dc2626", display: "inline-block" }} />}
+                          <div style={{ fontSize: "12px", color: "#5f6368" }}>{inquiry.email}</div>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: "13px", color: "#374151", lineHeight: 1.6, margin: "8px 0", padding: "12px", background: "#f8f6f3", borderRadius: "10px" }}>{inquiry.message}</p>
+                      <p style={{ fontSize: "11px", color: "#a0aec0" }}>
+                        {new Date(inquiry.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    {!inquiry.isRead && (
+                      <button onClick={() => markInquiryRead(inquiry.id)} style={{
+                        padding: "8px 14px", borderRadius: "8px", border: "1px solid #e3e8f0",
+                        background: "#fff", color: "#1e2a44", fontSize: "12px", fontWeight: 600,
+                        cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
+                        transition: "all 0.2s", flexShrink: 0,
+                      }}>
+                        <Eye style={{ width: "14px", height: "14px" }} /> Mark Read
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

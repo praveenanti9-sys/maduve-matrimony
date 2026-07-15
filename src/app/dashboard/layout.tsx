@@ -32,8 +32,25 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, currentUser, initializeSession, isLoggedIn, isLoading } = useStore();
+  const { logout, currentUser, initializeSession, isLoggedIn, isLoading, messages, interests, profiles } = useStore();
   const [sessionChecked, setSessionChecked] = useState(false);
+
+  // Badge calculations
+  const isAdmin = currentUser.role === 'admin';
+  const myId = currentUser.id;
+  const unreadMsgCount = messages.filter(m => {
+    if (isAdmin) return (m.receiverId === myId || m.receiverId === 'admin' || m.receiverId === '00000000-0000-0000-0000-00000000a111') && !m.read;
+    return m.receiverId === myId && !m.read;
+  }).length;
+  const pendingInterestCount = interests.filter(i => i.toId === myId && i.status === 'pending').length;
+  const pendingApprovalCount = isAdmin ? profiles.filter(p => p.status === 'pending').length : 0;
+
+  const getBadge = (href: string) => {
+    if (href === '/dashboard/messages') return unreadMsgCount;
+    if (href === '/dashboard/interests') return pendingInterestCount;
+    if (href === '/dashboard/admin') return pendingApprovalCount;
+    return 0;
+  };
 
   // Initialize session on load
   useEffect(() => {
@@ -56,7 +73,6 @@ export default function DashboardLayout({
     router.push("/");
   };
 
-  const isAdmin = currentUser.role === 'admin';
   const allLinks = isAdmin ? adminLinks : userLinks;
 
   // Show a premium loading screen while verifying auth to prevent content flash/leak
@@ -136,6 +152,7 @@ export default function DashboardLayout({
           {allLinks.map((link) => {
             const isActive = pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href));
             const isAdminLink = link.href === "/dashboard/admin";
+            const badge = getBadge(link.href);
             return (
               <Link
                 key={link.href}
@@ -157,7 +174,16 @@ export default function DashboardLayout({
               >
                 <link.icon style={{ width: "20px", height: "20px", flexShrink: 0 }} />
                 {link.label}
-                {isActive && <ChevronRight style={{ width: "16px", height: "16px", marginLeft: "auto" }} />}
+                {badge > 0 && (
+                  <span style={{
+                    marginLeft: "auto", minWidth: "20px", height: "20px", borderRadius: "999px",
+                    background: isAdminLink ? "#f59e0b" : "#dc2626",
+                    color: "#fff", fontSize: "11px", fontWeight: 700,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    padding: "0 6px", lineHeight: 1,
+                  }}>{badge > 99 ? '99+' : badge}</span>
+                )}
+                {isActive && !badge && <ChevronRight style={{ width: "16px", height: "16px", marginLeft: "auto" }} />}
               </Link>
             );
           })}
@@ -185,6 +211,7 @@ export default function DashboardLayout({
       }} className="lg:!hidden">
         {allLinks.slice(0, 5).map((link) => {
           const isActive = pathname === link.href || (link.href !== "/dashboard" && pathname.startsWith(link.href));
+          const badge = getBadge(link.href);
           return (
             <Link
               key={link.href}
@@ -194,10 +221,22 @@ export default function DashboardLayout({
                 gap: "2px", padding: "6px 12px", borderRadius: "12px",
                 fontSize: "10px", fontWeight: 500,
                 color: isActive ? "#1e2a44" : "#5f6368",
-                textDecoration: "none",
+                textDecoration: "none", position: "relative",
               }}
             >
-              <link.icon style={{ width: "20px", height: "20px" }} />
+              <div style={{ position: "relative" }}>
+                <link.icon style={{ width: "20px", height: "20px" }} />
+                {badge > 0 && (
+                  <span style={{
+                    position: "absolute", top: "-4px", right: "-8px",
+                    minWidth: "16px", height: "16px", borderRadius: "999px",
+                    background: "#dc2626", color: "#fff", fontSize: "9px", fontWeight: 700,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    padding: "0 4px", lineHeight: 1,
+                    border: "2px solid #fff",
+                  }}>{badge > 9 ? '9+' : badge}</span>
+                )}
+              </div>
               {link.label}
             </Link>
           );
