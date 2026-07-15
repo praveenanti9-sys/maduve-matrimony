@@ -547,27 +547,74 @@ export default function RegisterPage() {
         </div>
 
         {/* Step Indicator */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0", marginBottom: "8px", overflowX: "auto", paddingBottom: "10px" }}>
-          {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s) => (
-            <div key={s} style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+        <div style={{ position: "relative", marginBottom: "12px", padding: "0 10px" }}>
+          {/* Background connecting line stretching across all steps */}
+          <div style={{
+            position: "absolute",
+            top: "18px",
+            left: "20px",
+            right: "20px",
+            height: "2px",
+            background: "#e3e8f0",
+            zIndex: 0
+          }} />
+          
+          {/* Active connecting line showing progress */}
+          <div style={{
+            position: "absolute",
+            top: "18px",
+            left: "20px",
+            width: `${((step - 1) / (totalSteps - 1)) * 100}%`,
+            height: "2px",
+            background: "#16a34a",
+            zIndex: 0,
+            transition: "width 0.3s ease"
+          }} />
+
+          {/* Step Nodes container */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {Array.from({ length: totalSteps }, (_, i) => i + 1).map((s) => (
+              <div key={s} style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative", zIndex: 1 }}>
                 <div style={{
                   width: "36px", height: "36px", borderRadius: "50%",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: "13px", fontWeight: 700,
-                  background: step > s ? "#16a34a" : step === s ? "#1e2a44" : "#e3e8f0",
+                  background: step > s ? "#16a34a" : step === s ? "#1e2a44" : "#fff",
                   color: step >= s ? "#fff" : "#5f6368",
+                  border: step >= s ? "none" : "2px solid #e3e8f0",
                   transition: "all 0.3s ease",
+                  boxShadow: step === s ? "0 4px 10px rgba(30,42,68,0.25)" : "none"
                 }}>
                   {step > s ? <CheckCircle2 style={{ width: "18px", height: "18px" }} /> : s}
                 </div>
-                <span style={{ fontSize: "10px", fontWeight: 600, color: step >= s ? "#1e2a44" : "#a0aec0", whiteSpace: "nowrap" }}>{stepLabels[s - 1]}</span>
+                <span style={{
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  color: step >= s ? "#1e2a44" : "#a0aec0",
+                  marginTop: "6px",
+                  whiteSpace: "nowrap"
+                }} className="hidden md:block">
+                  {stepLabels[s - 1]}
+                </span>
               </div>
-              {s < totalSteps && (
-                <div style={{ width: "32px", height: "2px", background: step > s ? "#16a34a" : "#e3e8f0", transition: "all 0.3s", marginBottom: "18px", marginLeft: "6px", marginRight: "6px" }} />
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Current Step Label for Mobile */}
+          <div style={{ textAlign: "center", marginTop: "16px" }} className="block md:hidden">
+            <span style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              color: "#c6a55c",
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.5px"
+            }}>
+              Step {step} of {totalSteps}
+            </span>
+            <h4 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44", margin: "2px 0 0" }}>
+              {stepLabels[step - 1]}
+            </h4>
+          </div>
         </div>
 
         <div className="card" style={{ padding: "32px" }}>
