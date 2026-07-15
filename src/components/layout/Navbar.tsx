@@ -24,11 +24,11 @@ export function Navbar() {
     if (select) {
       select.value = lang;
       select.dispatchEvent(new Event('change'));
-      if (typeof window !== 'undefined') {
-        localStorage.setItem("preferred_lang", lang);
-      }
-      setCurrentLang(lang as "en" | "kn");
     }
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("preferred_lang", lang);
+    }
+    setCurrentLang(lang as "en" | "kn");
   };
 
   useEffect(() => {
@@ -42,17 +42,19 @@ export function Navbar() {
       }, 'google_translate_element');
 
       // Auto-trigger language from local storage once combo box is loaded
-      setTimeout(() => {
-        const saved = localStorage.getItem("preferred_lang");
-        if (saved === "kn" || saved === "en") {
+      let attempts = 0;
+      const interval = setInterval(() => {
+        const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+        const saved = localStorage.getItem("preferred_lang") || "en";
+        if (select) {
+          clearInterval(interval);
           setCurrentLang(saved as "en" | "kn");
-          const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
-          if (select && saved === "kn") {
-            select.value = 'kn';
-            select.dispatchEvent(new Event('change'));
-          }
+          select.value = saved;
+          select.dispatchEvent(new Event('change'));
         }
-      }, 1000);
+        attempts++;
+        if (attempts > 30) clearInterval(interval);
+      }, 500);
     };
 
     // 2. Inject Google Translate Script
@@ -269,7 +271,7 @@ export function Navbar() {
           </div>
 
           {/* Hidden Google Translate mount point */}
-          <div id="google_translate_element" style={{ display: "none" }} />
+          <div id="google_translate_element" style={{ position: "absolute", opacity: 0, width: 0, height: 0, overflow: "hidden", pointerEvents: "none" }} />
           {isLoggedIn ? (
             <>
               <Link
