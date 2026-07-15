@@ -37,7 +37,6 @@ export function Navbar() {
       new (window as any).google.translate.TranslateElement({
         pageLanguage: 'en',
         includedLanguages: 'en,kn',
-        layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
         autoDisplay: false
       }, 'google_translate_element');
 
