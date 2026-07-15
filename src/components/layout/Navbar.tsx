@@ -15,7 +15,21 @@ export function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   
+  const [currentLang, setCurrentLang] = useState<"en" | "kn">("en");
+  
   const { isLoggedIn, currentUser, logout, messages, interests, profiles, readNotificationIds, markNotificationAsRead, markAllNotificationsAsRead, markMessagesRead } = useStore();
+
+  const triggerGoogleTranslate = (lang: string) => {
+    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+    if (select) {
+      select.value = lang;
+      select.dispatchEvent(new Event('change'));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("preferred_lang", lang);
+      }
+      setCurrentLang(lang as "en" | "kn");
+    }
+  };
 
   useEffect(() => {
     // 1. Define global callback for Google Translate
@@ -26,6 +40,19 @@ export function Navbar() {
         layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
         autoDisplay: false
       }, 'google_translate_element');
+
+      // Auto-trigger language from local storage once combo box is loaded
+      setTimeout(() => {
+        const saved = localStorage.getItem("preferred_lang");
+        if (saved === "kn" || saved === "en") {
+          setCurrentLang(saved as "en" | "kn");
+          const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+          if (select && saved === "kn") {
+            select.value = 'kn';
+            select.dispatchEvent(new Event('change'));
+          }
+        }
+      }, 1000);
     };
 
     // 2. Inject Google Translate Script
@@ -37,32 +64,23 @@ export function Navbar() {
       document.body.appendChild(script);
     }
 
-    // 3. Inject Clean/Premium Custom Styles to hide ugly banners & style dropdown
+    // 3. Inject Clean/Premium Custom Styles to hide ugly banners, frames, tooltips & highlight
     const styleId = 'google-translate-custom-styles';
     if (!document.getElementById(styleId)) {
       const style = document.createElement('style');
       style.id = styleId;
       style.innerHTML = `
-        .goog-te-banner-frame.skiptranslate, .goog-te-banner-frame { display: none !important; }
+        .goog-te-banner-frame.skiptranslate, .goog-te-banner-frame, .goog-te-banner, #goog-gt-tt, .goog-te-balloon-frame { 
+          display: none !important; 
+          visibility: hidden !important;
+        }
         body { top: 0px !important; }
         .goog-logo-link { display: none !important; }
         .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
-        .goog-te-gadget .goog-te-combo {
-          padding: 6px 10px;
-          border-radius: 8px;
-          border: 1px solid #e2e8f0;
-          background: #f1f5f9;
-          color: #1e2a44;
-          font-size: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          outline: none;
-          font-family: inherit;
-          transition: all 0.2s;
-        }
-        .goog-te-gadget .goog-te-combo:hover {
-          border-color: #cbd5e1;
-          background: #e2e8f0;
+        .goog-text-highlight {
+          background-color: transparent !important;
+          box-shadow: none !important;
+          box-sizing: border-box !important;
         }
       `;
       document.head.appendChild(style);
@@ -202,7 +220,56 @@ export function Navbar() {
 
         {/* Right Side Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div id="google_translate_element" style={{ marginRight: "4px" }} />
+          {/* Custom Styled Switcher Buttons */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "2px",
+            background: "#f1f5f9",
+            padding: "2px",
+            borderRadius: "6px",
+            fontSize: "10px",
+            fontWeight: 700,
+            border: "1px solid #cbd5e1",
+            flexShrink: 0,
+            marginRight: "4px"
+          }}>
+            <button
+              onClick={() => triggerGoogleTranslate('en')}
+              style={{
+                padding: "4px 8px",
+                borderRadius: "4px",
+                border: "none",
+                background: currentLang === 'en' ? "#1e2a44" : "transparent",
+                color: currentLang === 'en' ? "#fff" : "#5f6368",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "10px",
+                transition: "all 0.15s"
+              }}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => triggerGoogleTranslate('kn')}
+              style={{
+                padding: "4px 8px",
+                borderRadius: "4px",
+                border: "none",
+                background: currentLang === 'kn' ? "#1e2a44" : "transparent",
+                color: currentLang === 'kn' ? "#fff" : "#5f6368",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "10px",
+                transition: "all 0.15s"
+              }}
+            >
+              ಕನ್ನಡ
+            </button>
+          </div>
+
+          {/* Hidden Google Translate mount point */}
+          <div id="google_translate_element" style={{ display: "none" }} />
           {isLoggedIn ? (
             <>
               <Link
