@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase-service';
-import { sendResendEmail, getRegistrationWelcomeHtml } from '@/lib/email-service';
+import { sendResendEmail } from '@/lib/email-service';
+import { getRegistrationWelcomeHtml } from '@/lib/email-templates';
 
 export async function POST(request: Request) {
   try {

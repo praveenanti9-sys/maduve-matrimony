@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import * as svc from '@/lib/supabase-service';
 import { ADMIN_UUID, SYSTEM_UUID } from '@/lib/supabase-service';
 import type { DbProfile, DbMessage, DbInterest, DbSystemSettings } from '@/lib/supabase-service';
-import { getAccountActivatedHtml } from '@/lib/email-service';
+import { getAccountActivatedHtml } from '@/lib/email-templates';
 
 // Read NEXT_PUBLIC_ env vars with fallback to server-injected runtime values
 function getClientEnv(key: string): string {
