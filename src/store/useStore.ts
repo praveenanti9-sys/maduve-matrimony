@@ -432,6 +432,10 @@ const clearSubscriptions = () => {
     interestSubscriptionUnsubscribe();
     interestSubscriptionUnsubscribe = null;
   }
+  if (profileSubscriptionUnsubscribe) {
+    profileSubscriptionUnsubscribe();
+    profileSubscriptionUnsubscribe = null;
+  }
 };
 
 function loadReadNotifs(userId: string): string[] {
