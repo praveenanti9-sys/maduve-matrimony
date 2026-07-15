@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabaseAdmin
       .from('messages')
       .insert({
-        sender_id: receiverId,
+        sender_id: senderType === 'admin' ? 'admin' : 'system',
         receiver_id: receiverId,
         text,
         sender_type: senderType || 'system',

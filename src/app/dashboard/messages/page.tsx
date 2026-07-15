@@ -10,15 +10,22 @@ export default function MessagesPage() {
   const [inputText, setInputText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const isAdmin = currentUser.role === 'admin';
   const myId = currentUser.id;
+  const myIds = isAdmin ? [myId, 'admin'] : [myId];
+  const isMyId = (id: string) => myIds.includes(id);
 
-  const chatPartnerIds = Array.from(
+  const rawPartnerIds = Array.from(
     new Set(
       messages
         .flatMap((m) => [m.senderId, m.receiverId])
-        .filter((id) => id !== myId)
+        .filter((id) => !isMyId(id))
     )
   );
+
+  const chatPartnerIds = isAdmin
+    ? rawPartnerIds
+    : Array.from(new Set(['admin', ...rawPartnerIds]));
 
   const getProfile = (id: string) => {
     if (id === 'system') return { id: 'system', name: '🔔 System Notifications', profilePhoto: '', age: 0, height: '', location: '', education: '', occupation: '', gothra: '', gender: '', nakshatra: '', rashi: '', maritalStatus: '', annualIncome: '', bio: '', district: '', phone: '', email: '', weight: '', complexion: '', fatherName: '', fatherOccupation: '', motherName: '', motherOccupation: '', siblings: '', prefAgeMin: '', prefAgeMax: '', prefHeightMin: '', prefDistrict: '', prefEducation: '', nativePlace: '', state: '', status: 'active' as const, statusReason: '', joinDate: '' }
@@ -28,11 +35,13 @@ export default function MessagesPage() {
 
   const activeChatMessages = activeChat
     ? messages
-        .filter(
-          (m) =>
-            (m.senderId === myId && m.receiverId === activeChat) ||
-            (m.senderId === activeChat && m.receiverId === myId)
-        )
+        .filter((m) => {
+          const senderIsMe = isMyId(m.senderId);
+          const receiverIsMe = isMyId(m.receiverId);
+          const senderIsPartner = m.senderId === activeChat;
+          const receiverIsPartner = m.receiverId === activeChat;
+          return (senderIsMe && receiverIsPartner) || (senderIsPartner && receiverIsMe);
+        })
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
     : [];
 
@@ -77,7 +86,7 @@ export default function MessagesPage() {
   };
 
   const getUnreadCount = (partnerId: string) => {
-    return messages.filter(m => m.senderId === partnerId && m.receiverId === myId && !m.read).length;
+    return messages.filter(m => m.senderId === partnerId && isMyId(m.receiverId) && !m.read).length;
   };
 
   return (
@@ -113,11 +122,13 @@ export default function MessagesPage() {
               if (!profile) return null;
 
               const partnerMessages = messages
-                .filter(
-                  (m) =>
-                    (m.senderId === myId && m.receiverId === partnerId) ||
-                    (m.senderId === partnerId && m.receiverId === myId)
-                )
+                .filter((m) => {
+                  const senderIsMe = isMyId(m.senderId);
+                  const receiverIsMe = isMyId(m.receiverId);
+                  const senderIsPartner = m.senderId === partnerId;
+                  const receiverIsPartner = m.receiverId === partnerId;
+                  return (senderIsMe && receiverIsPartner) || (senderIsPartner && receiverIsMe);
+                })
                 .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
               const lastMessage = partnerMessages[0];
               const isActive = activeChat === partnerId;
@@ -161,7 +172,7 @@ export default function MessagesPage() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <p style={{ fontSize: "12px", color: unreadCount > 0 ? "#1e2a44" : "#5f6368", fontWeight: unreadCount > 0 ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
                         {lastMessage
-                          ? (lastMessage.senderId === myId)
+                          ? isMyId(lastMessage.senderId)
                             ? `You: ${lastMessage.text}`
                             : lastMessage.text
                           : "Start chatting..."}

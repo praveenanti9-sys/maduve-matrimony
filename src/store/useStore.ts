@@ -370,13 +370,15 @@ const setupSubscriptions = (profileId: string, set: any, get: any) => {
   if (messageSubscriptionUnsubscribe) messageSubscriptionUnsubscribe();
   if (interestSubscriptionUnsubscribe) interestSubscriptionUnsubscribe();
 
+  const isAdmin = get().currentUser.role === 'admin';
+
   messageSubscriptionUnsubscribe = svc.subscribeToMessages(profileId, (newMsg) => {
     const state = get();
     const formattedMsg = dbMessageToMessage(newMsg);
     if (!state.messages.some((m: any) => m.id === formattedMsg.id)) {
       set({ messages: [...state.messages, formattedMsg] });
     }
-  });
+  }, isAdmin);
 
   interestSubscriptionUnsubscribe = svc.subscribeToInterests(profileId, (newInterest) => {
     const state = get();
@@ -659,10 +661,28 @@ export const useStore = create<AppState>((set, get) => ({
 
   sendMessage: async (receiverId, text, senderId) => {
     const state = get();
-    const actualSenderId = senderId || state.currentUser.id;
-    const senderType = senderId === 'system' ? 'system' : (state.currentUser.role === 'admin' ? 'admin' : 'user');
+    const isAdmin = state.currentUser.role === 'admin';
+    const actualSenderId = senderId || (isAdmin ? 'admin' : state.currentUser.id);
+    const senderType = senderId === 'system' ? 'system' : (isAdmin ? 'admin' : 'user');
 
-    const { message } = await svc.sendMessage(actualSenderId, receiverId, text, senderType);
+    let message: DbMessage | null = null;
+    if (isAdmin && senderId !== 'system') {
+      try {
+        const res = await fetch('/api/messages/system', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ receiverId, text, senderType: 'admin' }),
+        });
+        const data = await res.json();
+        message = data.message || null;
+      } catch (e) {
+        console.error('Failed to send admin message:', e);
+      }
+    } else {
+      const res = await svc.sendMessage(actualSenderId, receiverId, text, senderType);
+      message = res.message;
+    }
+
     if (message) {
       const newMsg = dbMessageToMessage(message);
       set({ messages: [...state.messages, newMsg] });
@@ -671,11 +691,13 @@ export const useStore = create<AppState>((set, get) => ({
 
   markMessagesRead: async (partnerId) => {
     const state = get();
-    const myId = state.currentUser.id;
-    await svc.markMessagesRead(myId, partnerId);
+    const isAdmin = state.currentUser.role === 'admin';
+    const myId = isAdmin ? 'admin' : state.currentUser.id;
+    const myIds = isAdmin ? [state.currentUser.id, 'admin'] : [state.currentUser.id];
+    await svc.markMessagesRead(myId, partnerId, isAdmin);
 
     const newMessages = state.messages.map(m =>
-      m.senderId === partnerId && m.receiverId === myId && !m.read ? { ...m, read: true } : m
+      m.senderId === partnerId && myIds.includes(m.receiverId) && !m.read ? { ...m, read: true } : m
     );
     set({ messages: newMessages });
   },

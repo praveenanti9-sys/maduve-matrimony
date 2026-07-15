@@ -394,15 +394,21 @@ export async function fetchAllMessages(): Promise<DbMessage[]> {
 /** Mark messages as read */
 export async function markMessagesRead(
   receiverId: string,
-  senderId: string
+  senderId: string,
+  isAdmin: boolean = false
 ): Promise<void> {
   const supabase = getSupabase();
-  await supabase
+  let query = supabase
     .from('messages')
     .update({ read: true })
     .eq('sender_id', senderId)
-    .eq('receiver_id', receiverId)
     .eq('read', false);
+
+  if (isAdmin) {
+    await query.in('receiver_id', [receiverId, 'admin']);
+  } else {
+    await query.eq('receiver_id', receiverId);
+  }
 }
 
 // ============================================================
@@ -683,9 +689,12 @@ export async function fetchContactInquiries(): Promise<DbContactInquiry[]> {
 /** Subscribe to new messages for a user */
 export function subscribeToMessages(
   profileId: string,
-  onNewMessage: (message: DbMessage) => void
+  onNewMessage: (message: DbMessage) => void,
+  isAdmin: boolean = false
 ) {
   const supabase = getSupabase();
+  const filter = isAdmin ? undefined : `receiver_id=eq.${profileId}`;
+
   const channel = supabase
     .channel(`messages:${profileId}`)
     .on(
@@ -694,7 +703,7 @@ export function subscribeToMessages(
         event: 'INSERT',
         schema: 'public',
         table: 'messages',
-        filter: `receiver_id=eq.${profileId}`,
+        ...(filter ? { filter } : {}),
       },
       (payload) => {
         onNewMessage(payload.new as DbMessage);

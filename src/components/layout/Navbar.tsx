@@ -35,8 +35,10 @@ export function Navbar() {
   }, [userMenuOpen, notifMenuOpen]);
 
   // Calculate notifications
-  const isMyId = (id: string) => id === currentUser.id;
-  
+  const isAdmin = currentUser.role === 'admin';
+  const myIds = isAdmin ? [currentUser.id, 'admin'] : [currentUser.id];
+  const isMyId = (id: string) => myIds.includes(id);
+
   const pendingInterests = interests.filter(i => isMyId(i.toId) && i.status === 'pending');
   const unreadMessages = messages.filter(m => isMyId(m.receiverId) && !m.read);
   
