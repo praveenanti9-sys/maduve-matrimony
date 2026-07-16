@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Phone, Mail, MapPin, Clock, Send, MessageSquare, CheckCircle2 } from "lucide-react";
-import { submitContactInquiry } from "@/lib/supabase-service";
+
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -18,8 +18,15 @@ export default function ContactPage() {
     setSubmitError("");
     setIsSubmitting(true);
     try {
-      const result = await submitContactInquiry(name, email, message, phone);
-      if (result?.error) {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message, phone })
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok || result.error) {
         setSubmitError("Failed to send message. Please try again or email us directly.");
       } else {
         setSubmitted(true);
