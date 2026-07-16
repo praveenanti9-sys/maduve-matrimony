@@ -170,9 +170,26 @@ export default function ForgotPasswordPage() {
               <h3 style={{ fontSize: "18px", fontWeight: 600, color: "#1e2a44", marginBottom: "8px" }}>
                 Reset Link Sent!
               </h3>
-              <p style={{ fontSize: "14px", color: "#5f6368", marginBottom: "24px", lineHeight: 1.5 }}>
+              <p style={{ fontSize: "14px", color: "#5f6368", marginBottom: "16px", lineHeight: 1.5 }}>
                 We&apos;ve sent a custom password reset link to <strong>{email}</strong> via email. Please check your inbox and click the button to update your credentials.
               </p>
+              
+              <div style={{
+                background: "rgba(245, 158, 11, 0.1)",
+                border: "1px dashed rgba(245, 158, 11, 0.4)",
+                borderRadius: "10px",
+                padding: "12px",
+                marginBottom: "24px",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "10px",
+                textAlign: "left"
+              }}>
+                <span style={{ fontSize: "16px", marginTop: "2px" }}>⚠️</span>
+                <p style={{ fontSize: "13px", color: "#b45309", margin: 0, lineHeight: 1.5 }}>
+                  <strong>Important:</strong> If you don&apos;t see the email in your inbox within 2 minutes, please <strong>check your Spam / Junk folder</strong>.
+                </p>
+              </div>
               <Link href="/login" className="btn-primary" style={{ display: "inline-flex", borderRadius: "12px", textDecoration: "none", width: "100%" }}>
                 <span>Go to Login</span>
               </Link>
