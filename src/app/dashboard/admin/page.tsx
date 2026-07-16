@@ -748,11 +748,8 @@ export default function AdminPage() {
                               🖼️ Proof
                             </button>
                           )}
-                          <button onClick={() => { verifyPayment(profile.id, 'verified'); showToast("Payment verified, account activated!", "success"); }} className="btn-success" style={{ padding: "6px 12px", fontSize: "12px", borderRadius: "8px" }}>
-                            <CheckCircle2 style={{ width: "14px", height: "14px" }} /> Approve
-                          </button>
-                          <button onClick={() => { verifyPayment(profile.id, 'failed'); showToast("Payment verification failed.", "error"); }} className="btn-danger" style={{ padding: "6px 12px", fontSize: "12px", borderRadius: "8px" }}>
-                            <Ban style={{ width: "14px", height: "14px" }} /> Reject
+                          <button onClick={() => setSelectedUserId(profile.id)} className="btn-primary" style={{ padding: "6px 12px", fontSize: "12px", borderRadius: "8px", display: "flex", alignItems: "center", gap: "4px" }}>
+                            <Eye style={{ width: "14px", height: "14px" }} /> View
                           </button>
                         </div>
                       </td>
