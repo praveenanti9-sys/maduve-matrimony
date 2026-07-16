@@ -1401,13 +1401,15 @@ export const useStore = create<AppState>((set, get) => ({
           canvas.toBlob(
             (blob) => {
               if (blob) {
-                resolve(new File([blob], imageFile.name, { type: 'image/jpeg' }));
+                // Change extension to .webp for the filename
+                const newName = imageFile.name.replace(/\.[^/.]+$/, "") + ".webp";
+                resolve(new File([blob], newName, { type: 'image/webp' }));
               } else {
                 resolve(imageFile);
               }
             },
-            'image/jpeg',
-            0.75
+            'image/webp',
+            0.6
           );
         };
         img.onerror = () => resolve(imageFile);

@@ -1,6 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle2 } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home",
+  description: "Find your perfect life partner within the Okkaliga community. Trusted matrimony platform by Utthana Uttara Kannada Okkalu Sangama.",
+};
 
 export default function Home() {
   return (

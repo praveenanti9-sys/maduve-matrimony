@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { Shield, CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "About Us | Maduvedibbana — Okkaliga Community Matrimony",
+  title: "About Us",
   description:
     "Learn about Maduvedibbana, a trusted matrimony platform by Utthana Uttara Kannada Okkalu Sangama for the Okkaliga community.",
 };

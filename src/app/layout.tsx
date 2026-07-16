@@ -16,7 +16,10 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Maduvedibbana | Okkaliga Community Matrimony",
+  title: {
+    template: "%s | Maduvedibbana",
+    default: "Maduvedibbana | Okkaliga Community Matrimony",
+  },
   description:
     "Find your perfect life partner within the Okkaliga community. Trusted matrimony platform by Utthana Uttara Kannada Okkalu Sangama, Bengaluru.",
   keywords: [
@@ -25,7 +28,22 @@ export const metadata: Metadata = {
     "kannada matrimony",
     "maduvedibbana",
     "community marriage",
+    "uttara kannada",
   ],
+  authors: [{ name: "Utthana Uttara Kannada Okkalu Sangama" }],
+  openGraph: {
+    title: "Maduvedibbana | Okkaliga Community Matrimony",
+    description: "Find your perfect life partner within the Okkaliga community. Trusted matrimony platform.",
+    url: "https://maduvedibbana.com",
+    siteName: "Maduvedibbana",
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Maduvedibbana | Okkaliga Community Matrimony",
+    description: "Find your perfect life partner within the Okkaliga community.",
+  },
 };
 
 // Helper: read env vars via dynamic key access so Next.js does NOT
