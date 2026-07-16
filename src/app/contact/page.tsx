@@ -40,7 +40,7 @@ export default function ContactPage() {
 
   const contactInfo = [
     { icon: Phone, label: "Phone / WhatsApp", value: "+91 8951872744", href: "tel:+918951872744" },
-    { icon: Mail, label: "Email", value: "maduvedibbana@gmail.com", href: "mailto:maduvedibbana@gmail.com" },
+    { icon: Mail, label: "Email", value: "contact@maduvedibbana.com", href: "mailto:contact@maduvedibbana.com" },
     { icon: MapPin, label: "Association", value: "In association with UTTHANA UTTARA KANNADA OKKALU SANGAMA(Reg.), Bengaluru", href: "#" },
     { icon: Clock, label: "Working Hours", value: "Mon – Sat, 10 AM – 6 PM", href: "#" },
   ];
