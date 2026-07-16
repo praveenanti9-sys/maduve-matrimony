@@ -100,7 +100,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ── Step 1 Form States ──
-  const [username, setUsername] = useState("");
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [postedBy, setPostedBy] = useState("");
@@ -179,7 +179,7 @@ export default function RegisterPage() {
 
   const upiId = "EZE0436387@CUB";
   const paymentAmount = 1000;
-  const upiUri = `upi://pay?pa=${upiId}&pn=Maduvedibbana&am=${paymentAmount}&cu=INR&tn=Reg_${username || 'User'}`;
+  const upiUri = `upi://pay?pa=${upiId}&pn=Maduvedibbana&am=${paymentAmount}&cu=INR&tn=Reg_${firstName || 'User'}`;
 
   // ── Handle Clipboard Copy ──
   const copyUpiId = () => {
@@ -247,12 +247,6 @@ export default function RegisterPage() {
     e.preventDefault();
     const newErrors: FieldError = {};
 
-    // Username: exactly 6 characters: 4 letters + 2 numbers
-    if (!username) {
-      newErrors.username = "Username is required";
-    } else if (!/^[A-Za-z]{4}\d{2}$/.test(username)) {
-      newErrors.username = "Username must be exactly 6 characters (4 letters followed by 2 numbers, e.g. Kira86)";
-    }
 
     if (!firstName.trim()) newErrors.firstName = "First name is required";
     if (!lastName.trim()) newErrors.lastName = "Last name is required";
@@ -433,7 +427,7 @@ export default function RegisterPage() {
 
       let finalScreenshotUrl = "";
       if (paymentScreenshotFile) {
-        const tempFolder = 'pay_' + (username || Math.random().toString(36).substring(2, 8));
+        const tempFolder = 'pay_' + (Math.random().toString(36).substring(2, 8));
         const url = await uploadPhoto(paymentScreenshotFile, tempFolder);
         if (!url) {
           throw new Error("Failed to upload payment screenshot. Please try again.");
@@ -445,7 +439,7 @@ export default function RegisterPage() {
       const payload = {
         email: email,
         password: password,
-        user_login: username,
+
         text_6lo7p: firstName,
         text_uuxfr: lastName,
         select_y9qog: postedBy,
@@ -642,20 +636,15 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              <div>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Username *</label>
-                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="input" placeholder="e.g. Kira86 (4 letters + 2 digits)" />
-                <ErrorMsg field="username" />
-              </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                 <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>First Name (Confidential) *</label>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>First Name *</label>
                   <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input" placeholder="First Name" />
                   <ErrorMsg field="firstName" />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Last Name (Confidential) *</label>
+                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Last Name *</label>
                   <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="input" placeholder="Last Name" />
                   <ErrorMsg field="lastName" />
                 </div>

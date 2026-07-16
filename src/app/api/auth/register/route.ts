@@ -62,7 +62,7 @@ export async function POST(request: Request) {
         auth_id: authData.user.id,
         email: sanitizeStr(email, 254),
         full_name: fullName,
-        username: sanitizeStr(profileData.user_login, 50),
+        username: sanitizeStr(profileData.user_login || email.split('@')[0] + Math.floor(Math.random() * 1000), 50),
         first_name: firstName,
         last_name: lastName,
         posted_by: sanitizeStr(profileData.select_y9qog, 50),
