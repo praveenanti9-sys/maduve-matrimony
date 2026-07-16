@@ -1290,10 +1290,9 @@ export default function RegisterPage() {
                     boxShadow: "0 4px 12px rgba(95, 37, 159, 0.25)", border: "1px solid rgba(255,255,255,0.15)"
                   }}>
                     {/* Authentic PhonePe Logo */}
-                    <div style={{ width: "26px", height: "26px", background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
-                      <svg width="26" height="26" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="512" height="512" rx="110" fill="#5f259f"/>
-                        <path d="M166.7 197.8C166.7 182.2 179.3 169.6 194.9 169.6H317.2C325 169.6 331.3 175.9 331.3 183.7V197.8H166.7ZM331.3 226.1V347.8C331.3 355.6 325 361.9 317.2 361.9H288.9C281.1 361.9 274.8 355.6 274.8 347.8V260.4H235C219.4 260.4 206.8 247.8 206.8 232.2V226.1H331.3ZM288.9 101.4L235 169.6H285L338.9 101.4H288.9Z" fill="white"/>
+                    <div style={{ width: "26px", height: "26px", background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
+                      <svg width="15" height="15" viewBox="166 101 176 261" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M166.7 197.8C166.7 182.2 179.3 169.6 194.9 169.6H317.2C325 169.6 331.3 175.9 331.3 183.7V197.8H166.7ZM331.3 226.1V347.8C331.3 355.6 325 361.9 317.2 361.9H288.9C281.1 361.9 274.8 355.6 274.8 347.8V260.4H235C219.4 260.4 206.8 247.8 206.8 232.2V226.1H331.3ZM288.9 101.4L235 169.6H285L338.9 101.4H288.9Z" fill="#5f259f"/>
                       </svg>
                     </div>
                     <span>PhonePe</span>
