@@ -575,76 +575,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Premium Presets */}
-            <div>
-              <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "12px" }}>Or Choose a Premium Avatar Preset</label>
-              
-              <div style={{ marginBottom: "16px" }}>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#c6a55c", letterSpacing: "1px", textTransform: "uppercase" }}>Groom Presets</span>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginTop: "8px" }}>
-                  {[
-                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=faces",
-                    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=faces",
-                    "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=faces",
-                    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=faces"
-                  ].map((url, i) => (
-                    <button 
-                      key={i} 
-                      onClick={() => {
-                        updateProfile({ profilePhoto: url });
-                        setShowPhotoModal(false);
-                      }}
-                      style={{ 
-                        width: "100%", 
-                        paddingBottom: "100%", 
-                        borderRadius: "10px", 
-                        backgroundImage: `url('${url}')`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        border: "2px solid transparent",
-                        cursor: "pointer",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-                        position: "relative",
-                        transition: "transform 0.2s"
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#c6a55c", letterSpacing: "1px", textTransform: "uppercase" }}>Bride Presets</span>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", marginTop: "8px" }}>
-                  {[
-                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=faces",
-                    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=faces",
-                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=faces",
-                    "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=faces"
-                  ].map((url, i) => (
-                    <button 
-                      key={i} 
-                      onClick={() => {
-                        updateProfile({ profilePhoto: url });
-                        setShowPhotoModal(false);
-                      }}
-                      style={{ 
-                        width: "100%", 
-                        paddingBottom: "100%", 
-                        borderRadius: "10px", 
-                        backgroundImage: `url('${url}')`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        border: "2px solid transparent",
-                        cursor: "pointer",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-                        position: "relative",
-                        transition: "transform 0.2s"
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+            {/* Premium Presets removed as per user request */}
           </div>
         </div>
       )}
