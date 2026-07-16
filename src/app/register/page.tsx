@@ -193,7 +193,7 @@ export default function RegisterPage() {
 
   const gpayUri = isAndroid 
     ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;action=android.intent.action.VIEW;end` 
-    : `gpay://upi/pay?${baseUpiParams}`;
+    : `tez://upi/pay?${baseUpiParams}`;
     
   const phonepeUri = isAndroid 
     ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.phonepe.app;action=android.intent.action.VIEW;end` 
@@ -1291,10 +1291,9 @@ export default function RegisterPage() {
                   }}>
                     {/* Authentic PhonePe Logo */}
                     <div style={{ width: "26px", height: "26px", background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
-                      <svg width="26" height="26" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="400" height="400" rx="80" fill="#5f259f"/>
-                        <path d="M258.4 142.3L223.2 92H181.1L228.9 142.3H144.5C132.4 142.3 122.6 152.1 122.6 164.2V186.1H277.4V164.2C277.4 152.1 267.6 142.3 258.4 142.3Z" fill="white"/>
-                        <path d="M277.4 207.9H144.5C132.4 207.9 122.6 217.7 122.6 229.8C122.6 241.9 132.4 251.7 144.5 251.7H220.6V308C220.6 314.1 225.5 319 231.6 319H253.5C259.6 319 264.5 314.1 264.5 308V207.9H277.4Z" fill="white"/>
+                      <svg width="26" height="26" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="512" height="512" rx="110" fill="#5f259f"/>
+                        <path d="M166.7 197.8C166.7 182.2 179.3 169.6 194.9 169.6H317.2C325 169.6 331.3 175.9 331.3 183.7V197.8H166.7ZM331.3 226.1V347.8C331.3 355.6 325 361.9 317.2 361.9H288.9C281.1 361.9 274.8 355.6 274.8 347.8V260.4H235C219.4 260.4 206.8 247.8 206.8 232.2V226.1H331.3ZM288.9 101.4L235 169.6H285L338.9 101.4H288.9Z" fill="white"/>
                       </svg>
                     </div>
                     <span>PhonePe</span>
