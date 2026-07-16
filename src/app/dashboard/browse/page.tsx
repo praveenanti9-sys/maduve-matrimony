@@ -43,8 +43,8 @@ export default function BrowseMatchesPage() {
   const [showBlockConfirm, setShowBlockConfirm] = useState<string | null>(null);
 
   const remainingInterests = getRemainingInterests();
-  // Admin sees ALL profiles (including suspended/blocked), users see only active
-  const browseProfiles = isAdmin ? profiles : getActiveProfiles();
+  // Admin sees ALL non-admin profiles (including suspended/blocked), users see only active non-admin profiles
+  const browseProfiles = (isAdmin ? profiles : getActiveProfiles()).filter(p => p.role !== 'admin');
 
   const filteredProfiles = browseProfiles
     .filter((p) => {
