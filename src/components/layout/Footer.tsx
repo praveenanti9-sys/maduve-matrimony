@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer style={{ background: "#0b0b0b", color: "#fff", fontFamily: "'Inter', sans-serif" }}>
       {/* Main Footer */}
-      <div style={{
+      <div className="footer-grid" style={{
         maxWidth: "1100px", margin: "0 auto", padding: "60px 20px",
         display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "50px",
       }}>
@@ -69,7 +69,7 @@ export function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div style={{
+      <div className="footer-bottom" style={{
         maxWidth: "1100px", margin: "0 auto", padding: "15px 20px",
         borderTop: "1px solid #222", 
         display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px",

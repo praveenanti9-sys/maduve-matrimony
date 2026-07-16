@@ -759,10 +759,22 @@ select.input {
     gap: 12px !important;
   }
 
-  /* Footer columns */
-  footer div[style*="grid-template-columns: repeat(4"] {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 28px !important;
+  /* Footer alignment on mobile: center columns and bottom bar */
+  .footer-grid,
+  footer div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 36px !important;
+    text-align: center !important;
+  }
+  .footer-bottom {
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 8px !important;
+  }
+  footer {
+    text-align: center !important;
   }
 
   /* Headings */
@@ -813,6 +825,7 @@ select.input {
     grid-template-columns: 1fr !important;
   }
 
+  .footer-grid,
   footer div[style*="gridTemplateColumns"],
   footer div[style*="grid-template-columns"] {
     grid-template-columns: 1fr !important;
