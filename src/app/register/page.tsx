@@ -811,6 +811,17 @@ export default function RegisterPage() {
                 <ErrorMsg field="gender" />
               </div>
 
+              {Object.keys(errors).length > 0 && (
+                <div style={{
+                  padding: "8px 12px", borderRadius: "8px", background: "#fef2f2",
+                  border: "1px solid #f87171", color: "#dc2626", fontSize: "12px",
+                  fontWeight: 600, display: "flex", alignItems: "center", gap: "6px", marginTop: "4px"
+                }}>
+                  <span style={{ color: "#dc2626", fontWeight: 800, fontSize: "14px" }}>*</span>
+                  <span>Please fill mandatory fields</span>
+                </div>
+              )}
+
               <button type="submit" className="btn-primary" style={{ width: "100%", minHeight: "48px", marginTop: "10px" }}>
                 <span>Continue to Step 2</span> <ArrowRight style={{ width: "16px", height: "16px" }} />
               </button>
@@ -995,6 +1006,17 @@ export default function RegisterPage() {
                 <ErrorMsg field="dosham" />
               </div>
 
+              {Object.keys(errors).length > 0 && (
+                <div style={{
+                  padding: "8px 12px", borderRadius: "8px", background: "#fef2f2",
+                  border: "1px solid #f87171", color: "#dc2626", fontSize: "12px",
+                  fontWeight: 600, display: "flex", alignItems: "center", gap: "6px", marginTop: "4px"
+                }}>
+                  <span style={{ color: "#dc2626", fontWeight: 800, fontSize: "14px" }}>*</span>
+                  <span>Please fill mandatory fields</span>
+                </div>
+              )}
+
               <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
                 <button type="button" onClick={() => setStep(1)} className="btn-outline" style={{ flex: 1, minHeight: "48px" }}>
                   <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
@@ -1178,6 +1200,17 @@ export default function RegisterPage() {
                 <input type="tel" value={guardianPhone} onChange={(e) => setGuardianPhone(e.target.value)} className="input" placeholder="Will be kept confidential" />
               </div>
 
+              {Object.keys(errors).length > 0 && (
+                <div style={{
+                  padding: "8px 12px", borderRadius: "8px", background: "#fef2f2",
+                  border: "1px solid #f87171", color: "#dc2626", fontSize: "12px",
+                  fontWeight: 600, display: "flex", alignItems: "center", gap: "6px", marginTop: "4px"
+                }}>
+                  <span style={{ color: "#dc2626", fontWeight: 800, fontSize: "14px" }}>*</span>
+                  <span>Please fill mandatory fields</span>
+                </div>
+              )}
+
               <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
                 <button type="button" onClick={() => setStep(2)} className="btn-outline" style={{ flex: 1, minHeight: "48px" }}>
                   <ArrowLeft style={{ width: "16px", height: "16px" }} /> <span>Back</span>
@@ -1333,6 +1366,17 @@ export default function RegisterPage() {
                 <ErrorMsg field="paymentScreenshot" />
               </div>
 
+              {Object.keys(errors).length > 0 && (
+                <div style={{
+                  padding: "8px 12px", borderRadius: "8px", background: "#fef2f2",
+                  border: "1px solid #f87171", color: "#dc2626", fontSize: "12px",
+                  fontWeight: 600, display: "flex", alignItems: "center", gap: "6px", marginTop: "4px"
+                }}>
+                  <span style={{ color: "#dc2626", fontWeight: 800, fontSize: "14px" }}>*</span>
+                  <span>Please fill mandatory fields</span>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
                 <button type="button" onClick={() => setStep(3)} className="btn-outline" style={{ flex: 1, minHeight: "48px" }}>
@@ -1439,10 +1483,14 @@ export default function RegisterPage() {
               </div>
               <ErrorMsg field="acceptTerms" />
 
-              {errors.submit && (
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px", background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.15)", borderRadius: "10px", color: "#dc2626", fontSize: "12px", fontWeight: 500 }}>
-                  <AlertCircle style={{ width: "16px", height: "16px", flexShrink: 0 }} />
-                  {errors.submit}
+              {Object.keys(errors).length > 0 && (
+                <div style={{
+                  padding: "8px 12px", borderRadius: "8px", background: "#fef2f2",
+                  border: "1px solid #f87171", color: "#dc2626", fontSize: "12px",
+                  fontWeight: 600, display: "flex", alignItems: "center", gap: "6px", marginTop: "4px"
+                }}>
+                  <span style={{ color: "#dc2626", fontWeight: 800, fontSize: "14px" }}>*</span>
+                  <span>Please fill mandatory fields</span>
                 </div>
               )}
 
