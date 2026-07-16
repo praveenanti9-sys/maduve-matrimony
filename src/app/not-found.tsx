@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Home, AlertCircle } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";

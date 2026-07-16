@@ -590,6 +590,7 @@ export default function RegisterPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
 
   const selectStyle: React.CSSProperties = {
     width: "100%", padding: "10px 14px", background: "#fafcff",
