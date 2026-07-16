@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useStore } from "@/store/useStore";
 import { ADMIN_UUID, SYSTEM_UUID } from "@/lib/supabase-service";
-import { Send, User, Search, Phone, Video, MoreVertical, MessageCircle, CheckCheck, Check, ArrowLeft } from "lucide-react";
+import { Send, User, Search, MoreVertical, MessageCircle, CheckCheck, Check, ArrowLeft } from "lucide-react";
 
 export default function MessagesPage() {
   const { messages, currentUser, profiles, sendMessage, markMessagesRead } = useStore();
@@ -246,14 +246,6 @@ export default function MessagesPage() {
                   <h3 style={{ fontWeight: 600, fontSize: "14px", color: "#1e2a44", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activeProfile.name}</h3>
                   <p style={{ fontSize: "11px", fontWeight: 500, color: "#16a34a" }}>Online</p>
                 </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
-                <button style={{ width: "34px", height: "34px", borderRadius: "50%", border: "none", background: "rgba(30,42,68,0.04)", cursor: "pointer", color: "#5f6368", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
-                  <Phone style={{ width: "15px", height: "15px" }} />
-                </button>
-                <button style={{ width: "34px", height: "34px", borderRadius: "50%", border: "none", background: "rgba(30,42,68,0.04)", cursor: "pointer", color: "#5f6368", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
-                  <Video style={{ width: "15px", height: "15px" }} />
-                </button>
               </div>
             </div>
 
