@@ -811,16 +811,37 @@ export function subscribeToMessages(
     .on(
       'postgres_changes',
       {
-        event: 'INSERT',
+        event: '*',
         schema: 'public',
         table: 'messages',
         ...(filter ? { filter } : {}),
       },
       (payload) => {
-        onNewMessage(payload.new as DbMessage);
+        if (payload.new && Object.keys(payload.new).length > 0) {
+          onNewMessage(payload.new as DbMessage);
+        }
       }
-    )
-    .subscribe();
+    );
+
+  // If not admin, also listen to messages we SENT (so we get read-receipt updates)
+  if (!isAdmin) {
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'messages',
+        filter: `sender_id=eq.${profileId}`,
+      },
+      (payload) => {
+        if (payload.new && Object.keys(payload.new).length > 0) {
+          onNewMessage(payload.new as DbMessage);
+        }
+      }
+    );
+  }
+
+  channel.subscribe();
 
   // Return unsubscribe function
   return () => {

@@ -645,7 +645,13 @@ const setupSubscriptions = (profileId: string, set: any, get: any) => {
   messageSubscriptionUnsubscribe = svc.subscribeToMessages(profileId, (newMsg) => {
     const state = get();
     const formattedMsg = dbMessageToMessage(newMsg);
-    if (!state.messages.some((m: any) => m.id === formattedMsg.id)) {
+    const existingIndex = state.messages.findIndex((m: any) => m.id === formattedMsg.id);
+    
+    if (existingIndex !== -1) {
+      const updatedMessages = [...state.messages];
+      updatedMessages[existingIndex] = formattedMsg;
+      set({ messages: updatedMessages });
+    } else {
       set({ messages: [...state.messages, formattedMsg] });
     }
   }, isAdmin);
