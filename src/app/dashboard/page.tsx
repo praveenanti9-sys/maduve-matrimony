@@ -40,16 +40,17 @@ export default function DashboardPage() {
 
   // ── Admin Dashboard ──
   if (isAdmin) {
-    const totalUsers = profiles.length;
-    const activeUsers = profiles.filter(p => p.status === 'active').length;
-    const suspendedUsers = profiles.filter(p => p.status === 'suspended').length;
-    const blockedUsers = profiles.filter(p => p.status === 'blocked').length;
-    const pendingUsers = profiles.filter(p => p.status === 'pending').length;
+    const clientProfiles = profiles.filter(p => p.role !== 'admin' && p.id !== currentUser.id);
+    const totalUsers = clientProfiles.length;
+    const activeUsers = clientProfiles.filter(p => p.status === 'active').length;
+    const suspendedUsers = clientProfiles.filter(p => p.status === 'suspended').length;
+    const blockedUsers = clientProfiles.filter(p => p.status === 'blocked').length;
+    const pendingUsers = clientProfiles.filter(p => p.status === 'pending').length;
     const totalMessages = messages.length;
     const totalInterests = interests.length;
     const pendingInterests = interests.filter(i => i.status === 'pending').length;
-    const maleCount = profiles.filter(p => p.gender === 'MALE').length;
-    const femaleCount = profiles.filter(p => p.gender === 'FEMALE').length;
+    const maleCount = clientProfiles.filter(p => p.gender === 'MALE').length;
+    const femaleCount = clientProfiles.filter(p => p.gender === 'FEMALE').length;
     const unreadInquiries = contactInquiries.filter(i => !i.isRead).length;
 
     // Registration trend (last 7 days)
@@ -60,14 +61,14 @@ export default function DashboardPage() {
     });
     const regTrend = last7Days.map(day => ({
       day: new Date(day).toLocaleDateString('en-IN', { weekday: 'short' }),
-      count: profiles.filter(p => p.joinDate === day).length,
+      count: clientProfiles.filter(p => p.joinDate === day).length,
     }));
     const maxReg = Math.max(...regTrend.map(r => r.count), 1);
 
     // Gender ratio for donut
-    const total = maleCount + femaleCount || 1;
-    const malePerc = Math.round((maleCount / total) * 100);
-    const femalePerc = 100 - malePerc;
+    const totalGender = maleCount + femaleCount;
+    const malePerc = totalGender > 0 ? Math.round((maleCount / totalGender) * 100) : 0;
+    const femalePerc = totalGender > 0 ? 100 - malePerc : 0;
     const maleAngle = (malePerc / 100) * 360;
 
     return (
@@ -244,14 +245,14 @@ export default function DashboardPage() {
                 Manage All <ArrowRight style={{ width: "12px", height: "12px" }} />
               </Link>
             </div>
-            {profiles.length === 0 ? (
+            {clientProfiles.length === 0 ? (
               <div style={{ textAlign: "center", padding: "32px", color: "#a0aec0" }}>
                 <Users style={{ width: "28px", height: "28px", margin: "0 auto 8px" }} />
                 <p style={{ fontSize: "13px" }}>No users registered yet</p>
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-                {profiles.slice(0, 8).map((p) => (
+                {clientProfiles.slice(0, 8).map((p) => (
                   <Link key={p.id} href="/dashboard/admin" style={{
                     display: "flex", alignItems: "center", gap: "12px", padding: "10px 8px",
                     borderBottom: "1px solid #f0ece4", cursor: "pointer", textDecoration: "none", color: "inherit",

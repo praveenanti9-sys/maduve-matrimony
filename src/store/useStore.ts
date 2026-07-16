@@ -966,7 +966,7 @@ export const useStore = create<AppState>((set, get) => ({
       dbProfiles = await svc.fetchActiveProfiles(targetGender);
     }
     const profiles = dbProfiles
-      .filter(p => p.id !== state.currentUser.id && (state.currentUser.role === 'admin' || p.role !== 'admin'))
+      .filter(p => p.id !== state.currentUser.id && p.role !== 'admin')
       .map(dbProfileToMatchProfile);
     set({ profiles });
   },
