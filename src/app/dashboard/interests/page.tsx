@@ -46,8 +46,9 @@ export default function InterestsPage() {
     updateInterestStatus(interestId, "accepted");
     const profile = getProfile(fromId);
     if (profile) {
-      // Send an automatic greeting message
-      sendMessage(fromId, `Namaste! I've accepted your interest. Looking forward to connecting with you. 🙏`);
+      // Send a clean automatic greeting message
+      const myName = currentUser?.name ? currentUser.name.split(" ")[0] : "I";
+      sendMessage(fromId, `Hello! ${myName} accepted your interest. We now have mutual interest and can start chatting.`);
     }
     setToast({ message: "Interest accepted! You can now message each other.", type: "success" });
     setTimeout(() => setToast(null), 3000);

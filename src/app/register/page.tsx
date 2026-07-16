@@ -192,8 +192,8 @@ export default function RegisterPage() {
   }, []);
 
   const gpayUri = isAndroid 
-    ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;action=android.intent.action.VIEW;end` 
-    : `gpay://upi/pay?${baseUpiParams}`;
+    ? `intent://upi/pay?${baseUpiParams}#Intent;scheme=tez;package=com.google.android.apps.nbu.paisa.user;action=android.intent.action.VIEW;end` 
+    : `tez://upi/pay?${baseUpiParams}`;
     
   const phonepeUri = isAndroid 
     ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.phonepe.app;action=android.intent.action.VIEW;end` 
@@ -1234,18 +1234,37 @@ export default function RegisterPage() {
                 <span style={{ fontSize: "12px", fontWeight: 600, color: "#5f6368", textAlign: "center" }}>Paying from mobile? Tap to open payment app:</span>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                   <a href={gpayUri} onClick={handlePaymentAppClick} style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
                     background: "linear-gradient(135deg, #1a73e8, #1557b0)", color: "#fff",
-                    textDecoration: "none", minHeight: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
+                    textDecoration: "none", minHeight: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 700,
+                    boxShadow: "0 4px 12px rgba(26, 115, 232, 0.25)", border: "1px solid rgba(255,255,255,0.15)"
                   }}>
-                    <Smartphone style={{ width: "16px", height: "16px" }} /> Google Pay
+                    {/* Google Pay Icon */}
+                    <div style={{ width: "26px", height: "26px", background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                        <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1V21.1H19.95C22.21 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4"/>
+                        <path d="M12 24C15.24 24 17.95 22.92 19.95 21.1L16.08 18.1C15 18.82 13.62 19.25 12 19.25C8.87 19.25 6.22 17.14 5.27 14.29H1.27V17.38C3.25 21.3 7.31 24 12 24Z" fill="#34A853"/>
+                        <path d="M5.27 14.29C5.02 13.57 4.89 12.8 4.89 12C4.89 11.2 5.02 10.43 5.27 9.71V6.62H1.27C0.46 8.23 0 10.06 0 12C0 13.94 0.46 15.77 1.27 17.38L5.27 14.29Z" fill="#FBBC05"/>
+                        <path d="M12 4.75C13.77 4.75 15.35 5.36 16.6 6.55L20.03 3.12C17.95 1.19 15.24 0 12 0C7.31 0 3.25 2.7 1.27 6.62L5.27 9.71C6.22 6.86 8.87 4.75 12 4.75Z" fill="#EA4335"/>
+                      </svg>
+                    </div>
+                    <span>Google Pay</span>
                   </a>
                   <a href={phonepeUri} onClick={handlePaymentAppClick} style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
                     background: "linear-gradient(135deg, #5f259f, #4d1c82)", color: "#fff",
-                    textDecoration: "none", minHeight: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
+                    textDecoration: "none", minHeight: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 700,
+                    boxShadow: "0 4px 12px rgba(95, 37, 159, 0.25)", border: "1px solid rgba(255,255,255,0.15)"
                   }}>
-                    <Smartphone style={{ width: "16px", height: "16px" }} /> PhonePe
+                    {/* PhonePe Icon */}
+                    <div style={{ width: "26px", height: "26px", background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M18.8 3H5.2C3.98 3 3 3.98 3 5.2V18.8C3 20.02 3.98 21 5.2 21H18.8C20.02 21 21 20.02 21 18.8V5.2C21 3.98 20.02 3 18.8 3Z" fill="#5f259f"/>
+                        <path d="M14.7 10.35L11.55 7.2C11.35 7 11.02 7 10.82 7.2C10.62 7.4 10.62 7.73 10.82 7.93L12.57 9.68H8.5C8.22 9.68 8 9.9 8 10.18C8 10.46 8.22 10.68 8.5 10.68H12.57L10.82 12.43C10.62 12.63 10.62 12.96 10.82 13.16C10.92 13.26 11.05 13.31 11.18 13.31C11.31 13.31 11.44 13.26 11.54 13.16L14.69 10.01V10.35Z" fill="white"/>
+                        <path d="M15.5 10.2C15.5 12.96 13.26 15.2 10.5 15.2H9V17.5C9 17.78 8.78 18 8.5 18C8.22 18 8 17.78 8 17.5V7C8 6.72 8.22 6.5 8.5 6.5C8.78 6.5 9 6.72 9 7V9.2H10.5C13.26 9.2 15.5 11.44 15.5 10.2ZM14.5 12.2C14.5 10.01 12.69 8.2 10.5 8.2H9V16.2H10.5C12.69 16.2 14.5 14.39 14.5 12.2Z" fill="white"/>
+                      </svg>
+                    </div>
+                    <span>PhonePe</span>
                   </a>
                 </div>
               </div>

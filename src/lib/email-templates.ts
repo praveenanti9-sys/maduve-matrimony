@@ -19,10 +19,10 @@ export function getRegistrationWelcomeHtml(name: string, originUrl: string = 'ht
       ${EMAIL_HEADER}
       
       <div style="padding: 24px; background-color: #f8fafc; border-radius: 12px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
-        <h2 style="color: #1e2a44; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Namaste ${name},</h2>
-        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 12px;">Welcome to <strong>Maduvedibbana Matrimony</strong>! We are absolutely delighted to have you join our community.</p>
-        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 12px;">Your registration has been successfully received. To ensure a safe and genuine environment for all brides and grooms, your profile is currently undergoing a standard security and verification review by our administrative team.</p>
-        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 0;">You will receive another notification the moment your account is activated and approved.</p>
+        <h2 style="color: #1e2a44; font-size: 20px; margin-top: 0; margin-bottom: 16px;">Hello ${name},</h2>
+        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 12px;">Welcome to <strong>Maduvedibbana Matrimony</strong>! Your registration has been successfully submitted.</p>
+        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 12px;">To ensure a safe and verified community, your profile is currently undergoing a quick verification review by our admin team.</p>
+        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 0;">We will notify you via email as soon as your account is approved and activated.</p>
       </div>
       
       <div style="text-align: center; margin: 32px 0;">
@@ -40,14 +40,14 @@ export function getAccountActivatedHtml(name: string, originUrl: string = 'https
       ${EMAIL_HEADER}
       
       <div style="padding: 24px; background-color: rgba(56,161,105,0.04); border: 1px solid rgba(56,161,105,0.15); border-radius: 12px; margin-bottom: 24px;">
-        <h2 style="color: #276749; font-size: 20px; margin-top: 0; margin-bottom: 16px;">🎉 Profile Approved & Activated!</h2>
-        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 12px;">Namaste <strong>${name}</strong>,</p>
-        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 12px;">We are pleased to inform you that your profile on <strong>Maduvedibbana Matrimony</strong> has been verified and activated by our team.</p>
-        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 0;">Your profile is now live! You can immediately begin exploring verified matches, sending connection interests, and chatting with prospects.</p>
+        <h2 style="color: #276749; font-size: 20px; margin-top: 0; margin-bottom: 16px;">🎉 Profile Approved & Active!</h2>
+        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 12px;">Hello <strong>${name}</strong>,</p>
+        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 12px;">Great news! Your profile on <strong>Maduvedibbana Matrimony</strong> has been verified and approved by our admin team.</p>
+        <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-bottom: 0;">You can now view profiles, express mutual interest, and start chatting with matches directly from your dashboard.</p>
       </div>
       
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${originUrl}/login" style="background: linear-gradient(135deg, #1e2a44, #2b3c61); color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(30,42,68,0.2);">Log In to Your Dashboard</a>
+        <a href="${originUrl}/login" style="background: linear-gradient(135deg, #1e2a44, #2b3c61); color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(30,42,68,0.2);">Log In to Dashboard</a>
       </div>
       
       ${EMAIL_FOOTER}
