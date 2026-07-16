@@ -5,8 +5,15 @@ import { getRegistrationWelcomeHtml } from '@/lib/email-templates';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { email, password, profileData = {} } = body;
+    const formData = await request.formData();
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const profileDataStr = formData.get('profileData') as string;
+    const profileData = profileDataStr ? JSON.parse(profileDataStr) : {};
+    
+    // Extract files
+    const photos = formData.getAll('photos') as File[];
+    const paymentScreenshot = formData.get('paymentScreenshot') as File | null;
 
     if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
       return NextResponse.json({ error: 'Valid email and password are required' }, { status: 400 });
@@ -131,6 +138,75 @@ export async function POST(request: Request) {
     if (profileError) {
       await adminClient.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json({ error: profileError.message }, { status: 400 });
+    }
+
+    // 4. Securely upload files using Admin Privileges
+    try {
+      let primaryPhotoUrl = '';
+      const galleryUrls: string[] = [];
+      
+      // Upload profile photos
+      for (let i = 0; i < photos.length; i++) {
+        const file = photos[i];
+        const fileExt = file.name.split('.').pop() || 'webp';
+        const path = `${profile.id}/photo_${Date.now()}_${i}.${fileExt}`;
+        
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        
+        const { data, error } = await adminClient.storage
+          .from('profile-photos')
+          .upload(path, buffer, {
+            contentType: file.type || 'image/webp',
+            upsert: true
+          });
+          
+        if (!error && data) {
+          const { data: { publicUrl } } = adminClient.storage.from('profile-photos').getPublicUrl(path);
+          if (i === 0) {
+            primaryPhotoUrl = publicUrl;
+          } else {
+            galleryUrls.push(publicUrl);
+          }
+        } else {
+          console.error("Failed to upload photo:", error);
+        }
+      }
+
+      // Upload payment screenshot
+      let paymentScreenshotUrl = '';
+      if (paymentScreenshot) {
+         const fileExt = paymentScreenshot.name.split('.').pop() || 'jpg';
+         const path = `${profile.id}/payment_${Date.now()}.${fileExt}`;
+         const arrayBuffer = await paymentScreenshot.arrayBuffer();
+         const buffer = Buffer.from(arrayBuffer);
+         
+         const { data, error } = await adminClient.storage.from('profile-photos').upload(path, buffer, { contentType: paymentScreenshot.type, upsert: true });
+         if (!error && data) {
+           const { data: { publicUrl } } = adminClient.storage.from('profile-photos').getPublicUrl(path);
+           paymentScreenshotUrl = publicUrl;
+         }
+      }
+
+      // If any photos were uploaded, update the profile record
+      if (primaryPhotoUrl || paymentScreenshotUrl) {
+         const updatePayload: any = {};
+         if (primaryPhotoUrl) updatePayload.profile_photo = primaryPhotoUrl;
+         if (paymentScreenshotUrl) updatePayload.payment_screenshot = paymentScreenshotUrl;
+         if (galleryUrls.length > 0) updatePayload.gallery_photos = galleryUrls;
+
+         const { error: updateError } = await adminClient.from('profiles').update(updatePayload).eq('id', profile.id);
+         
+         if (updateError) {
+           console.error("Failed to update profile with photo URLs. Did you run the SQL migration for gallery_photos?", updateError);
+         } else {
+           profile.profile_photo = primaryPhotoUrl || profile.profile_photo;
+           profile.payment_screenshot = paymentScreenshotUrl || profile.payment_screenshot;
+           profile.gallery_photos = galleryUrls;
+         }
+      }
+    } catch (uploadException) {
+      console.error("Exception during file upload phase:", uploadException);
     }
 
     // Dispatch welcome email (non-blocking)

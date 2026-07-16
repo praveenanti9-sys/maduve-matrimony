@@ -92,7 +92,7 @@ interface FieldError { [key: string]: string }
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, uploadPhoto, error: storeError } = useStore();
+  const { register, error: storeError } = useStore();
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<FieldError>({});
@@ -162,8 +162,8 @@ export default function RegisterPage() {
   const paymentFileInputRef = useRef<HTMLInputElement>(null);
 
   // ── Step 5 Photo & Consent States ──
-  const [profilePhoto, setProfilePhoto] = useState("");
-  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
+  const [profilePhotos, setProfilePhotos] = useState<string[]>([]);
+  const [profilePhotoFiles, setProfilePhotoFiles] = useState<File[]>([]);
   const [bio, setBio] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -183,8 +183,11 @@ export default function RegisterPage() {
   const upiUri = `upi://pay?${baseUpiParams}`;
 
   const [isAndroid, setIsAndroid] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    setIsAndroid(/android/i.test(navigator.userAgent || ""));
+    const ua = navigator.userAgent || "";
+    setIsAndroid(/android/i.test(ua));
+    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua));
   }, []);
 
   const gpayUri = isAndroid 
@@ -195,6 +198,13 @@ export default function RegisterPage() {
     ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.phonepe.app;end` 
     : `phonepe://pay?${baseUpiParams}`;
 
+  const handlePaymentAppClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!isMobile) {
+      e.preventDefault();
+      alert("No payment apps found on this device. Please use the QR code scanner to make the payment.");
+    }
+  };
+
   // ── Handle Clipboard Copy ──
   const copyUpiId = () => {
     navigator.clipboard.writeText(upiId);
@@ -204,22 +214,41 @@ export default function RegisterPage() {
 
   // ── Handle Photo uploads preview ──
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    
+    if (profilePhotoFiles.length + files.length > 3) {
+      alert("You can upload a maximum of 3 photos.");
+      return;
+    }
+
+    const validFiles = files.filter(file => {
       if (!file.type.startsWith('image/')) {
-        alert("Please upload a valid image file (JPG, PNG)");
-        return;
+        alert(`${file.name} is not a valid image file (JPG, PNG)`);
+        return false;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert("Image must be smaller than 5MB");
-        return;
+        alert(`${file.name} is larger than 5MB`);
+        return false;
       }
-      setProfilePhotoFile(file);
-      setProfilePhoto(URL.createObjectURL(file));
-      const ne = { ...errors };
-      delete ne.profilePhoto;
-      setErrors(ne);
-    }
+      return true;
+    });
+
+    const newPreviewUrls = validFiles.map(file => URL.createObjectURL(file));
+    
+    setProfilePhotoFiles(prev => [...prev, ...validFiles]);
+    setProfilePhotos(prev => [...prev, ...newPreviewUrls]);
+    
+    const ne = { ...errors };
+    delete ne.profilePhoto;
+    setErrors(ne);
+    
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removePhoto = (index: number) => {
+    setProfilePhotoFiles(prev => prev.filter((_, i) => i !== index));
+    setProfilePhotos(prev => prev.filter((_, i) => i !== index));
   };
 
   // ── Handle Payment Screenshot upload preview ──
@@ -393,7 +422,6 @@ export default function RegisterPage() {
     } else if (!/^\d{12}$/.test(paymentUtr)) {
       newErrors.paymentUtr = "UTR must be exactly 12 digits";
     }
-
     if (!paymentScreenshotFile && !paymentScreenshot) {
       newErrors.paymentScreenshot = "Payment screenshot receipt is required";
     }
@@ -413,8 +441,8 @@ export default function RegisterPage() {
     const newErrors: FieldError = {};
 
     // Profile photo is strictly mandatory (avatar field)
-    if (!profilePhotoFile && !profilePhoto) {
-      newErrors.profilePhoto = "Profile picture is mandatory to login";
+    if (profilePhotoFiles.length === 0) {
+      newErrors.profilePhoto = "At least one profile picture is mandatory to login";
     }
 
     if (!acceptTerms) {
@@ -430,30 +458,12 @@ export default function RegisterPage() {
     setErrors({});
 
     try {
-      let finalPhotoUrl = "";
-      if (profilePhotoFile) {
-        const url = await uploadPhoto(profilePhotoFile);
-        if (!url) {
-          throw new Error("Failed to upload profile photo. Please try again.");
-        }
-        finalPhotoUrl = url;
-      }
-
-      let finalScreenshotUrl = "";
-      if (paymentScreenshotFile) {
-        const tempFolder = 'pay_' + (Math.random().toString(36).substring(2, 8));
-        const url = await uploadPhoto(paymentScreenshotFile, tempFolder);
-        if (!url) {
-          throw new Error("Failed to upload payment screenshot. Please try again.");
-        }
-        finalScreenshotUrl = url;
-      }
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('password', password);
 
       // Prepare payload to register endpoint mapped to ARMember field names
-      const payload = {
-        email: email,
-        password: password,
-
+      const profileData = {
         text_6lo7p: firstName,
         text_uuxfr: lastName,
         select_y9qog: postedBy,
@@ -487,10 +497,10 @@ export default function RegisterPage() {
         radio_xdzu9: familyValue,
         radio_tyzfs: familyType,
         radio_4pzno: familyStatus,
-        text_4obie: fatherName,
         select_tmkwh: fatherStatus,
-        text_fxamj: motherName,
+        text_4obie: fatherName,
         select_3dm9u: motherStatus,
+        text_fxamj: motherName,
         text_yaxmk: brothers,
         text_qswpw: brothersMarried,
         text_pqeee: sisters,
@@ -499,27 +509,87 @@ export default function RegisterPage() {
         text_t6hil: guardianPhone,
         text_fqhn4: familyOrigin,
         textarea_d8efs: bio,
-        profile_photo: finalPhotoUrl,
-        
-        // Payment info payload mapping
-        payment_status: 'pending_verification',
+        payment_status: paymentUtr ? "pending_verification" : "unpaid",
         payment_utr: paymentUtr,
-        payment_screenshot: finalScreenshotUrl,
-        payment_amount: paymentAmount,
+        payment_amount: 1000
       };
 
-      const success = await register(payload);
-      if (success) {
-        setShowSuccessModal(true);
-      } else {
-        setErrors({ submit: storeError || "Registration failed. Try a different username/email." });
+      formData.append('profileData', JSON.stringify(profileData));
+
+      // Client-side image compression helper
+      const compressImage = (imageFile: File): Promise<File> => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = URL.createObjectURL(imageFile);
+          img.onload = () => {
+            URL.revokeObjectURL(img.src);
+            let width = img.width;
+            let height = img.height;
+            const maxDim = 600;
+
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { resolve(imageFile); return; }
+
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  const newName = imageFile.name.replace(/\.[^/.]+$/, "") + ".webp";
+                  resolve(new File([blob], newName, { type: 'image/webp' }));
+                } else {
+                  resolve(imageFile);
+                }
+              },
+              'image/webp',
+              0.6
+            );
+          };
+          img.onerror = () => resolve(imageFile);
+        });
+      };
+
+      // Compress and append photos
+      for (let i = 0; i < profilePhotoFiles.length; i++) {
+        const compressedFile = await compressImage(profilePhotoFiles[i]);
+        formData.append('photos', compressedFile);
       }
+
+      if (paymentScreenshotFile) {
+        const compressedFile = await compressImage(paymentScreenshotFile);
+        formData.append('paymentScreenshot', compressedFile);
+      }
+
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to register account');
+      }
+
+      setShowSuccessModal(true);
     } catch (err) {
+      console.error('Registration failed:', err);
       setErrors({ submit: (err as Error).message });
     } finally {
       setIsSubmitting(false);
     }
-  };
 
   const selectStyle: React.CSSProperties = {
     width: "100%", padding: "10px 14px", background: "#fafcff",
@@ -1161,14 +1231,14 @@ export default function RegisterPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <span style={{ fontSize: "12px", fontWeight: 600, color: "#5f6368", textAlign: "center" }}>Paying from mobile? Tap to open payment app:</span>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <a href={gpayUri} style={{
+                  <a href={gpayUri} onClick={handlePaymentAppClick} style={{
                     display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                     background: "linear-gradient(135deg, #1a73e8, #1557b0)", color: "#fff",
                     textDecoration: "none", minHeight: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
                   }}>
                     <Smartphone style={{ width: "16px", height: "16px" }} /> Google Pay
                   </a>
-                  <a href={phonepeUri} style={{
+                  <a href={phonepeUri} onClick={handlePaymentAppClick} style={{
                     display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                     background: "linear-gradient(135deg, #5f259f, #4d1c82)", color: "#fff",
                     textDecoration: "none", minHeight: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
@@ -1268,38 +1338,51 @@ export default function RegisterPage() {
                 ref={fileInputRef}
                 onChange={handlePhotoUpload}
                 accept="image/png, image/jpeg, image/jpg"
+                multiple={true}
                 style={{ display: "none" }}
               />
 
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                style={{
-                  height: "220px", borderRadius: "16px", border: profilePhoto ? "2px solid #16a34a" : "2px dashed #d4d8e0",
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", backgroundImage: profilePhoto ? `url('${profilePhoto}')` : "none",
-                  backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat",
-                  background: profilePhoto ? undefined : "rgba(30,42,68,0.02)", position: "relative",
-                  transition: "all 0.3s ease",
-                }}
-              >
-                {!profilePhoto ? (
-                  <>
-                    <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(198,165,92,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px" }}>
-                      <Camera style={{ width: "24px", height: "24px", color: "#c6a55c" }} />
-                    </div>
-                    <span style={{ fontSize: "14px", color: "#1e2a44", fontWeight: 600 }}>Upload Profile Picture *</span>
-                    <span style={{ fontSize: "11px", color: "#a0aec0", marginTop: "4px" }}>Mandatory to create and log in to your account (Max 5MB)</span>
-                  </>
-                ) : (
-                  <div style={{
-                    position: "absolute", bottom: 0, left: 0, right: 0,
-                    background: "rgba(0,0,0,0.6)", padding: "10px",
-                    borderBottomLeftRadius: "14px", borderBottomRightRadius: "14px",
-                    textAlign: "center", fontSize: "12px", color: "#fff", fontWeight: 600
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "12px" }}>
+                {profilePhotos.map((photo, idx) => (
+                  <div key={idx} style={{
+                    position: "relative", height: "120px", borderRadius: "12px", border: "2px solid #16a34a",
+                    backgroundImage: `url('${photo}')`, backgroundSize: "cover", backgroundPosition: "center",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
                   }}>
-                    Change Profile Photo
+                    <div 
+                      onClick={(e) => { e.stopPropagation(); removePhoto(idx); }}
+                      style={{
+                        position: "absolute", top: "-6px", right: "-6px", background: "#ef4444", color: "#fff",
+                        width: "24px", height: "24px", borderRadius: "50%", display: "flex", alignItems: "center", 
+                        justifyContent: "center", cursor: "pointer", fontSize: "14px", fontWeight: "bold",
+                        boxShadow: "0 2px 5px rgba(0,0,0,0.2)", zIndex: 10
+                      }}
+                    >
+                      ×
+                    </div>
+                  </div>
+                ))}
+                
+                {profilePhotos.length < 3 && (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      height: "120px", borderRadius: "12px", border: "2px dashed #d4d8e0",
+                      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer", background: "rgba(30,42,68,0.02)", transition: "all 0.3s ease",
+                    }}
+                  >
+                    <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(198,165,92,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "8px" }}>
+                      <Camera style={{ width: "16px", height: "16px", color: "#c6a55c" }} />
+                    </div>
+                    <span style={{ fontSize: "12px", color: "#1e2a44", fontWeight: 600 }}>Add Photo</span>
+                    <span style={{ fontSize: "10px", color: "#a0aec0", marginTop: "2px" }}>{3 - profilePhotos.length} left</span>
                   </div>
                 )}
+              </div>
+              
+              <div style={{ fontSize: "11px", color: "#a0aec0", marginTop: "4px" }}>
+                At least 1 profile picture is mandatory to create and log in to your account. You can upload up to 3 photos (Max 5MB each).
               </div>
               <ErrorMsg field="profilePhoto" />
 
