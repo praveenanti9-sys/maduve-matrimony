@@ -94,6 +94,21 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Re-trigger Google Translate when pathname changes (SPA navigation)
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem("preferred_lang") : null;
+    if (saved && saved !== 'en') {
+      const timer = setTimeout(() => {
+        const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+        if (select) {
+          select.value = saved;
+          select.dispatchEvent(new Event('change'));
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname]);
+
   // Close menus on click outside
   useEffect(() => {
     const handleClick = () => {
@@ -509,7 +524,7 @@ export function Navbar() {
               }}
               className="hidden md:inline-flex"
               >
-                Register Free
+                Register Profile
               </Link>
             </>
           )}
@@ -684,7 +699,7 @@ export function Navbar() {
                     fontSize: "14px", fontWeight: 600, textDecoration: "none",
                   }}
                 >
-                  Register Free
+                  Register Profile
                 </Link>
               </li>
             )}

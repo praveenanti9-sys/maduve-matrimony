@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+
 import Link from "next/link";
 import { useStore } from "@/store/useStore";
 import {
@@ -13,18 +13,11 @@ import {
 export default function DashboardPage() {
   const {
     currentUser, interests, messages, profiles,
-    getActiveProfiles, getRemainingInterests, incrementProfileViews,
+    getActiveProfiles, getRemainingInterests,
     contactInquiries, auditLog,
   } = useStore();
   
   const isAdmin = currentUser.role === 'admin';
-
-  // Increment views dynamically on load
-  useEffect(() => {
-    if (!isAdmin) {
-      incrementProfileViews();
-    }
-  }, [isAdmin, incrementProfileViews]);
 
   const greeting = () => {
     const h = new Date().getHours();

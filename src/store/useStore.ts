@@ -625,7 +625,7 @@ interface AppState {
   fetchAuditLog: () => Promise<void>;
 
   // Views
-  incrementProfileViews: () => void;
+  incrementProfileViews: (profileId?: string) => void;
   uploadPhoto: (file: File, customId?: string) => Promise<string | null>;
 }
 
@@ -1347,10 +1347,11 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   // ── Views ──
-  incrementProfileViews: () => {
+  incrementProfileViews: (profileId?: string) => {
     const state = get();
-    if (state.currentUser.id) {
-      svc.incrementProfileViews(state.currentUser.id);
+    const targetId = profileId || state.currentUser.id;
+    if (targetId) {
+      svc.incrementProfileViews(targetId);
     }
   },
 

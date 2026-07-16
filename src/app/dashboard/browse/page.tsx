@@ -13,6 +13,7 @@ export default function BrowseMatchesPage() {
   const {
     profiles, getActiveProfiles, sendInterest, interests, getRemainingInterests,
     currentUser, blockUser, suspendUser, activateUser, toggleShortlist,
+    incrementProfileViews,
   } = useStore();
 
   const isAdmin = currentUser.role === 'admin';
@@ -102,6 +103,14 @@ export default function BrowseMatchesPage() {
   const uniqueNakshatras = Array.from(new Set(browseProfiles.map(p => p.nakshatra))).sort();
 
   useEffect(() => { setCurrentPage(1); }, [searchTerm, filterGender, filterAgeMin, filterAgeMax, filterDistrict, filterGothra, filterHeight, filterEducation, filterNakshatra, filterStatus, sortBy]);
+
+  // Realistically count profile views: increment when another user views a profile detail
+  useEffect(() => {
+    if (selectedProfile && selectedProfile !== currentUser?.id) {
+      incrementProfileViews(selectedProfile);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProfile]);
 
   const totalPages = Math.ceil(filteredProfiles.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -748,25 +757,25 @@ export default function BrowseMatchesPage() {
                   <>
                     {detailProfile.status === 'active' && (
                       <>
-                        <button onClick={() => { setShowSuspendModal(detailProfile.id); }} style={{ flex: 1, height: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, border: "1px solid rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.06)", color: "#d97706", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                        <button onClick={() => { setShowSuspendModal(detailProfile.id); }} style={{ flex: 1, minHeight: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, border: "1px solid rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.06)", color: "#d97706", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
                           <AlertTriangle style={{ width: "16px", height: "16px" }} /> Suspend User
                         </button>
-                        <button onClick={() => setShowBlockConfirm(detailProfile.id)} style={{ flex: 1, height: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, border: "1px solid rgba(220,38,38,0.3)", background: "rgba(220,38,38,0.06)", color: "#dc2626", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                        <button onClick={() => setShowBlockConfirm(detailProfile.id)} style={{ flex: 1, minHeight: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, border: "1px solid rgba(220,38,38,0.3)", background: "rgba(220,38,38,0.06)", color: "#dc2626", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
                           <Ban style={{ width: "16px", height: "16px" }} /> Block User
                         </button>
                       </>
                     )}
                     {detailProfile.status === 'suspended' && (
-                      <button onClick={() => { handleAdminActivate(detailProfile.id); }} style={{ flex: 1, height: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, border: "1px solid rgba(22,163,106,0.3)", background: "rgba(22,163,106,0.06)", color: "#16a34a", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                      <button onClick={() => { handleAdminActivate(detailProfile.id); }} style={{ flex: 1, minHeight: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, border: "1px solid rgba(22,163,106,0.3)", background: "rgba(22,163,106,0.06)", color: "#16a34a", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
                         <UserCheck style={{ width: "16px", height: "16px" }} /> Activate User
                       </button>
                     )}
                     {detailProfile.status === 'blocked' && (
-                      <button onClick={() => { handleAdminActivate(detailProfile.id); }} style={{ flex: 1, height: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, border: "1px solid rgba(22,163,106,0.3)", background: "rgba(22,163,106,0.06)", color: "#16a34a", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                      <button onClick={() => { handleAdminActivate(detailProfile.id); }} style={{ flex: 1, minHeight: "48px", borderRadius: "12px", fontSize: "14px", fontWeight: 600, border: "1px solid rgba(22,163,106,0.3)", background: "rgba(22,163,106,0.06)", color: "#16a34a", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
                         <UserCheck style={{ width: "16px", height: "16px" }} /> Unblock User
                       </button>
                     )}
-                    <button onClick={() => setSelectedProfile(null)} className="btn-outline" style={{ flex: 1, height: "48px" }}><span>Close</span></button>
+                    <button onClick={() => setSelectedProfile(null)} className="btn-outline" style={{ flex: 1, minHeight: "48px" }}><span>Close</span></button>
                   </>
                 ) : (
                   /* User: send interest / close */
@@ -776,7 +785,7 @@ export default function BrowseMatchesPage() {
                       disabled={hasSentInterest(detailProfile.id) || remainingInterests <= 0}
                       className="btn-primary"
                       style={{
-                        flex: 1, height: "48px",
+                        flex: 1, minHeight: "48px",
                         background: hasSentInterest(detailProfile.id) ? "rgba(22,163,106,0.1)" : remainingInterests <= 0 ? "#e3e8f0" : undefined,
                         color: hasSentInterest(detailProfile.id) ? "#16a34a" : remainingInterests <= 0 ? "#a0aec0" : undefined,
                         boxShadow: hasSentInterest(detailProfile.id) || remainingInterests <= 0 ? "none" : undefined,
@@ -786,7 +795,7 @@ export default function BrowseMatchesPage() {
                        remainingInterests <= 0 ? <><AlertCircle style={{ width: "16px", height: "16px" }} /> <span>Limit Reached</span></> :
                        <><Heart style={{ width: "16px", height: "16px" }} /> <span>Send Interest</span></>}
                     </button>
-                    <button onClick={() => setSelectedProfile(null)} className="btn-outline" style={{ flex: 1, height: "48px" }}><span>Close</span></button>
+                    <button onClick={() => setSelectedProfile(null)} className="btn-outline" style={{ flex: 1, minHeight: "48px" }}><span>Close</span></button>
                   </>
                 )}
               </div>

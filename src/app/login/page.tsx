@@ -123,7 +123,7 @@ export default function LoginPage() {
             <p style={{ fontSize: "14px", color: "#5f6368" }}>
               Don&apos;t have an account?{" "}
               <Link href="/register" style={{ color: "#005AEE", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                Register Free <ArrowRight style={{ width: "14px", height: "14px" }} />
+                Register Now <ArrowRight style={{ width: "14px", height: "14px" }} />
               </Link>
             </p>
           </div>

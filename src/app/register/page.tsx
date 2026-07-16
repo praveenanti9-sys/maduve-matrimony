@@ -627,6 +627,21 @@ export default function RegisterPage() {
                 <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#1e2a44" }}>Account Credentials</h3>
               </div>
 
+              <div style={{
+                background: "rgba(198, 165, 92, 0.08)",
+                border: "1px dashed rgba(198, 165, 92, 0.4)",
+                borderRadius: "12px",
+                padding: "12px 16px",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "10px",
+              }}>
+                <Info style={{ width: "18px", height: "18px", color: "#c6a55c", marginTop: "2px", flexShrink: 0 }} />
+                <p style={{ fontSize: "12px", color: "#5f6368", margin: 0, lineHeight: "1.5" }}>
+                  <strong style={{ color: "#1e2a44" }}>One-Time Activation Fee:</strong> A fee of <strong>₹1,000</strong> will be charged in Step 4 to verify and activate your matrimony profile.
+                </p>
+              </div>
+
               <div>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "6px" }}>Username *</label>
                 <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="input" placeholder="e.g. Kira86 (4 letters + 2 digits)" />
@@ -1118,7 +1133,7 @@ export default function RegisterPage() {
                 
                 {/* QR Code Container */}
                 <div style={{
-                  width: "180px", height: "180px", background: "#fff", padding: "8px",
+                  width: "240px", height: "240px", background: "#fff", padding: "10px",
                   borderRadius: "12px", margin: "0 auto 16px", display: "flex", alignItems: "center",
                   justifyContent: "center", border: "4px solid #c6a55c"
                 }}>

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabase-service';
+import { getSupabaseAdmin, getSupabase } from '@/lib/supabase-service';
 
 export async function POST(req: Request) {
   try {
@@ -31,8 +31,16 @@ export async function POST(req: Request) {
     const resendFrom = process.env.RESEND_FROM_EMAIL || 'Maduvedibbana <onboarding@resend.dev>';
 
     if (!resendApiKey) {
-      console.warn("RESEND_API_KEY not set. Reset link:", resetLink);
-      return NextResponse.json({ error: 'Email configuration is missing on server' }, { status: 500 });
+      console.warn("RESEND_API_KEY not set. Falling back to Supabase native password reset email.");
+      // Fallback: use Supabase's built-in email delivery for password reset
+      const supabase = getSupabase();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${origin}/forgot-password`
+      });
+      if (resetError) {
+        return NextResponse.json({ error: resetError.message }, { status: 400 });
+      }
+      return NextResponse.json({ success: true, fallback: true });
     }
 
     // Call Resend API directly to send the custom password reset email
