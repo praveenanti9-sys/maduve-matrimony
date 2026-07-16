@@ -301,17 +301,38 @@ export default function DashboardPage() {
                   const targetProfile = profiles.find(p => p.id === entry.targetUserId);
                   const actionColors: Record<string, string> = { approve: "#16a34a", activate: "#16a34a", block: "#dc2626", suspend: "#f59e0b", reject: "#dc2626", delete: "#dc2626", verify: "#3b82f6" };
                   const actionIcons: Record<string, string> = { approve: "✅", activate: "✅", block: "🚫", suspend: "⚠️", reject: "❌", delete: "🗑️", verify: "🔵" };
+                  let actionDesc = "";
+                  let extraDetails = entry.details;
+                  const targetName = targetProfile?.name || entry.targetUserId.slice(0, 8);
+                  
+                  switch(entry.action) {
+                    case 'approve': actionDesc = `Approved ${targetName}`; break;
+                    case 'block': actionDesc = `Blocked ${targetName}`; break;
+                    case 'suspend': actionDesc = `Suspended ${targetName}`; break;
+                    case 'activate': actionDesc = `Activated ${targetName}`; break;
+                    case 'verify':
+                      if (entry.details?.includes('true')) {
+                        actionDesc = `Verified ${targetName}`;
+                        extraDetails = undefined;
+                      } else {
+                        actionDesc = `Removed verification for ${targetName}`;
+                        extraDetails = undefined;
+                      }
+                      break;
+                    default: 
+                      actionDesc = `${entry.action.charAt(0).toUpperCase() + entry.action.slice(1)} ${targetName}`;
+                  }
+
                   return (
                     <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 8px", borderBottom: "1px solid #f0ece4" }}>
                       <div style={{ width: "32px", height: "32px", borderRadius: "10px", background: `${actionColors[entry.action] || '#5f6368'}10`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "14px" }}>
                         {actionIcons[entry.action] || "📋"}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: "12px", color: "#1e2a44" }}>
-                          <span style={{ fontWeight: 600, textTransform: "capitalize" }}>{entry.action}</span>{" "}
-                          <span style={{ color: "#5f6368" }}>{targetProfile?.name || entry.targetUserId.slice(0, 8)}</span>
+                        <p style={{ fontSize: "13px", color: "#1e2a44", fontWeight: 500, margin: 0 }}>
+                          {actionDesc}
                         </p>
-                        {entry.details && <p style={{ fontSize: "11px", color: "#a0aec0", marginTop: "1px" }}>{entry.details}</p>}
+                        {extraDetails && <p style={{ fontSize: "11px", color: "#a0aec0", marginTop: "2px", marginBottom: 0 }}>{extraDetails}</p>}
                       </div>
                       <span style={{ fontSize: "10px", color: "#a0aec0", flexShrink: 0 }}>{timeAgo(entry.createdAt)}</span>
                     </div>
