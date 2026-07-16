@@ -179,7 +179,8 @@ export default function RegisterPage() {
 
   const upiId = "EZE0436387@CUB";
   const paymentAmount = 1000;
-  const baseUpiParams = `pa=${upiId}&pn=Maduvedibbana&am=${paymentAmount}&cu=INR&tn=Reg_${firstName || 'User'}`;
+  const tnEncoded = encodeURIComponent(`Reg_${firstName || 'User'}`);
+  const baseUpiParams = `pa=${upiId}&pn=Maduvedibbana&am=${paymentAmount}&cu=INR&tn=${tnEncoded}`;
   const upiUri = `upi://pay?${baseUpiParams}`;
 
   const [isAndroid, setIsAndroid] = useState(false);
@@ -191,11 +192,11 @@ export default function RegisterPage() {
   }, []);
 
   const gpayUri = isAndroid 
-    ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end` 
+    ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;action=android.intent.action.VIEW;end` 
     : `gpay://upi/pay?${baseUpiParams}`;
     
   const phonepeUri = isAndroid 
-    ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.phonepe.app;end` 
+    ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.phonepe.app;action=android.intent.action.VIEW;end` 
     : `phonepe://pay?${baseUpiParams}`;
 
   const handlePaymentAppClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
