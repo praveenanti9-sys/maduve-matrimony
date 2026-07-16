@@ -61,7 +61,7 @@ export default function Home() {
         <div className="home-section-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
           <div>
             <Image
-              src="https://maduvedibbana.com/wp-content/uploads/2026/04/madhuve.webp"
+              src="/madhuve.webp"
               alt="Maduvedibbana Matrimony"
               width={550}
               height={400}
@@ -116,7 +116,7 @@ export default function Home() {
           </div>
           <div>
             <Image
-              src="https://maduvedibbana.com/wp-content/uploads/2026/04/matrimonyyyy.webp"
+              src="/matrimonyyyy.webp"
               alt="Built on Tradition"
               width={550}
               height={700}
@@ -133,7 +133,7 @@ export default function Home() {
         <div className="home-section-grid" style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
           <div>
             <Image
-              src="https://maduvedibbana.com/wp-content/uploads/2026/04/matrimonny.webp"
+              src="/matrimonny.webp"
               alt="Maduvedibbana"
               width={550}
               height={700}
@@ -198,7 +198,7 @@ export default function Home() {
           </div>
           <div>
             <Image
-              src="https://maduvedibbana.com/wp-content/uploads/2026/04/Jai-Lord-Sri-Venkateshwara.webp"
+              src="/Jai-Lord-Sri-Venkateshwara.webp"
               alt="Our Objectives"
               width={550}
               height={700}

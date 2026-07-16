@@ -188,7 +188,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href={isLoggedIn ? "/dashboard" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
           <Image
-            src="https://maduvedibbana.com/wp-content/uploads/2026/04/cropped-Untitled-design-22.png"
+            src="/logo.png"
             alt="Maduvedibbana Logo"
             width={56}
             height={56}

@@ -1,6 +1,6 @@
 const EMAIL_HEADER = `
   <div style="text-align: center; margin-bottom: 24px;">
-    <img src="https://maduvedibbana.com/wp-content/uploads/2026/04/cropped-Untitled-design-22.png" alt="Maduvedibbana" style="width: 60px; height: auto; margin-bottom: 12px; border-radius: 12px;" />
+    <img src="https://maduvedibbana.com/logo.png" alt="Maduvedibbana" style="width: 60px; height: auto; margin-bottom: 12px; border-radius: 12px;" />
     <h1 style="font-family: Georgia, serif; color: #1e2a44; margin: 0; font-size: 26px; font-weight: 700;">Maduvedibbana Matrimony</h1>
     <p style="color: #c6a55c; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin: 4px 0 0;">Okkaliga Community</p>
   </div>

@@ -12,7 +12,7 @@ export function Footer() {
         {/* Col 1 — Logo */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "10px" }}>
           <Image
-            src="https://maduvedibbana.com/wp-content/uploads/2026/04/cropped-Untitled-design-22.png"
+            src="/logo.png"
             alt="Maduvedibbana"
             width={70}
             height={70}
@@ -26,7 +26,7 @@ export function Footer() {
         {/* Col 2 — 2nd Logo */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "10px" }}>
           <Image
-            src="https://maduvedibbana.com/wp-content/uploads/2026/04/2nd-logo-maduve-dibbana.webp"
+            src="/2nd-logo.webp"
             alt="In Association With"
             width={70}
             height={70}
