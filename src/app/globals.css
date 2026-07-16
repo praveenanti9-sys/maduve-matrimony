@@ -26,18 +26,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ── Fallback Mobile Utilities ── */
-@media (max-width: 768px) {
-  .md\:hidden { display: none !important; }
-  .hidden { display: none !important; }
-}
+.hidden { display: none !important; }
+
 @media (min-width: 640px) {
   .sm\:block { display: block !important; }
+  .sm\:inline { display: inline !important; }
 }
-@media (min-width: 769px) {
+
+@media (min-width: 768px) {
+  .md\:hidden { display: none !important; }
   .md\:flex { display: flex !important; }
   .md\:block { display: block !important; }
   .md\:inline-flex { display: inline-flex !important; }
 }
+
+/* ── Typography & Layout Fixes ── */
+body {
   color: #1e2a44;
   line-height: 1.35;
 }

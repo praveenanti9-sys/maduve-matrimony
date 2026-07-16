@@ -425,7 +425,7 @@ export default function AdminPage() {
                   View All <ChevronRight style={{ width: "12px", height: "12px" }} />
                 </button>
               </div>
-              {profiles.slice(-5).reverse().map(p => (
+              {allProfiles.slice(-5).reverse().map(p => (
                 <div key={p.id} onClick={() => viewUserDetail(p.id)} style={{
                   display: "flex", alignItems: "center", gap: "12px", padding: "10px 0",
                   borderBottom: "1px solid #f0ece4", cursor: "pointer",
