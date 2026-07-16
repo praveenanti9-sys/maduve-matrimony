@@ -313,10 +313,10 @@ export default function DashboardPage() {
                     case 'verify':
                       if (entry.details?.includes('true')) {
                         actionDesc = `Verified ${targetName}`;
-                        extraDetails = undefined;
+                        extraDetails = "";
                       } else {
                         actionDesc = `Removed verification for ${targetName}`;
-                        extraDetails = undefined;
+                        extraDetails = "";
                       }
                       break;
                     default: 
