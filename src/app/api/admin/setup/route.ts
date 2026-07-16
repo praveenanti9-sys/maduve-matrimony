@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     const supabaseUrl = env('NEXT_PUBLIC_SUPABASE_URL');
     const serviceRoleKey = env('SUPABASE_SERVICE_ROLE_KEY');
-    const adminEmail = env('NEXT_PUBLIC_ADMIN_EMAIL') || env('ADMIN_EMAIL') || 'admin@maduvedibbana.com';
+    const adminEmail = env('NEXT_PUBLIC_ADMIN_EMAIL') || env('ADMIN_EMAIL') || 'contact@maduvedibbana.com';
     const adminPassword = env('ADMIN_PASSWORD') || env('NEXT_PUBLIC_ADMIN_PASSWORD') || 'admin123';
 
     if (!supabaseUrl || !serviceRoleKey) {

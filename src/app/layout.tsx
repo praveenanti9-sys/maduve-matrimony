@@ -133,7 +133,7 @@ export default function RootLayout({
   const envScript = `window.__ENV__=${JSON.stringify({
     NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnon,
-    NEXT_PUBLIC_ADMIN_EMAIL: getRuntimeEnv('NEXT_PUBLIC_ADMIN_EMAIL') || 'admin@maduvedibbana.com',
+    NEXT_PUBLIC_ADMIN_EMAIL: getRuntimeEnv('NEXT_PUBLIC_ADMIN_EMAIL') || 'contact@maduvedibbana.com',
   })};`;
 
   return (

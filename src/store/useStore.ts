@@ -832,7 +832,7 @@ export const useStore = create<AppState>((set, get) => ({
       set({ isLoading: true, error: null });
 
       // If logging in as admin, trigger admin setup API route first to ensure admin exists in DB
-      const adminEmail = getClientEnv('NEXT_PUBLIC_ADMIN_EMAIL') || 'admin@maduvedibbana.com';
+      const adminEmail = getClientEnv('NEXT_PUBLIC_ADMIN_EMAIL') || 'contact@maduvedibbana.com';
       if (email === adminEmail) {
         try {
           await fetch('/api/admin/setup', { method: 'POST' });
