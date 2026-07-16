@@ -23,6 +23,21 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Playfair Display', var(--font-playfair), serif;
+}
+
+/* ── Fallback Mobile Utilities ── */
+@media (max-width: 768px) {
+  .md\:hidden { display: none !important; }
+  .hidden { display: none !important; }
+}
+@media (min-width: 640px) {
+  .sm\:block { display: block !important; }
+}
+@media (min-width: 769px) {
+  .md\:flex { display: flex !important; }
+  .md\:block { display: block !important; }
+  .md\:inline-flex { display: inline-flex !important; }
+}
   color: #1e2a44;
   line-height: 1.35;
 }

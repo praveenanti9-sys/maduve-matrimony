@@ -186,25 +186,27 @@ export function Navbar() {
         height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         {/* Logo */}
-        <Link href={isLoggedIn ? "/dashboard" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px" }}>
+        <Link href={isLoggedIn ? "/dashboard" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
           <Image
             src="https://maduvedibbana.com/wp-content/uploads/2026/04/cropped-Untitled-design-22.png"
             alt="Maduvedibbana Logo"
-            width={44}
-            height={44}
+            width={40}
+            height={40}
             style={{ borderRadius: "8px", objectFit: "contain" }}
           />
-          <div>
+          <div className="hidden sm:block" style={{ minWidth: 0 }}>
             <span style={{
               fontFamily: "'Playfair Display', serif",
-              fontSize: "20px", fontWeight: 700, color: "#1e2a44",
+              fontSize: "18px", fontWeight: 700, color: "#1e2a44",
               letterSpacing: "-0.3px", display: "block", lineHeight: 1.1,
+              whiteSpace: "nowrap"
             }}>
               Maduvedibbana
             </span>
             <span style={{
-              fontSize: "10px", fontWeight: 600, color: "#c6a55c",
+              fontSize: "9px", fontWeight: 600, color: "#c6a55c",
               letterSpacing: "1.5px", textTransform: "uppercase",
+              display: "block"
             }}>
               Matrimony
             </span>
