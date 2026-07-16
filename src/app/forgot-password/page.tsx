@@ -16,13 +16,35 @@ export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // 1. Detect if URL hash has access token for recovery
+    // 1. Detect if URL hash has access token for recovery (native Supabase redirect)
     const hash = typeof window !== 'undefined' ? window.location.hash : '';
     if (hash.includes('access_token=') && (hash.includes('type=recovery') || hash.includes('type=signup'))) {
       setStep("reset");
     }
 
-    // 2. Subscribe to auth state changes to catch PASSWORD_RECOVERY event
+    // 2. Detect custom token_hash query param (Bypassing Supabase Redirect limitation)
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const tokenHash = params.get('token_hash');
+    if (tokenHash) {
+      const verifyCustomToken = async () => {
+        try {
+          const supabase = getSupabase();
+          const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+          if (!error) {
+            setStep("reset");
+            // Clean up the URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } else {
+            setError("Recovery link is invalid or has expired. Please request a new one.");
+          }
+        } catch (err) {
+          setError("Failed to verify recovery link.");
+        }
+      };
+      verifyCustomToken();
+    }
+
+    // 3. Subscribe to auth state changes to catch PASSWORD_RECOVERY event
     const supabase = getSupabase();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {

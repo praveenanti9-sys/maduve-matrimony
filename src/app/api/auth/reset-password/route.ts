@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       }
     });
 
-    if (error || !data?.properties?.action_link) {
+    if (error || !data?.properties?.hashed_token) {
       // If admin link generation fails, fall back to Supabase native email
       console.warn("Admin generateLink failed, falling back to Supabase native reset:", error?.message);
       const supabase = getSupabase();
@@ -36,7 +36,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, method: 'supabase-native' });
     }
 
-    const resetLink = data.properties.action_link;
+    // Bypass Supabase redirect logic entirely by sending the user directly to our page with the token_hash
+    const tokenHash = data.properties.hashed_token;
+    const resetLink = `${origin}/forgot-password?token_hash=${tokenHash}`;
 
     // Build the branded email HTML
     const emailHtml = getPasswordResetHtml(resetLink);
