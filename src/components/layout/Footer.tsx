@@ -71,10 +71,24 @@ export function Footer() {
       {/* Bottom Bar */}
       <div style={{
         maxWidth: "1100px", margin: "0 auto", padding: "15px 20px",
-        borderTop: "1px solid #222", textAlign: "center",
+        borderTop: "1px solid #222", 
+        display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px",
         fontSize: "13px", color: "#777",
       }}>
-        © 2026 Maduvedibbana Matrimony. Designed by <strong style={{ fontWeight: 600, color: "#999" }}>Metromindz</strong>
+        <span>© {new Date().getFullYear()} Maduvedibbana Matrimony. All Rights Reserved.</span>
+        <span>
+          Designed by{" "}
+          <a 
+            href="https://metromindz.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            style={{ fontWeight: 600, color: "#c6a55c", textDecoration: "none", transition: "color 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "#fff"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "#c6a55c"}
+          >
+            Metromindz
+          </a>
+        </span>
       </div>
     </footer>
   );
