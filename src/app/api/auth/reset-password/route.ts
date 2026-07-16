@@ -11,7 +11,8 @@ export async function POST(req: Request) {
     }
 
     const supabaseAdmin = getSupabaseAdmin();
-    const origin = req.headers.get('origin') || 'http://localhost:3000';
+    // Vercel deployment origin or fallback
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://maduvedibbana.com';
 
     // Generate recovery link using Supabase Admin Auth API
     const { data, error } = await supabaseAdmin.auth.admin.generateLink({
