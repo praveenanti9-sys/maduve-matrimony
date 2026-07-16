@@ -192,8 +192,8 @@ export default function RegisterPage() {
   }, []);
 
   const gpayUri = isAndroid 
-    ? `intent://upi/pay?${baseUpiParams}#Intent;scheme=tez;package=com.google.android.apps.nbu.paisa.user;action=android.intent.action.VIEW;end` 
-    : `tez://upi/pay?${baseUpiParams}`;
+    ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;action=android.intent.action.VIEW;end` 
+    : `gpay://upi/pay?${baseUpiParams}`;
     
   const phonepeUri = isAndroid 
     ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.phonepe.app;action=android.intent.action.VIEW;end` 
@@ -891,9 +891,9 @@ export default function RegisterPage() {
 
               <div style={{ background: "#fafcff", padding: "16px", borderRadius: "12px", border: "1px solid #e3e8f0" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1e2a44", marginBottom: "8px" }}>Eating Habits *</label>
-                <div style={{ display: "flex", gap: "20px" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "12px 18px" }}>
                   {["Non Vegetarian", "Vegetarian", "Eggetarian"].map((habit) => (
-                    <label key={habit} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#5f6368", cursor: "pointer" }}>
+                    <label key={habit} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#5f6368", cursor: "pointer", whiteSpace: "nowrap" }}>
                       <input
                         type="checkbox"
                         checked={eatingHabits.includes(habit)}
@@ -1257,11 +1257,10 @@ export default function RegisterPage() {
                     boxShadow: "0 4px 12px rgba(95, 37, 159, 0.25)", border: "1px solid rgba(255,255,255,0.15)"
                   }}>
                     {/* PhonePe Icon */}
-                    <div style={{ width: "26px", height: "26px", background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M18.8 3H5.2C3.98 3 3 3.98 3 5.2V18.8C3 20.02 3.98 21 5.2 21H18.8C20.02 21 21 20.02 21 18.8V5.2C21 3.98 20.02 3 18.8 3Z" fill="#5f259f"/>
-                        <path d="M14.7 10.35L11.55 7.2C11.35 7 11.02 7 10.82 7.2C10.62 7.4 10.62 7.73 10.82 7.93L12.57 9.68H8.5C8.22 9.68 8 9.9 8 10.18C8 10.46 8.22 10.68 8.5 10.68H12.57L10.82 12.43C10.62 12.63 10.62 12.96 10.82 13.16C10.92 13.26 11.05 13.31 11.18 13.31C11.31 13.31 11.44 13.26 11.54 13.16L14.69 10.01V10.35Z" fill="white"/>
-                        <path d="M15.5 10.2C15.5 12.96 13.26 15.2 10.5 15.2H9V17.5C9 17.78 8.78 18 8.5 18C8.22 18 8 17.78 8 17.5V7C8 6.72 8.22 6.5 8.5 6.5C8.78 6.5 9 6.72 9 7V9.2H10.5C13.26 9.2 15.5 11.44 15.5 10.2ZM14.5 12.2C14.5 10.01 12.69 8.2 10.5 8.2H9V16.2H10.5C12.69 16.2 14.5 14.39 14.5 12.2Z" fill="white"/>
+                    <div style={{ width: "26px", height: "26px", background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+                      <svg width="22" height="22" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100" height="100" rx="20" fill="#5f259f"/>
+                        <path d="M69.8 45.4L55.2 30.8V23H44.8V30.8L30.2 45.4C29.1 46.5 29.1 48.3 30.2 49.4L34.1 53.3C35.2 54.4 37 54.4 38.1 53.3L44.8 46.6V77H55.2V46.6L61.9 53.3C63 54.4 64.8 54.4 65.9 53.3L69.8 49.4C70.9 48.3 70.9 46.5 69.8 45.4Z" fill="white"/>
                       </svg>
                     </div>
                     <span>PhonePe</span>
