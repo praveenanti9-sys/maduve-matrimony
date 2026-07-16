@@ -179,7 +179,21 @@ export default function RegisterPage() {
 
   const upiId = "EZE0436387@CUB";
   const paymentAmount = 1000;
-  const upiUri = `upi://pay?pa=${upiId}&pn=Maduvedibbana&am=${paymentAmount}&cu=INR&tn=Reg_${firstName || 'User'}`;
+  const baseUpiParams = `pa=${upiId}&pn=Maduvedibbana&am=${paymentAmount}&cu=INR&tn=Reg_${firstName || 'User'}`;
+  const upiUri = `upi://pay?${baseUpiParams}`;
+
+  const [isAndroid, setIsAndroid] = useState(false);
+  useEffect(() => {
+    setIsAndroid(/android/i.test(navigator.userAgent || ""));
+  }, []);
+
+  const gpayUri = isAndroid 
+    ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end` 
+    : `gpay://upi/pay?${baseUpiParams}`;
+    
+  const phonepeUri = isAndroid 
+    ? `intent://pay?${baseUpiParams}#Intent;scheme=upi;package=com.phonepe.app;end` 
+    : `phonepe://pay?${baseUpiParams}`;
 
   // ── Handle Clipboard Copy ──
   const copyUpiId = () => {
@@ -1147,19 +1161,19 @@ export default function RegisterPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <span style={{ fontSize: "12px", fontWeight: 600, color: "#5f6368", textAlign: "center" }}>Paying from mobile? Tap to open payment app:</span>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <a href={upiUri} style={{
+                  <a href={gpayUri} style={{
                     display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                     background: "linear-gradient(135deg, #1a73e8, #1557b0)", color: "#fff",
                     textDecoration: "none", minHeight: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
                   }}>
-                    <Smartphone style={{ width: "16px", height: "16px" }} /> Google Pay / UPI
+                    <Smartphone style={{ width: "16px", height: "16px" }} /> Google Pay
                   </a>
-                  <a href={upiUri} style={{
+                  <a href={phonepeUri} style={{
                     display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                     background: "linear-gradient(135deg, #5f259f, #4d1c82)", color: "#fff",
                     textDecoration: "none", minHeight: "46px", borderRadius: "12px", fontSize: "13px", fontWeight: 700
                   }}>
-                    <Smartphone style={{ width: "16px", height: "16px" }} /> PhonePe / BHIM
+                    <Smartphone style={{ width: "16px", height: "16px" }} /> PhonePe
                   </a>
                 </div>
               </div>
