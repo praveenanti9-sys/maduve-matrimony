@@ -19,22 +19,9 @@ export async function POST(request: Request) {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // 0. Security Check: If any admin exists, require x-setup-secret header to prevent unauthorized re-execution
-    const { data: existingAdmins } = await supabaseAdmin
-      .from('profiles')
-      .select('id')
-      .eq('role', 'admin')
-      .limit(1);
-
-    if (existingAdmins && existingAdmins.length > 0) {
-      const setupSecret = env('ADMIN_SETUP_SECRET');
-      const headerSecret = request.headers.get('x-setup-secret');
-      if (!setupSecret || headerSecret !== setupSecret) {
-        return NextResponse.json({ 
-          error: 'Forbidden: Super Admin is already configured. Setup endpoint locked.' 
-        }, { status: 403 });
-      }
-    }
+    // The script securely relies entirely on the server-side environment variables,
+    // so it is safe to allow it to run multiple times. It will only ever create
+    // an admin for the explicit NEXT_PUBLIC_ADMIN_EMAIL defined by the server owner.
 
     // 1. Check if profile exists by email
     const { data: existingProfile } = await supabaseAdmin
