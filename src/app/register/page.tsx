@@ -1118,7 +1118,7 @@ export default function RegisterPage() {
                 boxShadow: "0 8px 32px rgba(30, 42, 68, 0.15)", border: "1px solid rgba(198,165,92,0.3)"
               }}>
                 <span style={{ fontSize: "11px", fontWeight: 700, color: "#c6a55c", textTransform: "uppercase", letterSpacing: "1px" }}>Profile Activation Fee</span>
-                <h2 style={{ fontSize: "36px", fontWeight: 800, margin: "6px 0 16px", fontFamily: "Outfit, sans-serif" }}>₹1,000</h2>
+                <h2 style={{ fontSize: "36px", fontWeight: 800, margin: "6px 0 16px", fontFamily: "Outfit, sans-serif", color: "#ffffff" }}>₹1,000</h2>
                 
                 {/* QR Code Container */}
                 <div style={{
