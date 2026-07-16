@@ -186,12 +186,12 @@ export function Navbar() {
         height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         {/* Logo */}
-        <Link href={isLoggedIn ? "/dashboard" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+        <Link href={isLoggedIn ? "/dashboard" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
           <Image
             src="https://maduvedibbana.com/wp-content/uploads/2026/04/cropped-Untitled-design-22.png"
             alt="Maduvedibbana Logo"
-            width={40}
-            height={40}
+            width={56}
+            height={56}
             style={{ borderRadius: "8px", objectFit: "contain" }}
           />
           <div className="hidden sm:block" style={{ minWidth: 0 }}>
