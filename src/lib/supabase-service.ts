@@ -774,7 +774,7 @@ export async function submitContactInquiry(
   message: string,
   phone?: string
 ): Promise<{ error: string | null }> {
-  const supabase = getSupabase();
+  const supabase = getSupabaseAdmin();
   const { error } = await supabase
     .from('contact_inquiries')
     .insert({ name, email, message, phone });
