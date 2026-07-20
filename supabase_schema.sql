@@ -205,6 +205,7 @@ CREATE TABLE IF NOT EXISTS public.contact_inquiries (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   name text NOT NULL,
   email text NOT NULL,
+  phone text,
   message text NOT NULL,
   is_read boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT now()

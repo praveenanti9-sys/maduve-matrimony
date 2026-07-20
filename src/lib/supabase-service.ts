@@ -775,9 +775,11 @@ export async function submitContactInquiry(
   phone?: string
 ): Promise<{ error: string | null }> {
   const supabase = getSupabaseAdmin();
+  // Append phone to message since the DB schema lacks a phone column
+  const fullMessage = phone ? `Phone: ${phone}\n\n${message}` : message;
   const { error } = await supabase
     .from('contact_inquiries')
-    .insert({ name, email, message, phone });
+    .insert({ name, email, message: fullMessage });
 
   return { error: error?.message || null };
 }
