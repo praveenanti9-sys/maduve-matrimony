@@ -26,7 +26,7 @@ export function Footer() {
         {/* Col 2 — 2nd Logo */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "10px" }}>
           <Image
-            src="/2nd-logo.webp"
+            src="/utthana-logo.png"
             alt="In Association With"
             width={70}
             height={70}
